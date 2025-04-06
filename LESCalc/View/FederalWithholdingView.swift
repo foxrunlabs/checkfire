@@ -13,6 +13,7 @@ struct FederalWithholdingView: View {
                                 .tag(status)
                         }
                     }
+                    .pickerStyle(.menu)
                     
                     Toggle("Multiple Jobs or Spouse Works", isOn: $myPayData.multipleJobs)
                 }
