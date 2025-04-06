@@ -14,11 +14,11 @@ struct ContentView: View {
                 TSPDataView(myPayData: $myPayData)
             }
             
-            Tab("Pay Period", systemImage: "pencil.and.list.clipboard") {
+            Tab("Pay Period", systemImage: "dollarsign") {
                 LESDataView(lesData: $lesData)
             }
             
-            Tab("Net Pay", systemImage: "dollarsign") {
+            Tab("Net Pay", systemImage: "banknote") {
                 NetPayView(lesData: lesData, myPayData: myPayData)
             }
         }
