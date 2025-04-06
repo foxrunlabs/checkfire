@@ -4,21 +4,26 @@ struct TSPDataView: View {
     @Binding var myPayData: MyPayData
     
     var body: some View {
-        Form {
-            Section("Traditional TSP") {
-                Stepper(
-                    "Base Pay",
-                    value: $myPayData.tspPercentage,
-                    in: 0...0.20,
-                    step: 0.01,
-                    format: .percent
-                )
+        NavigationStack {
+            Form {
+                Section("Traditional TSP") {
+                    Stepper(
+                        "Base Pay \(myPayData.tspPercentage.formatted(.percent))",
+                        value: $myPayData.tspPercentage,
+                        in: 0...0.20,
+                        step: 0.01,
+                        format: .percent
+                    )
+                }
             }
+            .formStyle(.grouped)
+            .navigationTitle("Thrift Savings Plan")
+            .toolbarTitleDisplayMode(UIDevice.isiPad ? .large : .inline)
         }
-        .formStyle(.grouped)
     }
 }
 
 #Preview {
-    TSPDataView(myPayData: .constant(MyPayData()))
+    @Previewable @State var myPayData = MyPayData()
+    TSPDataView(myPayData: $myPayData)
 }
