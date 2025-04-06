@@ -5,40 +5,66 @@ struct NetPayView: View {
     let myPayData: MyPayData
     
     var body: some View {
-        List {
-            TextLabel(label: "Gross Pay:", value: lesData.grossPay)
-            
-            TextLabel(label: "TSP Contribution:", value: lesData.tspContribution(using: myPayData))
-            
-            TextLabel(label: "Wage Period:", value: lesData.wagePeriod(using: myPayData))
-            
-            TextLabel(label: "Federal Taxes:", value: lesData.federalTaxes(using: myPayData))
-            
-            TextLabel(label: "Medicare:", value: lesData.medicare(using: myPayData))
-            
-            TextLabel(label: "Social Security:", value: lesData.socialSecurity(using: myPayData))
-            
-            TextLabel(label: "Net Pay:", value: lesData.netPay(using: myPayData))
-        }
-        .listStyle(.sidebar)
-    }
-    
-    private struct TextLabel: View {
-        let label: String
-        let value: Decimal
-        
-        var body: some View {
-            HStack {
-                Text(label)
+        NavigationStack {
+            List {
+                Section {
+                    LabeledContent {
+                        Text(lesData.grossPay.formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Gross Pay")
+                    }
+                }
                 
-                Spacer()
+                Section {
+                    LabeledContent {
+                        Text(lesData.tspContribution(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("TSP Contribution")
+                    }
+                    
+                    LabeledContent {
+                        Text(lesData.wagePeriod(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Wage Period")
+                    }
+                }
                 
-                Text(value.formatted(.currency(code: "USD")))
+                Section {
+                    LabeledContent {
+                        Text(lesData.federalTaxes(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Federal Taxes")
+                    }
+                    
+                    LabeledContent {
+                        Text(lesData.medicare(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Medicare")
+                    }
+                    
+                    LabeledContent {
+                        Text(lesData.socialSecurity(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Social Security")
+                    }
+                }
+                
+                Section {
+                    LabeledContent {
+                        Text(lesData.netPay(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Net Pay")
+                    }
+                }
             }
+            .navigationTitle("Net Pay")
+            .navigationBarTitleDisplayMode(UIDevice.isiPad ? .large : .inline)
         }
     }
 }
 
 #Preview {
-    NetPayView(lesData: LESData(), myPayData: MyPayData())
+    let lesData = LESData()
+    let myPayData = MyPayData()
+    NetPayView(lesData: lesData, myPayData: myPayData)
 }
