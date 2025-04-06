@@ -14,7 +14,7 @@ struct ContentView: View {
                 TSPDataView(myPayData: $myPayData)
             }
             
-            Tab("LES Data", systemImage: "pencil.and.list.clipboard") {
+            Tab("Pay Period", systemImage: "pencil.and.list.clipboard") {
                 LESDataView(lesData: $lesData)
             }
             
