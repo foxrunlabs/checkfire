@@ -10,12 +10,16 @@ struct LESData {
     
     var grossPay: Decimal { basePay + specialPays + allowances }
     
-    func tspContribution(using myPayData: MyPayData) -> Decimal {
-        basePay * Decimal(myPayData.tspPercentage)
+    func traditionalTspContribution(using myPayData: MyPayData) -> Decimal {
+        basePay * Decimal(myPayData.traditionalTspPercentage)
+    }
+    
+    func rothTspContribution(using myPayData: MyPayData) -> Decimal {
+        basePay * Decimal(myPayData.rothTspPercentage)
     }
     
     func wagePeriod(using myPayData: MyPayData) -> Decimal {
-        basePay + specialPays - tspContribution(using: myPayData)
+        basePay + specialPays - traditionalTspContribution(using: myPayData)
     }
     
     /// Calculate federal income tax withholding for a given Form W-4.
@@ -54,7 +58,8 @@ struct LESData {
     /// - Returns: Net monthly pay.
     func netPay(using myPayData: MyPayData) -> Decimal {
         var net = grossPay
-        net -= tspContribution(using: myPayData) + otherDeductions + allotments
+        net -= traditionalTspContribution(using: myPayData) + rothTspContribution(using: myPayData)
+        net -= otherDeductions + allotments
         net -= federalTaxes(using: myPayData)
         net -= medicare(using: myPayData) + socialSecurity(using: myPayData)
         return net

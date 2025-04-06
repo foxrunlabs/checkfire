@@ -13,19 +13,25 @@ struct NetPayView: View {
                     } label: {
                         Text("Gross Pay")
                     }
-                }
-                
-                Section {
-                    LabeledContent {
-                        Text(lesData.tspContribution(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("TSP Contribution")
-                    }
                     
                     LabeledContent {
                         Text(lesData.wagePeriod(using: myPayData).formatted(.currency(code: "USD")))
                     } label: {
                         Text("Wage Period")
+                    }
+                }
+                
+                Section {
+                    LabeledContent {
+                        Text(lesData.traditionalTspContribution(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Traditional TSP")
+                    }
+                    
+                    LabeledContent {
+                        Text(lesData.rothTspContribution(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Roth TSP")
                     }
                 }
                 

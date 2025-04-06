@@ -8,8 +8,18 @@ struct TSPDataView: View {
             Form {
                 Section("Traditional TSP") {
                     Stepper(
-                        "Base Pay \(myPayData.tspPercentage.formatted(.percent))",
-                        value: $myPayData.tspPercentage,
+                        "Base Pay \(myPayData.traditionalTspPercentage.formatted(.percent))",
+                        value: $myPayData.traditionalTspPercentage,
+                        in: 0...0.20,
+                        step: 0.01,
+                        format: .percent
+                    )
+                }
+                
+                Section("Roth TSP") {
+                    Stepper(
+                        "Base Pay \(myPayData.rothTspPercentage.formatted(.percent))",
+                        value: $myPayData.rothTspPercentage,
                         in: 0...0.20,
                         step: 0.01,
                         format: .percent
