@@ -24,6 +24,6 @@ struct TSPDataView: View {
 }
 
 #Preview {
-    @Previewable @State var myPayData = MyPayData()
+    @Previewable @State var myPayData = MyPayData.example
     TSPDataView(myPayData: $myPayData)
 }

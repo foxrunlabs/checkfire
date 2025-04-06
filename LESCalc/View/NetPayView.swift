@@ -37,15 +37,15 @@ struct NetPayView: View {
                     }
                     
                     LabeledContent {
-                        Text(lesData.medicare(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Medicare")
-                    }
-                    
-                    LabeledContent {
                         Text(lesData.socialSecurity(using: myPayData).formatted(.currency(code: "USD")))
                     } label: {
                         Text("Social Security")
+                    }
+                    
+                    LabeledContent {
+                        Text(lesData.medicare(using: myPayData).formatted(.currency(code: "USD")))
+                    } label: {
+                        Text("Medicare")
                     }
                 }
                 
@@ -64,7 +64,7 @@ struct NetPayView: View {
 }
 
 #Preview {
-    let lesData = LESData()
-    let myPayData = MyPayData()
+    let lesData = LESData.example
+    let myPayData = MyPayData.example
     NetPayView(lesData: lesData, myPayData: myPayData)
 }

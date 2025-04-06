@@ -78,6 +78,6 @@ struct LESDataView: View {
 }
 
 #Preview {
-    @Previewable @State var lesData = LESData()
+    @Previewable @State var lesData = LESData.example
     LESDataView(lesData: $lesData)
 }

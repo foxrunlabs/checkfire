@@ -59,4 +59,13 @@ struct LESData {
         net -= medicare(using: myPayData) + socialSecurity(using: myPayData)
         return net
     }
+    
+    static let example = LESData(
+        year: 2025,
+        basePay: 11592.30,
+        specialPays: 840.00,
+        allowances: 4805.78,
+        otherDeductions: 41.00,
+        allotments: 29.98
+    )
 }

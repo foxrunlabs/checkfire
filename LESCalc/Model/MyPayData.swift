@@ -9,4 +9,15 @@ struct MyPayData {
     var deductions: Decimal = 0.00
     var extraWithholding: Decimal = 0.00
     var tspPercentage = 0.00
+    
+    static let example = MyPayData(
+        maritalStatus: .married,
+        multipleJobs: true,
+        childDependents: 2,
+        otherDependents: 0,
+        otherIncome: 0.00,
+        deductions: 0.00,
+        extraWithholding: 0.00,
+        tspPercentage: 0.11
+    )
 }

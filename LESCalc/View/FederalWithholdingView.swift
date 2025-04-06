@@ -74,6 +74,6 @@ struct FederalWithholdingView: View {
 }
 
 #Preview {
-    @Previewable @State var myPayData = MyPayData()
+    @Previewable @State var myPayData = MyPayData.example
     FederalWithholdingView(myPayData: $myPayData)
 }
