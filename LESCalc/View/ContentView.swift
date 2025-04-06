@@ -1,30 +1,20 @@
+import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @State private var myPayData = MyPayData()
-    @State private var lesData = LESData()
-
     var body: some View {
-        TabView {
-            Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
-                FederalWithholdingView(myPayData: $myPayData)
-            }
-            
-            Tab("TSP", systemImage: "dollarsign.bank.building") {
-                TSPDataView(myPayData: $myPayData)
-            }
-            
-            Tab("Pay Period", systemImage: "dollarsign") {
-                LESDataView(lesData: $lesData)
-            }
-            
-            Tab("Net Pay", systemImage: "banknote") {
-                NetPayView(lesData: lesData, myPayData: myPayData)
-            }
+        NavigationSplitView {
+            SidebarView()
+        } detail: {
+            ContentUnavailableView(
+                "Select a paycheck from the sidebar",
+                systemImage: "sidebar.left"
+            )
         }
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(PreviewController.container)
 }

@@ -1,76 +1,69 @@
 import SwiftUI
 
 struct NetPayView: View {
-    let lesData: LESData
-    let myPayData: MyPayData
+    let paycheck: Paycheck
     
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    LabeledContent {
-                        Text(lesData.grossPay.formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Gross Pay")
-                    }
-                    
-                    LabeledContent {
-                        Text(lesData.wagePeriod(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Wage Period")
-                    }
+        List {
+            Section {
+                LabeledContent {
+                    Text(paycheck.lesData.grossPay.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Gross Pay")
                 }
                 
-                Section {
-                    LabeledContent {
-                        Text(lesData.traditionalTspContribution(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Traditional TSP")
-                    }
-                    
-                    LabeledContent {
-                        Text(lesData.rothTspContribution(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Roth TSP")
-                    }
-                }
-                
-                Section {
-                    LabeledContent {
-                        Text(lesData.federalTaxes(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Federal Taxes")
-                    }
-                    
-                    LabeledContent {
-                        Text(lesData.socialSecurity(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Social Security")
-                    }
-                    
-                    LabeledContent {
-                        Text(lesData.medicare(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Medicare")
-                    }
-                }
-                
-                Section {
-                    LabeledContent {
-                        Text(lesData.netPay(using: myPayData).formatted(.currency(code: "USD")))
-                    } label: {
-                        Text("Net Pay")
-                    }
+                LabeledContent {
+                    Text(paycheck.wagePeriod.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Wage Period")
                 }
             }
-            .navigationTitle("Net Pay")
-            .navigationBarTitleDisplayMode(UIDevice.isiPad ? .large : .inline)
+            
+            Section {
+                LabeledContent {
+                    Text(paycheck.traditionalTspContribution.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Traditional TSP")
+                }
+                
+                LabeledContent {
+                    Text(paycheck.rothTspContribution.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Roth TSP")
+                }
+            }
+            
+            Section {
+                LabeledContent {
+                    Text(paycheck.federalTaxes.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Federal Taxes")
+                }
+                
+                LabeledContent {
+                    Text(paycheck.socialSecurity.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Social Security")
+                }
+                
+                LabeledContent {
+                    Text(paycheck.medicare.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Medicare")
+                }
+            }
+            
+            Section {
+                LabeledContent {
+                    Text(paycheck.netPay.formatted(.currency(code: "USD")))
+                } label: {
+                    Text("Net Pay")
+                }
+            }
         }
     }
 }
 
 #Preview {
-    let lesData = LESData.example
-    let myPayData = MyPayData.example
-    NetPayView(lesData: lesData, myPayData: myPayData)
+    NetPayView(paycheck: Paycheck.example)
 }

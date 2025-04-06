@@ -1,6 +1,6 @@
 import Foundation
 
-struct MyPayData {
+struct MyPayData: Codable {
     var maritalStatus: MaritalStatus = .single
     var multipleJobs = false
     

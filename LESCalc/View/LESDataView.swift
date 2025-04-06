@@ -1,83 +1,78 @@
 import SwiftUI
 
 struct LESDataView: View {
-    @Binding var lesData: LESData
+    @Bindable var paycheck: Paycheck
     
     var body: some View {
-        NavigationStack {
-            Form {
-                Picker("Year", selection: $lesData.year) {
-                    ForEach(TaxYears.shared.years, id: \.self) { year in
-                        Text(year.description)
-                            .tag(year)
-                    }
-                }
-                
-                Section("Entitlements, Deductions, and Allotments") {
-                    LabeledContent {
-                        TextField(
-                            "Base Pay",
-                            value: $lesData.basePay,
-                            format: .currency(code: "USD")
-                        )
-                        .multilineTextAlignment(.trailing)
-                    } label: {
-                        Text("Base Pay")
-                    }
-                    
-                    LabeledContent {
-                        TextField(
-                            "Special and Incentive Pays",
-                            value: $lesData.specialPays,
-                            format: .currency(code: "USD")
-                        )
-                        .multilineTextAlignment(.trailing)
-                    } label: {
-                        Text("Special and Incentive Pays")
-                    }
-                    
-                    LabeledContent {
-                        TextField(
-                            "Allowances",
-                            value: $lesData.allowances,
-                            format: .currency(code: "USD")
-                        )
-                        .multilineTextAlignment(.trailing)
-                    } label: {
-                        Text("Allowances")
-                    }
-                    
-                    LabeledContent {
-                        TextField(
-                            "Other Deductions",
-                            value: $lesData.otherDeductions,
-                            format: .currency(code: "USD")
-                        )
-                        .multilineTextAlignment(.trailing)
-                    } label: {
-                        Text("Other Deductions")
-                    }
-                    
-                    LabeledContent {
-                        TextField(
-                            "Allotments",
-                            value: $lesData.allotments,
-                            format: .currency(code: "USD")
-                        )
-                        .multilineTextAlignment(.trailing)
-                    } label: {
-                        Text("Allotments")
-                    }
+        Form {
+            Picker("Year", selection: $paycheck.year) {
+                ForEach(TaxYears.shared.years, id: \.self) { year in
+                    Text(year.description)
+                        .tag(year)
                 }
             }
-            .formStyle(.grouped)
-            .navigationTitle("Pay Period")
-            .navigationBarTitleDisplayMode(UIDevice.isiPad ? .large : .inline)
+            
+            Section("Entitlements, Deductions, and Allotments") {
+                LabeledContent {
+                    TextField(
+                        "Base Pay",
+                        value: $paycheck.lesData.basePay,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                } label: {
+                    Text("Base Pay")
+                }
+                
+                LabeledContent {
+                    TextField(
+                        "Special and Incentive Pays",
+                        value: $paycheck.lesData.specialPays,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                } label: {
+                    Text("Special and Incentive Pays")
+                }
+                
+                LabeledContent {
+                    TextField(
+                        "Allowances",
+                        value: $paycheck.lesData.allowances,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                } label: {
+                    Text("Allowances")
+                }
+                
+                LabeledContent {
+                    TextField(
+                        "Other Deductions",
+                        value: $paycheck.lesData.otherDeductions,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                } label: {
+                    Text("Other Deductions")
+                }
+                
+                LabeledContent {
+                    TextField(
+                        "Allotments",
+                        value: $paycheck.lesData.allotments,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                } label: {
+                    Text("Allotments")
+                }
+            }
         }
     }
 }
 
 #Preview {
-    @Previewable @State var lesData = LESData.example
-    LESDataView(lesData: $lesData)
+    @Previewable @State var paycheck = Paycheck.example
+    LESDataView(paycheck: paycheck)
 }

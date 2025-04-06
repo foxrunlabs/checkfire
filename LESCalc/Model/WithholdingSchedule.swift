@@ -1,6 +1,6 @@
 import Foundation
 
-enum WithholdingSchedule: String, Decodable {
+enum WithholdingSchedule: String, Codable {
     case standard
     case multipleJobs
 }

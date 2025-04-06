@@ -1,6 +1,6 @@
 import Foundation
 
-struct WithholdingData: Decodable {
+struct WithholdingData: Codable {
     let atLeast: Decimal
     let tentativeAmount: Decimal
     let rate: Decimal
