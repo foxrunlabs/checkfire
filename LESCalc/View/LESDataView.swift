@@ -12,7 +12,7 @@ struct LESDataView: View {
                 }
             }
             
-            Section("Entitlements, Deductions, and Allotments") {
+            Section("Entitlements") {
                 LabeledContent {
                     TextField(
                         "Base Pay",
@@ -45,7 +45,9 @@ struct LESDataView: View {
                 } label: {
                     Text("Allowances")
                 }
-                
+            }
+            
+            Section("Deductions") {
                 LabeledContent {
                     TextField(
                         "Other Deductions",
@@ -56,7 +58,9 @@ struct LESDataView: View {
                 } label: {
                     Text("Other Deductions")
                 }
-                
+            }
+            
+            Section("Allotments") {
                 LabeledContent {
                     TextField(
                         "Allotments",

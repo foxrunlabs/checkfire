@@ -6,18 +6,15 @@ struct SidebarView: View {
     
     var body: some View {
         List {
-            Section("Paychecks") {
-                ForEach(paychecks) { paycheck in
-                    NavigationLink(value: paycheck) {
-                        Text(paycheck.name)
-                    }
+            ForEach(paychecks) { paycheck in
+                NavigationLink(value: paycheck) {
+                    Text(paycheck.name)
                 }
             }
         }
         .navigationDestination(for: Paycheck.self) {
             PaycheckView(paycheck: $0)
         }
-        .navigationTitle("LES Calc")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Paychecks")
     }
 }

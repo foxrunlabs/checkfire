@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PaycheckView: View {
-    let paycheck: Paycheck
+    @Bindable var paycheck: Paycheck
     
     var body: some View {
         TabView {
@@ -13,15 +13,15 @@ struct PaycheckView: View {
                 TSPDataView(paycheck: paycheck)
             }
             
-            Tab("Pay Period", systemImage: "dollarsign") {
+            Tab("Earnings", systemImage: "plus.forwardslash.minus") {
                 LESDataView(paycheck: paycheck)
             }
             
-            Tab("Net Pay", systemImage: "banknote") {
+            Tab("Net Pay", systemImage: "dollarsign") {
                 NetPayView(paycheck: paycheck)
             }
         }
-        .navigationTitle(paycheck.name)
+        .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
