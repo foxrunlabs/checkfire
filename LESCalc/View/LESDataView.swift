@@ -3,14 +3,30 @@ import SwiftUI
 struct LESDataView: View {
     @Bindable var paycheck: Paycheck
     
+    private var dateRange: ClosedRange<Date> {
+        let startDate = DateComponents(
+            calendar: .current,
+            year: TaxYears.shared.years.first!,
+            month: 1, day: 1
+        ).date!
+        
+        let lastDate = DateComponents(
+            calendar: .current,
+            year: TaxYears.shared.years.last!,
+            month: 12,
+            day: 31
+        ).date!
+        
+        return startDate...lastDate
+    }
+    
     var body: some View {
         Form {
-            Picker("Year", selection: $paycheck.year) {
-                ForEach(TaxYears.shared.years, id: \.self) { year in
-                    Text(year.description)
-                        .tag(year)
-                }
-            }
+            DatePicker("Pay Date",
+                selection: $paycheck.date,
+                in: dateRange,
+                displayedComponents: .date
+            )
             
             Section("Entitlements") {
                 LabeledContent {

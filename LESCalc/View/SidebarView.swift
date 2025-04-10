@@ -8,7 +8,12 @@ struct SidebarView: View {
         List {
             ForEach(paychecks) { paycheck in
                 NavigationLink(value: paycheck) {
-                    Text(paycheck.name)
+                    VStack(alignment: .leading) {
+                        Text(paycheck.name)
+                            .bold()
+                        
+                        Text(paycheck.date, style: .date)
+                    }
                 }
             }
         }
@@ -17,4 +22,9 @@ struct SidebarView: View {
         }
         .navigationTitle("Paychecks")
     }
+}
+
+#Preview {
+    SidebarView()
+        .modelContainer(PreviewController.container)
 }

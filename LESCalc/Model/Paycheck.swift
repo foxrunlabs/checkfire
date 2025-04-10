@@ -5,9 +5,11 @@ import SwiftData
 final class Paycheck: Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String
-    var year: Int
+    var date: Date
     var myPayData: MyPayData
     var lesData: LESData
+    
+    private var year: Int { Calendar.current.component(.year, from: date) }
     
     var traditionalTspContribution: Decimal {
         lesData.basePay * Decimal(myPayData.traditionalTspPercentage)
@@ -58,19 +60,20 @@ final class Paycheck: Identifiable {
     /// Creates a new paycheck.
     /// - Parameters:
     ///   - name: Name of paycheck.
+    ///   - date: Date of paycheck.
     ///   - myPayData: myPay data for paycheck.
     ///   - lesData: LES data for paycheck.
-    init(name: String, year: Int, myPayData: MyPayData = MyPayData(), lesData: LESData = LESData()) {
+    init(name: String, date: Date, myPayData: MyPayData = MyPayData(), lesData: LESData = LESData()) {
         self.id = UUID()
         self.name = name
-        self.year = year
+        self.date = date
         self.myPayData = myPayData
         self.lesData = lesData
     }
     
     static let example = Paycheck(
         name: "Example",
-        year: TaxYears.shared.years.last!,
+        date: DateComponents(calendar: Calendar.current, year: 2025, month: 1, day: 1).date!,
         myPayData: MyPayData.example,
         lesData: LESData.example
     )
