@@ -1,6 +1,6 @@
 import Foundation
 
-struct LESData: Codable, Equatable {
+struct LESData: Codable {
     var basePay: Decimal = 0.00
     var specialPays: Decimal = 0.00
     var allowances: Decimal = 0.00

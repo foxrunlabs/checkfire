@@ -7,16 +7,17 @@ final class Paycheck: Identifiable {
     var name: String
     var date: Date
     var myPayData: MyPayData
+    var tspData: TSPData
     var lesData: LESData
     
     private var year: Int { Calendar.current.component(.year, from: date) }
     
     var traditionalTspContribution: Decimal {
-        lesData.basePay * Decimal(myPayData.traditionalTspPercentage)
+        lesData.basePay * Decimal(tspData.traditionalTspPercentage)
     }
     
     var rothTspContribution: Decimal {
-        lesData.basePay * Decimal(myPayData.rothTspPercentage)
+        lesData.basePay * Decimal(tspData.rothTspPercentage)
     }
     
     var wagePeriod: Decimal {
@@ -62,12 +63,20 @@ final class Paycheck: Identifiable {
     ///   - name: Name of paycheck.
     ///   - date: Date of paycheck.
     ///   - myPayData: myPay data for paycheck.
+    ///   - tspData: TSP data for paycheck.
     ///   - lesData: LES data for paycheck.
-    init(name: String, date: Date, myPayData: MyPayData = MyPayData(), lesData: LESData = LESData()) {
+    init(
+        name: String,
+        date: Date,
+        myPayData: MyPayData = MyPayData(),
+        tspData: TSPData = TSPData(),
+        lesData: LESData = LESData()
+    ) {
         self.id = UUID()
         self.name = name
         self.date = date
         self.myPayData = myPayData
+        self.tspData = tspData
         self.lesData = lesData
     }
     
@@ -75,6 +84,7 @@ final class Paycheck: Identifiable {
         name: "Example",
         date: DateComponents(calendar: Calendar.current, year: 2025, month: 1, day: 1).date!,
         myPayData: MyPayData.example,
+        tspData: TSPData.example,
         lesData: LESData.example
     )
 }

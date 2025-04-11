@@ -1,6 +1,6 @@
 import Foundation
 
-struct MyPayData: Codable, Equatable {
+struct MyPayData: Codable{
     var maritalStatus: MaritalStatus = .single
     var multipleJobs = false
     
@@ -11,9 +11,6 @@ struct MyPayData: Codable, Equatable {
     var deductions: Decimal = 0.00
     var extraWithholding: Decimal = 0.00
     
-    var traditionalTspPercentage = 0.00
-    var rothTspPercentage = 0.00
-    
     static let example = MyPayData(
         maritalStatus: .married,
         multipleJobs: true,
@@ -21,8 +18,6 @@ struct MyPayData: Codable, Equatable {
         otherDependents: 0,
         otherIncome: 0.00,
         deductions: 0.00,
-        extraWithholding: 0.00,
-        traditionalTspPercentage: 0.11,
-        rothTspPercentage: 0.00
+        extraWithholding: 0.00
     )
 }
