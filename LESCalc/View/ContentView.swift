@@ -2,14 +2,20 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedPaycheck: Paycheck?
+    
     var body: some View {
         NavigationSplitView {
-            SidebarView()
+            SidebarView(selectedPaycheck: $selectedPaycheck)
         } detail: {
-            ContentUnavailableView(
-                "Select a paycheck from the sidebar",
-                systemImage: "sidebar.left"
-            )
+            if let selectedPaycheck {
+                PaycheckView(paycheck: selectedPaycheck)
+            } else {
+                ContentUnavailableView(
+                    "Select a paycheck from the sidebar",
+                    systemImage: "sidebar.left"
+                )
+            }
         }
     }
 }
