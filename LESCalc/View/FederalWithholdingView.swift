@@ -3,6 +3,10 @@ import SwiftUI
 struct FederalWithholdingView: View {
     @Bindable var paycheck: Paycheck
     
+    @State private var otherIncome: Decimal = 0.00
+    @State private var deductions: Decimal = 0.00
+    @State private var extraWithholding: Decimal = 0.00
+    
     var body: some View {
         Form {
             Section {
@@ -35,10 +39,13 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Other Income Amount - Not From Jobs",
-                        value: $paycheck.myPayData.otherIncome,
+                        value: $otherIncome,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.myPayData.otherIncome = otherIncome
+                    }
                 } label: {
                     Text("Other Income Amount - Not From Jobs")
                 }
@@ -46,10 +53,13 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Other Deductions",
-                        value: $paycheck.myPayData.deductions,
+                        value: $deductions,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.myPayData.deductions = deductions
+                    }
                 } label: {
                     Text("Other Deductions")
                 }
@@ -57,14 +67,22 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Extra Withholding Amount Monthly",
-                        value: $paycheck.myPayData.extraWithholding,
+                        value: $extraWithholding,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.myPayData.extraWithholding = extraWithholding
+                    }
                 } label: {
                     Text("Extra Withholding Amount Monthly")
                 }
             }
+        }
+        .onAppear {
+            otherIncome = paycheck.myPayData.otherIncome
+            deductions = paycheck.myPayData.deductions
+            extraWithholding = paycheck.myPayData.extraWithholding
         }
     }
 }

@@ -3,6 +3,12 @@ import SwiftUI
 struct LESDataView: View {
     @Bindable var paycheck: Paycheck
     
+    @State private var basePay: Decimal = 0.00
+    @State private var specialPays: Decimal = 0.00
+    @State private var allowances: Decimal = 0.00
+    @State private var otherDeductions: Decimal = 0.00
+    @State private var allotments: Decimal = 0.00
+    
     private var dateRange: ClosedRange<Date> {
         let startDate = DateComponents(
             calendar: .current,
@@ -23,19 +29,22 @@ struct LESDataView: View {
     var body: some View {
         Form {
             DatePicker("Pay Date",
-                selection: $paycheck.date,
-                in: dateRange,
-                displayedComponents: .date
+                       selection: $paycheck.date,
+                       in: dateRange,
+                       displayedComponents: .date
             )
             
             Section("Entitlements") {
                 LabeledContent {
                     TextField(
                         "Base Pay",
-                        value: $paycheck.lesData.basePay,
+                        value: $basePay,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.lesData.basePay = basePay
+                    }
                 } label: {
                     Text("Base Pay")
                 }
@@ -43,10 +52,13 @@ struct LESDataView: View {
                 LabeledContent {
                     TextField(
                         "Special and Incentive Pays",
-                        value: $paycheck.lesData.specialPays,
+                        value: $specialPays,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.lesData.specialPays = specialPays
+                    }
                 } label: {
                     Text("Special and Incentive Pays")
                 }
@@ -54,10 +66,13 @@ struct LESDataView: View {
                 LabeledContent {
                     TextField(
                         "Allowances",
-                        value: $paycheck.lesData.allowances,
+                        value: $allowances,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.lesData.allowances = allowances
+                    }
                 } label: {
                     Text("Allowances")
                 }
@@ -67,10 +82,13 @@ struct LESDataView: View {
                 LabeledContent {
                     TextField(
                         "Other Deductions",
-                        value: $paycheck.lesData.otherDeductions,
+                        value: $otherDeductions,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.lesData.otherDeductions = otherDeductions
+                    }
                 } label: {
                     Text("Other Deductions")
                 }
@@ -80,14 +98,24 @@ struct LESDataView: View {
                 LabeledContent {
                     TextField(
                         "Allotments",
-                        value: $paycheck.lesData.allotments,
+                        value: $allotments,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .onSubmit {
+                        paycheck.lesData.allotments = allotments
+                    }
                 } label: {
                     Text("Allotments")
                 }
             }
+        }
+        .onAppear {
+            basePay = paycheck.lesData.basePay
+            specialPays = paycheck.lesData.specialPays
+            allowances = paycheck.lesData.allowances
+            otherDeductions = paycheck.lesData.otherDeductions
+            allotments = paycheck.lesData.allotments
         }
     }
 }
