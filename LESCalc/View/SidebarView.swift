@@ -104,9 +104,9 @@ fileprivate struct QueryView: View {
         let newPaycheck = Paycheck(
             name: paycheck.name,
             date: paycheck.date,
+            lesData: paycheck.lesData,
             myPayData: paycheck.myPayData,
-            tspData: paycheck.tspData,
-            lesData: paycheck.lesData
+            tspData: paycheck.tspData
         )
         
         modelContext.insert(newPaycheck)

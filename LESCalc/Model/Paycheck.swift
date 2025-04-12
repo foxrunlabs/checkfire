@@ -6,9 +6,9 @@ final class Paycheck: Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String
     var date: Date
+    var lesData: LESData
     var myPayData: MyPayData
     var tspData: TSPData
-    var lesData: LESData
     
     private var year: Int { Calendar.current.component(.year, from: date) }
     
@@ -68,23 +68,23 @@ final class Paycheck: Identifiable {
     init(
         name: String,
         date: Date,
+        lesData: LESData = LESData(),
         myPayData: MyPayData = MyPayData(),
-        tspData: TSPData = TSPData(),
-        lesData: LESData = LESData()
+        tspData: TSPData = TSPData()
     ) {
         self.id = UUID()
         self.name = name
         self.date = date
+        self.lesData = lesData
         self.myPayData = myPayData
         self.tspData = tspData
-        self.lesData = lesData
     }
     
     static let example = Paycheck(
         name: "Example",
         date: DateComponents(calendar: Calendar.current, year: 2025, month: 1, day: 1).date!,
+        lesData: LESData.example,
         myPayData: MyPayData.example,
-        tspData: TSPData.example,
-        lesData: LESData.example
+        tspData: TSPData.example
     )
 }
