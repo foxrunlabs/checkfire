@@ -76,25 +76,52 @@ fileprivate struct QueryView: View {
     }
     
     var body: some View {
-        List(selection: $selectedPaycheck.animation()) {
-            ForEach(paychecks) { paycheck in
-                NavigationLink(value: paycheck) {
-                    VStack(alignment: .leading) {
-                        Text(paycheck.name)
-                            .bold()
-                        
-                        Text(paycheck.date, style: .date)
-                    }
-                    .padding(.vertical, ProcessInfo.processInfo.isiOSAppOnMac ? 8 : 0)
+        List(paychecks, selection: $selectedPaycheck.animation()) { paycheck in
+            NavigationLink(value: paycheck) {
+                VStack(alignment: .leading) {
+                    Text(paycheck.name)
+                        .bold()
+                    
+                    Text(paycheck.date, style: .date)
                 }
+                .padding(.vertical, ProcessInfo.processInfo.isiOSAppOnMac ? 8 : 0)
             }
-            .onDelete(perform: deletePaycheck)
+            .swipeActions {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    deletePaycheck(paycheck)
+                }
+                
+                Button("Copy", systemImage: "document.on.document") {
+                    copyPaycheck(paycheck)
+                }
+                .tint(.blue)
+            }
         }
         .listStyle(.inset)
     }
     
-    private func deletePaycheck(indices: IndexSet) {
-        indices.forEach { modelContext.delete(paychecks[$0]) }
+    private func copyPaycheck(_ paycheck: Paycheck) {
+        let newPaycheck = Paycheck(
+            name: paycheck.name,
+            date: paycheck.date,
+            myPayData: paycheck.myPayData,
+            tspData: paycheck.tspData,
+            lesData: paycheck.lesData
+        )
+        
+        modelContext.insert(newPaycheck)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        withAnimation { selectedPaycheck = newPaycheck }
+    }
+    
+    private func deletePaycheck(_ paycheck: Paycheck) {
+        modelContext.delete(paycheck)
         withAnimation { selectedPaycheck = nil }
     }
 }
