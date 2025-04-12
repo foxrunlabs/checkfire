@@ -17,10 +17,12 @@ struct SidebarView: View {
                         
                         Text(paycheck.date, style: .date)
                     }
+                    .padding(.vertical, ProcessInfo.processInfo.isiOSAppOnMac ? 8 : 0)
                 }
             }
             .onDelete(perform: deletePaycheck)
         }
+        .listStyle(.inset)
         .navigationTitle("Paychecks")
         .toolbar {
             ToolbarItem {
