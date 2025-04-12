@@ -5,16 +5,16 @@ struct PaycheckView: View {
     
     var body: some View {
         TabView {
+            Tab("LES", systemImage: "plus.forwardslash.minus") {
+                LESDataView(paycheck: paycheck)
+            }
+            
             Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
                 FederalWithholdingView(paycheck: paycheck)
             }
             
             Tab("TSP", systemImage: "dollarsign.bank.building") {
                 TSPDataView(paycheck: paycheck)
-            }
-            
-            Tab("Earnings", systemImage: "plus.forwardslash.minus") {
-                LESDataView(paycheck: paycheck)
             }
             
             Tab("Net Pay", systemImage: "dollarsign") {
