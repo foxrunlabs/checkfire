@@ -3,11 +3,8 @@ import SwiftUI
 struct LESDataView: View {
     @Bindable var paycheck: Paycheck
     
-    @State private var basePay: Decimal = 0.00
-    @State private var specialPays: Decimal = 0.00
-    @State private var allowances: Decimal = 0.00
-    @State private var otherDeductions: Decimal = 0.00
-    @State private var allotments: Decimal = 0.00
+    @State private var lesData = LESData()
+    @State private var editAllotments = false
     
     private var dateRange: ClosedRange<Date> {
         let startDate = DateComponents(
@@ -29,93 +26,143 @@ struct LESDataView: View {
     var body: some View {
         Form {
             DatePicker("Pay Date",
-                       selection: $paycheck.date,
-                       in: dateRange,
-                       displayedComponents: .date
+                selection: $paycheck.date,
+                in: dateRange,
+                displayedComponents: .date
             )
             
             Section("Entitlements") {
-                LabeledContent {
+                LabeledContent("Base Pay") {
                     TextField(
                         "Base Pay",
-                        value: $basePay,
+                        value: $lesData.basePay,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
                     .onSubmit {
-                        paycheck.lesData.basePay = basePay
+                        paycheck.lesData.basePay = lesData.basePay
                     }
-                } label: {
-                    Text("Base Pay")
                 }
                 
-                LabeledContent {
-                    TextField(
-                        "Special and Incentive Pays",
-                        value: $specialPays,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .onSubmit {
-                        paycheck.lesData.specialPays = specialPays
+                ForEach($lesData.specialPays) { $specialPay in
+                    LabeledContent(specialPay.name) {
+                        TextField(
+                            specialPay.name,
+                            value: $specialPay.amount,
+                            format: .currency(code: "USD")
+                        )
+                        .multilineTextAlignment(.trailing)
+                        .onSubmit {
+                            paycheck.lesData.specialPays = lesData.specialPays
+                        }
                     }
-                } label: {
-                    Text("Special and Incentive Pays")
                 }
                 
-                LabeledContent {
-                    TextField(
-                        "Allowances",
-                        value: $allowances,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .onSubmit {
-                        paycheck.lesData.allowances = allowances
+                ForEach($lesData.allowances) { $allowance in
+                    LabeledContent(allowance.name) {
+                        TextField(
+                            allowance.name,
+                            value: $allowance.amount,
+                            format: .currency(code: "USD")
+                        )
+                        .multilineTextAlignment(.trailing)
+                        .onSubmit {
+                            paycheck.lesData.allowances = lesData.allowances
+                        }
                     }
-                } label: {
-                    Text("Allowances")
                 }
             }
             
             Section("Deductions") {
-                LabeledContent {
-                    TextField(
-                        "Other Deductions",
-                        value: $otherDeductions,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .onSubmit {
-                        paycheck.lesData.otherDeductions = otherDeductions
+                ForEach($lesData.deductions) { $deduction in
+                    LabeledContent(deduction.name) {
+                        TextField(
+                            deduction.name,
+                            value: $deduction.amount,
+                            format: .currency(code: "USD")
+                        )
+                        .multilineTextAlignment(.trailing)
+                        .onSubmit {
+                            paycheck.lesData.deductions = lesData.deductions
+                        }
                     }
-                } label: {
-                    Text("Other Deductions")
                 }
             }
             
-            Section("Allotments") {
-                LabeledContent {
-                    TextField(
-                        "Allotments",
-                        value: $allotments,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .onSubmit {
-                        paycheck.lesData.allotments = allotments
-                    }
-                } label: {
+            Section {
+                ForEach($lesData.allotments) { $allotment in
+                    LabeledContent {
+                        TextField(
+                            allotment.name,
+                            value: $allotment.amount,
+                            format: .currency(code: "USD")
+                        )
+                        .multilineTextAlignment(.trailing)
+                        .onSubmit {
+                            paycheck.lesData.allotments = lesData.allotments
+                        }
+                    } label: {
+                       HStack {
+                           if editAllotments {
+                               Button(role: .destructive) {
+                                   withAnimation {
+                                       lesData.allotments.removeAll { $0.id == allotment.id }
+                                   }
+                                   
+                                   paycheck.lesData.allotments = lesData.allotments
+                               } label: {
+                                   Image(systemName: "trash")
+                               }
+                               .buttonStyle(.borderless)
+                           }
+                           
+                           TextField("Name", text: $allotment.name)
+                               .disabled(editAllotments == false)
+                       }
+                   }
+                }
+            } header: {
+                HStack {
                     Text("Allotments")
+                    
+                    Spacer()
+                    
+                    if editAllotments == false {
+                        Button {
+                            withAnimation { editAllotments.toggle() }
+                        } label: {
+                            Text("Edit")
+                                .font(.body.smallCaps())
+                        }
+                    } else {
+                        Button {
+                            let newLESItem = LESItem(name: "New Allotment", amount: 0.00)
+                            
+                            withAnimation {
+                                lesData.allotments.append(newLESItem)
+                            }
+                            
+                            paycheck.lesData.allotments = lesData.allotments
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body.smallCaps())
+                        }
+                        
+                        Button {
+                            withAnimation { editAllotments.toggle() }
+                        } label: {
+                            Text("Done")
+                                .font(.body.smallCaps())
+                        }
+                    }
                 }
             }
         }
         .onAppear {
-            basePay = paycheck.lesData.basePay
-            specialPays = paycheck.lesData.specialPays
-            allowances = paycheck.lesData.allowances
-            otherDeductions = paycheck.lesData.otherDeductions
-            allotments = paycheck.lesData.allotments
+            lesData = paycheck.lesData
+        }
+        .onDisappear {
+            lesData = LESData()
         }
     }
 }

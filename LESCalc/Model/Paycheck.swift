@@ -21,7 +21,7 @@ final class Paycheck: Identifiable {
     }
     
     var wagePeriod: Decimal {
-        lesData.basePay + lesData.specialPays - traditionalTspContribution
+        lesData.basePay + lesData.specialPays.reduce(0.00) { $0 + $1.amount } - traditionalTspContribution
     }
 
     var federalTaxes: Decimal {
@@ -51,7 +51,7 @@ final class Paycheck: Identifiable {
     var netPay: Decimal {
         var net = lesData.grossPay
         net -= traditionalTspContribution + rothTspContribution
-        net -= lesData.otherDeductions + lesData.allotments
+        net -= lesData.deductions.reduce(0.00) { $0 + $1.amount } + lesData.allotments.reduce(0.00) { $0 + $1.amount }
         net -= federalTaxes
         net -= medicare + socialSecurity
         
