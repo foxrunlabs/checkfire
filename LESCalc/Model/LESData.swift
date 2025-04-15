@@ -1,6 +1,7 @@
 import Foundation
 
-struct LESData: Codable {
+struct LESData: Codable, Equatable {
+    var date: Date = .now
     var basePay: Decimal = 0.00
     var specialPays: [LESItem] = []
     var allowances: [LESItem] = []
@@ -12,6 +13,7 @@ struct LESData: Codable {
     }
     
     static let example = LESData(
+        date: DateComponents(calendar: Calendar.current, year: 2025, month: 1, day: 1).date!,
         basePay: 11592.30,
         specialPays: [LESItem(name: "Fly Pay", amount: 840.00)],
         allowances: [

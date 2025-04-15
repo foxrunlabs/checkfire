@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct TSPDataView: View {
-    @Bindable var paycheck: Paycheck
+    @Binding var tspData: TSPData
     
     var body: some View {
         Form {
             Section("Traditional TSP") {
                 Stepper(
-                    "Base Pay \(paycheck.tspData.traditionalTspPercentage.formatted(.percent))",
-                    value: $paycheck.tspData.traditionalTspPercentage,
+                    "Base Pay \(tspData.traditionalTspPercentage.formatted(.percent))",
+                    value: $tspData.traditionalTspPercentage,
                     in: 0...0.20,
                     step: 0.01,
                     format: .percent
@@ -17,8 +17,8 @@ struct TSPDataView: View {
             
             Section("Roth TSP") {
                 Stepper(
-                    "Base Pay \(paycheck.tspData.rothTspPercentage.formatted(.percent))",
-                    value: $paycheck.tspData.rothTspPercentage,
+                    "Base Pay \(tspData.rothTspPercentage.formatted(.percent))",
+                    value: $tspData.rothTspPercentage,
                     in: 0...0.20,
                     step: 0.01,
                     format: .percent
@@ -29,6 +29,6 @@ struct TSPDataView: View {
 }
 
 #Preview {
-    @Previewable @State var paycheck = Paycheck.example
-    TSPDataView(paycheck: paycheck)
+    @Previewable @State var tspData = Paycheck.example.tspData
+    TSPDataView(tspData: $tspData)
 }

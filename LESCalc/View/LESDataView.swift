@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct LESDataView: View {
-    @Bindable var paycheck: Paycheck
+    @Binding var lesData: LESData
     
     private var dateRange: ClosedRange<Date> {
         let startDate = DateComponents(
@@ -24,32 +24,32 @@ struct LESDataView: View {
     var body: some View {
         Form {
             DatePicker("Pay Date",
-                selection: $paycheck.date,
-                in: dateRange,
-                displayedComponents: .date
+                       selection: $lesData.date,
+                       in: dateRange,
+                       displayedComponents: .date
             )
             
             LabeledContent("Base Pay") {
                 TextField(
                     "Base Pay",
-                    value: $paycheck.lesData.basePay,
+                    value: $lesData.basePay,
                     format: .currency(code: "USD")
                 )
                 .multilineTextAlignment(.trailing)
             }
             
-            LESDataViewSection("Allowances", items: $paycheck.lesData.allowances)
+            LESDataViewSection("Allowances", items: $lesData.allowances)
             
-            LESDataViewSection("Special Pays", items: $paycheck.lesData.specialPays)
+            LESDataViewSection("Special Pays", items: $lesData.specialPays)
             
-            LESDataViewSection("Deductions", items: $paycheck.lesData.deductions)
+            LESDataViewSection("Deductions", items: $lesData.deductions)
             
-            LESDataViewSection("Allotments", items: $paycheck.lesData.allotments)
+            LESDataViewSection("Allotments", items: $lesData.allotments)
         }
     }
 }
 
 #Preview {
-    @Previewable @State var paycheck = Paycheck.example
-    LESDataView(paycheck: paycheck)
+    @Previewable @State var lesData = Paycheck.example.lesData
+    LESDataView(lesData: $lesData)
 }

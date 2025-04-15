@@ -1,6 +1,6 @@
 import Foundation
 
-struct TSPData: Codable {
+struct TSPData: Codable, Equatable {
     var traditionalTspPercentage = 0.00
     var rothTspPercentage = 0.00
     

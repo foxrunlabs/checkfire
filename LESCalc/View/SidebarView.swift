@@ -5,7 +5,7 @@ struct SidebarView: View {
     @Binding var selectedPaycheck: Paycheck?
     
     @Environment(\.modelContext) private var modelContext
-    @State private var sortOrder = SortDescriptor(\Paycheck.date)
+    @State private var sortOrder = SortDescriptor(\Paycheck.lesData.date)
     
     var body: some View {
         QueryView(selectedPaycheck: $selectedPaycheck, sortBy: sortOrder)
@@ -16,7 +16,7 @@ struct SidebarView: View {
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortOrder) {
                                 Text("Date")
-                                    .tag(SortDescriptor(\Paycheck.date))
+                                    .tag(SortDescriptor(\Paycheck.lesData.date))
                                 
                                 Text("Name")
                                     .tag(SortDescriptor(\Paycheck.name))
@@ -41,7 +41,7 @@ struct SidebarView: View {
     }
     
     private func addPaycheck() {
-        let newPaycheck = Paycheck(name: "New Paycheck", date: .now)
+        let newPaycheck = Paycheck(name: "New Paycheck")
         modelContext.insert(newPaycheck)
         
         do {
@@ -82,7 +82,7 @@ fileprivate struct QueryView: View {
                     Text(paycheck.name)
                         .bold()
                     
-                    Text(paycheck.date, style: .date)
+                    Text(paycheck.lesData.date, style: .date)
                 }
                 .padding(.vertical, ProcessInfo.processInfo.isiOSAppOnMac ? 8 : 0)
             }
@@ -103,7 +103,6 @@ fileprivate struct QueryView: View {
     private func copyPaycheck(_ paycheck: Paycheck) {
         let newPaycheck = Paycheck(
             name: paycheck.name,
-            date: paycheck.date,
             lesData: paycheck.lesData,
             myPayData: paycheck.myPayData,
             tspData: paycheck.tspData
