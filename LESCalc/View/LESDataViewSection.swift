@@ -15,31 +15,9 @@ struct LESDataViewSection: View {
     var body: some View {
         Section {
             ForEach($items) { $item in
-                LabeledContent {
-                    TextField(
-                        item.name,
-                        value: $item.amount,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .disabled(isEditEnabled)
-                } label: {
-                   HStack {
-                       if isEditEnabled {
-                           Button(role: .destructive) {
-                               withAnimation {
-                                   items.removeAll { $0.id == item.id }
-                               }
-                           } label: {
-                               Image(systemName: "trash")
-                           }
-                           .buttonStyle(.borderless)
-                       }
-                       
-                       TextField("Item Name", text: $item.name)
-                           .disabled(isEditEnabled == false)
-                   }
-               }
+                LESItemView($item, isEditing: isEditEnabled) {
+                    items.removeAll { $0.id == item.id }
+                }
             }
         } header: {
             HStack {

@@ -12,15 +12,15 @@ final class Paycheck: Identifiable {
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
     
     var traditionalTspContribution: Decimal {
-        lesData.basePay * Decimal(tspData.traditionalTspPercentage)
+        lesData.basePay.amount * Decimal(tspData.traditionalTspPercentage)
     }
     
     var rothTspContribution: Decimal {
-        lesData.basePay * Decimal(tspData.rothTspPercentage)
+        lesData.basePay.amount * Decimal(tspData.rothTspPercentage)
     }
     
     var wagePeriod: Decimal {
-        lesData.basePay + lesData.specialPays.reduce(0.00) { $0 + $1.amount } - traditionalTspContribution
+        lesData.basePay.amount + lesData.specialPays.reduce(0.00) { $0 + $1.amount } - traditionalTspContribution
     }
 
     var federalTaxes: Decimal {
@@ -36,7 +36,7 @@ final class Paycheck: Identifiable {
             fatalError("No tax data found for \(year.description)")
         }
         
-        return (lesData.basePay * taxData.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        return (lesData.basePay.amount * taxData.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var socialSecurity: Decimal {
@@ -44,7 +44,7 @@ final class Paycheck: Identifiable {
             fatalError("No tax data found for \(year.description)")
         }
         
-        return (lesData.basePay * taxData.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        return (lesData.basePay.amount * taxData.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var netPay: Decimal {

@@ -4,7 +4,7 @@ import SwiftUI
 struct LESDataView: View {
     @Binding var lesData: LESData
     
-    @State private var isEditEnabled = false
+    @State private var isEditing = false
     
     private var dateRange: ClosedRange<Date> {
         let startDate = DateComponents(
@@ -31,37 +31,29 @@ struct LESDataView: View {
                            in: dateRange,
                            displayedComponents: .date
                 )
-                .disabled(isEditEnabled)
+                .disabled(isEditing)
                 
-                LabeledContent("Base Pay") {
-                    TextField(
-                        "Base Pay",
-                        value: $lesData.basePay,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                    .disabled(isEditEnabled)
-                }
+                LESItemView($lesData.basePay, isEditing: false) {}
             } header: {
                 HStack {
                     Spacer()
                     
                     Button {
-                        withAnimation { isEditEnabled.toggle() }
+                        withAnimation { isEditing.toggle() }
                     } label: {
-                        Text(isEditEnabled ? "Done" : "Edit")
+                        Text(isEditing ? "Done" : "Edit")
                             .font(.body.smallCaps())
                     }
                 }
             }
             
-            LESDataViewSection("Allowances", items: $lesData.allowances, isEditEnabled: $isEditEnabled)
+            LESDataViewSection("Allowances", items: $lesData.allowances, isEditEnabled: $isEditing)
             
-            LESDataViewSection("Special Pays", items: $lesData.specialPays, isEditEnabled: $isEditEnabled)
+            LESDataViewSection("Special Pays", items: $lesData.specialPays, isEditEnabled: $isEditing)
             
-            LESDataViewSection("Deductions", items: $lesData.deductions, isEditEnabled: $isEditEnabled)
+            LESDataViewSection("Deductions", items: $lesData.deductions, isEditEnabled: $isEditing)
             
-            LESDataViewSection("Allotments", items: $lesData.allotments, isEditEnabled: $isEditEnabled)
+            LESDataViewSection("Allotments", items: $lesData.allotments, isEditEnabled: $isEditing)
         }
     }
 }
