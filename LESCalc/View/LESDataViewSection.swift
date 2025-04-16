@@ -4,12 +4,12 @@ import SwiftUI
 struct LESDataViewSection: View {
     let title: String
     @Binding var items: [LESItem]
+    @Binding var isEditEnabled: Bool
     
-    @State private var isEditEnabled = false
-    
-    init(_ title: String, items: Binding<[LESItem]>) {
+    init(_ title: String, items: Binding<[LESItem]>, isEditEnabled: Binding<Bool>) {
         self.title = title
         self._items = items
+        self._isEditEnabled = isEditEnabled
     }
     
     var body: some View {
@@ -22,6 +22,7 @@ struct LESDataViewSection: View {
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
+                    .disabled(isEditEnabled)
                 } label: {
                    HStack {
                        if isEditEnabled {
@@ -46,14 +47,7 @@ struct LESDataViewSection: View {
                 
                 Spacer()
                 
-                if isEditEnabled == false {
-                    Button {
-                        withAnimation { isEditEnabled.toggle() }
-                    } label: {
-                        Text("Edit")
-                            .font(.body.smallCaps())
-                    }
-                } else {
+                if isEditEnabled {
                     Button {
                         let newLESItem = LESItem(name: "New Item", amount: 0.00)
                         
@@ -64,13 +58,6 @@ struct LESDataViewSection: View {
                         Image(systemName: "plus")
                             .font(.body.smallCaps())
                     }
-                    
-                    Button {
-                        withAnimation { isEditEnabled.toggle() }
-                    } label: {
-                        Text("Done")
-                            .font(.body.smallCaps())
-                    }
                 }
             }
         }
@@ -79,5 +66,6 @@ struct LESDataViewSection: View {
 
 #Preview {
     @Previewable @State var allotments = Paycheck.example.lesData.allotments
-    LESDataViewSection("Allotments", items: $allotments)
+    @Previewable @State var isEditEnabled = false
+    LESDataViewSection("Allotments", items: $allotments, isEditEnabled: $isEditEnabled)
 }

@@ -4,6 +4,8 @@ import SwiftUI
 struct LESDataView: View {
     @Binding var lesData: LESData
     
+    @State private var isEditEnabled = false
+    
     private var dateRange: ClosedRange<Date> {
         let startDate = DateComponents(
             calendar: .current,
@@ -23,28 +25,43 @@ struct LESDataView: View {
     
     var body: some View {
         Form {
-            DatePicker("Pay Date",
-                       selection: $lesData.date,
-                       in: dateRange,
-                       displayedComponents: .date
-            )
-            
-            LabeledContent("Base Pay") {
-                TextField(
-                    "Base Pay",
-                    value: $lesData.basePay,
-                    format: .currency(code: "USD")
+            Section {
+                DatePicker("Pay Date",
+                           selection: $lesData.date,
+                           in: dateRange,
+                           displayedComponents: .date
                 )
-                .multilineTextAlignment(.trailing)
+                .disabled(isEditEnabled)
+                
+                LabeledContent("Base Pay") {
+                    TextField(
+                        "Base Pay",
+                        value: $lesData.basePay,
+                        format: .currency(code: "USD")
+                    )
+                    .multilineTextAlignment(.trailing)
+                    .disabled(isEditEnabled)
+                }
+            } header: {
+                HStack {
+                    Spacer()
+                    
+                    Button {
+                        withAnimation { isEditEnabled.toggle() }
+                    } label: {
+                        Text(isEditEnabled ? "Done" : "Edit")
+                            .font(.body.smallCaps())
+                    }
+                }
             }
             
-            LESDataViewSection("Allowances", items: $lesData.allowances)
+            LESDataViewSection("Allowances", items: $lesData.allowances, isEditEnabled: $isEditEnabled)
             
-            LESDataViewSection("Special Pays", items: $lesData.specialPays)
+            LESDataViewSection("Special Pays", items: $lesData.specialPays, isEditEnabled: $isEditEnabled)
             
-            LESDataViewSection("Deductions", items: $lesData.deductions)
+            LESDataViewSection("Deductions", items: $lesData.deductions, isEditEnabled: $isEditEnabled)
             
-            LESDataViewSection("Allotments", items: $lesData.allotments)
+            LESDataViewSection("Allotments", items: $lesData.allotments, isEditEnabled: $isEditEnabled)
         }
     }
 }

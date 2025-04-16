@@ -36,7 +36,7 @@ struct PaycheckView: View {
         .toolbar {
             if isUndoAndSaveEnabled {
                 ToolbarItemGroup {
-                    Button("Undo", systemImage: "arrow.uturn.backward") {
+                    Button("Undo", systemImage: "arrow.uturn.backward.circle") {
                         withAnimation {
                             name = paycheck.name
                             lesData = paycheck.lesData
@@ -45,7 +45,7 @@ struct PaycheckView: View {
                         }
                     }
                     
-                    Button("Save", systemImage: "checkmark") {
+                    Button("Save", systemImage: "checkmark.circle") {
                         withAnimation {
                             paycheck.name = name
                             paycheck.lesData = lesData
