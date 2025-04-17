@@ -33,7 +33,7 @@ struct LESDataView: View {
                 )
                 .disabled(isEditing)
                 
-                LESItemView($lesData.basePay, isEditing: false) {}
+                LESItemView($lesData.basePay)
             } header: {
                 HStack {
                     Spacer()

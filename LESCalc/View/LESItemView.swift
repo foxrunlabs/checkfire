@@ -5,6 +5,12 @@ struct LESItemView: View {
     let isEditing: Bool
     let onDelete: () -> Void
     
+    init(_ item: Binding<LESItem>) {
+        self._item = item
+        self.isEditing = false
+        self.onDelete = {}
+    }
+    
     init(_ item: Binding<LESItem>, isEditing: Bool, onDelete: @escaping () -> Void) {
         self._item = item
         self.isEditing = isEditing
