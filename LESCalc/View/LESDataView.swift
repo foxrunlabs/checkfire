@@ -1,4 +1,3 @@
-import SwiftData
 import SwiftUI
 
 struct LESDataView: View {
@@ -10,7 +9,8 @@ struct LESDataView: View {
         let startDate = DateComponents(
             calendar: .current,
             year: TaxYears.shared.years.first!,
-            month: 1, day: 1
+            month: 1,
+            day: 1
         ).date!
         
         let lastDate = DateComponents(
@@ -27,13 +27,14 @@ struct LESDataView: View {
         Form {
             Section {
                 DatePicker("Pay Date",
-                           selection: $lesData.date,
-                           in: dateRange,
-                           displayedComponents: .date
+                    selection: $lesData.date,
+                    in: dateRange,
+                    displayedComponents: .date
                 )
                 .disabled(isEditing)
                 
                 LESItemView($lesData.basePay)
+                    .disabled(isEditing)
             } header: {
                 HStack {
                     Spacer()
@@ -47,13 +48,13 @@ struct LESDataView: View {
                 }
             }
             
-            LESDataViewSection("Allowances", items: $lesData.allowances, isEditEnabled: $isEditing)
+            LESItemSectionView("Allowances", lesItems: $lesData.allowances, isEditing: $isEditing)
             
-            LESDataViewSection("Special Pays", items: $lesData.specialPays, isEditEnabled: $isEditing)
+            LESItemSectionView("Special Pays", lesItems: $lesData.specialPays, isEditing: $isEditing)
             
-            LESDataViewSection("Deductions", items: $lesData.deductions, isEditEnabled: $isEditing)
+            LESItemSectionView("Deductions", lesItems: $lesData.deductions, isEditing: $isEditing)
             
-            LESDataViewSection("Allotments", items: $lesData.allotments, isEditEnabled: $isEditing)
+            LESItemSectionView("Allotments", lesItems: $lesData.allotments, isEditing: $isEditing)
         }
     }
 }
