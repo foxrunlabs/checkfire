@@ -34,26 +34,26 @@ struct PaycheckView: View {
         .navigationTitle($name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if isUndoAndSaveEnabled {
-                ToolbarItemGroup {
-                    Button("Undo", systemImage: "arrow.uturn.backward.circle") {
-                        withAnimation {
-                            name = paycheck.name
-                            lesData = paycheck.lesData
-                            myPayData = paycheck.myPayData
-                            tspData = paycheck.tspData
-                        }
-                    }
-                    
-                    Button("Save", systemImage: "checkmark.circle") {
-                        withAnimation {
-                            paycheck.name = name
-                            paycheck.lesData = lesData
-                            paycheck.myPayData = myPayData
-                            paycheck.tspData = tspData
-                        }
+            ToolbarItemGroup {
+                Button("Undo", systemImage: "arrow.uturn.backward.circle") {
+                    withAnimation {
+                        name = paycheck.name
+                        lesData = paycheck.lesData
+                        myPayData = paycheck.myPayData
+                        tspData = paycheck.tspData
                     }
                 }
+                .disabled(!isUndoAndSaveEnabled)
+                
+                Button("Save", systemImage: "checkmark.circle") {
+                    withAnimation {
+                        paycheck.name = name
+                        paycheck.lesData = lesData
+                        paycheck.myPayData = myPayData
+                        paycheck.tspData = tspData
+                    }
+                }
+                .disabled(!isUndoAndSaveEnabled)
             }
         }
         .onAppear {
