@@ -101,13 +101,7 @@ fileprivate struct QueryView: View {
     }
     
     private func copyPaycheck(_ paycheck: Paycheck) {
-        let newPaycheck = Paycheck(
-            name: paycheck.name,
-            lesData: paycheck.lesData,
-            myPayData: paycheck.myPayData,
-            tspData: paycheck.tspData
-        )
-        
+        let newPaycheck = Paycheck(copyFrom: paycheck)
         modelContext.insert(newPaycheck)
         
         do {

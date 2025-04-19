@@ -67,13 +67,23 @@ final class Paycheck: Identifiable {
         name: String,
         lesData: LESData = LESData(),
         myPayData: MyPayData = MyPayData(),
-        tspData: TSPData = TSPData()
+        tspData: TSPData = TSPData(),
     ) {
         self.id = UUID()
         self.name = name
         self.lesData = lesData
         self.myPayData = myPayData
         self.tspData = tspData
+    }
+    
+    /// Creates a new paycheck from another paycheck.
+    /// - Parameter paycheck: Paycheck to copy.
+    init(copyFrom paycheck: Paycheck) {
+        self.id = UUID()
+        self.name = paycheck.name
+        self.lesData = LESData(copyFrom: paycheck.lesData)
+        self.myPayData = paycheck.myPayData
+        self.tspData = paycheck.tspData
     }
     
     static let example = Paycheck(
