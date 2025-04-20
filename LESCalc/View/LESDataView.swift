@@ -26,10 +26,10 @@ struct LESDataView: View {
     var body: some View {
         Form {
             Section {
-                DatePicker("Pay Date",
+                PaycheckDatePicker(
+                    "Pay Date",
                     selection: $lesData.date,
-                    in: dateRange,
-                    displayedComponents: .date
+                    in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
                 )
                 .disabled(isEditing)
                 

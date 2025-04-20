@@ -22,7 +22,9 @@ struct LESData: Codable, Equatable {
         deductions: [LESItem] = [],
         allotments: [LESItem] = []
     ) {
-        self.date = date
+        var components = Calendar.current.dateComponents([.year, .month], from: date)
+        components.day = 1
+        self.date = components.date ?? date
         self.basePay = LESItem(name: "Base Pay", amount: basePay)
         self.specialPays = specialPays
         self.allowances = allowances

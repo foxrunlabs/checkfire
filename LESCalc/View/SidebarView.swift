@@ -5,7 +5,10 @@ struct SidebarView: View {
     @Binding var selectedPaycheck: Paycheck?
     
     @Environment(\.modelContext) private var modelContext
-    @State private var sortOrder = SortDescriptor(\Paycheck.lesData.date)
+    @State private var sortOrder = [
+        SortDescriptor(\Paycheck.lesData.date),
+        SortDescriptor(\Paycheck.name)
+    ]
     
     var body: some View {
         QueryView(selectedPaycheck: $selectedPaycheck, sortBy: sortOrder)
@@ -16,10 +19,16 @@ struct SidebarView: View {
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortOrder) {
                                 Text("Date")
-                                    .tag(SortDescriptor(\Paycheck.lesData.date))
+                                    .tag([
+                                        SortDescriptor(\Paycheck.lesData.date),
+                                        SortDescriptor(\Paycheck.name)
+                                    ])
                                 
                                 Text("Name")
-                                    .tag(SortDescriptor(\Paycheck.name))
+                                    .tag([
+                                        SortDescriptor(\Paycheck.name),
+                                        SortDescriptor(\Paycheck.lesData.date)
+                                    ])
                             }
                             .pickerStyle(.inline)
                         }
@@ -70,9 +79,9 @@ fileprivate struct QueryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
     
-    init(selectedPaycheck: Binding<Paycheck?>, sortBy: SortDescriptor<Paycheck>) {
+    init(selectedPaycheck: Binding<Paycheck?>, sortBy: [SortDescriptor<Paycheck>]) {
         self._selectedPaycheck = selectedPaycheck
-        self._paychecks = Query(sort: [sortBy])
+        self._paychecks = Query(sort: sortBy)
     }
     
     var body: some View {
@@ -82,7 +91,7 @@ fileprivate struct QueryView: View {
                     Text(paycheck.name)
                         .bold()
                     
-                    Text(paycheck.lesData.date, style: .date)
+                    Text(paycheck.lesData.date.formatted(.dateTime.month(.wide).year()))
                 }
                 .padding(.vertical, ProcessInfo.processInfo.isiOSAppOnMac ? 8 : 0)
             }
