@@ -43,28 +43,12 @@ fileprivate struct PickerView: View {
             YearStepper(selection: $selection, in: yearRange)
             
             Grid {
-                GridRow {
-                    MonthPicker(.january, selection: $selection)
-                    MonthPicker(.february, selection: $selection)
-                    MonthPicker(.march, selection: $selection)
-                }
-                
-                GridRow {
-                    MonthPicker(.april, selection: $selection)
-                    MonthPicker(.may, selection: $selection)
-                    MonthPicker(.june, selection: $selection)
-                }
-                
-                GridRow {
-                    MonthPicker(.july, selection: $selection)
-                    MonthPicker(.august, selection: $selection)
-                    MonthPicker(.september, selection: $selection)
-                }
-                
-                GridRow {
-                    MonthPicker(.october, selection: $selection)
-                    MonthPicker(.november, selection: $selection)
-                    MonthPicker(.december, selection: $selection)
+                ForEach(0..<4) { row in
+                    GridRow {
+                        MonthPicker(3 * row + 1, selection: $selection)
+                        MonthPicker(3 * row + 2, selection: $selection)
+                        MonthPicker(3 * row + 3, selection: $selection)
+                    }
                 }
             }
         }
@@ -76,20 +60,6 @@ fileprivate struct YearStepper: View {
     @Binding private var selection: Date
     private let yearRange: ClosedRange<Int>
     
-    private var selectionYear: Int {
-        get {
-            Calendar.current.component(.year, from: selection)
-        }
-        nonmutating set {
-            let components = DateComponents(year: newValue, month: selectionMonth, day: 1)
-            selection = Calendar.current.date(from: components)!
-        }
-    }
-    
-    private var selectionMonth: Int {
-            Calendar.current.component(.month, from: selection)
-    }
-    
     init(selection: Binding<Date>, in yearRange: ClosedRange<Int>) {
         self._selection = selection
         self.yearRange = yearRange
@@ -98,68 +68,48 @@ fileprivate struct YearStepper: View {
     var body: some View {
         HStack {
             Button {
-                selectionYear = max(yearRange.lowerBound, selectionYear - 1)
+                selection.year = max(yearRange.lowerBound, selection.year - 1)
             } label: {
                 Image(systemName: "chevron.left")
                     .bold()
             }
-            .disabled(selectionYear == yearRange.lowerBound)
+            .disabled(selection.year == yearRange.lowerBound)
             
             Text(selection.formatted(.dateTime.year()))
                 .foregroundStyle(.primary)
                 .bold()
             
             Button {
-                selectionYear = min(selectionYear + 1, yearRange.upperBound)
+                selection.year = min(selection.year + 1, yearRange.upperBound)
             } label: {
                 Image(systemName: "chevron.right")
                     .bold()
             }
-            .disabled(selectionYear == yearRange.upperBound)
-        }
-    }
-}
-
-fileprivate enum Month: Int, CustomStringConvertible {
-    case january = 1
-    case february, march, april, may, june, july, august, september, october, november, december
-    
-    var description: String {
-        switch self {
-        case .january: "Jan"
-        case .february: "Feb"
-        case .march: "Mar"
-        case .april: "Apr"
-        case .may: "May"
-        case .june: "Jun"
-        case .july: "Jul"
-        case .august: "Aug"
-        case .september: "Sep"
-        case .october: "Oct"
-        case .november: "Nov"
-        case .december: "Dec"
+            .disabled(selection.year == yearRange.upperBound)
         }
     }
 }
 
 fileprivate struct MonthPicker: View {
-    private let month: Month
+    private let month: Int
     @Binding private var selection: Date
     
-    init(_ month: Month, selection: Binding<Date>) {
+    private let months = Calendar.current.monthSymbols.map { $0.prefix(3) }
+    
+    init(_ month: Int, selection: Binding<Date>) {
         self.month = month
         self._selection = selection
     }
     
     var body: some View {
-        Text(month.description)
+        Text(months[month - 1])
             .frame(width: 50, height: 35)
-            .bold(selection.month == month.rawValue)
-            .foregroundStyle(selection.month == month.rawValue ? Color.accentColor : .primary)
-            .background(selection.month == month.rawValue ? Color.accentColor.opacity(0.25) : .clear)
+            .bold(selection.month == month)
+            .foregroundStyle(selection.month == month ? Color.accentColor : .primary)
+            .background(selection.month == month ? Color.accentColor.opacity(0.25) : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 5))
             .onTapGesture {
-                selection.month = month.rawValue
+                selection.month = month
             }
     }
 }

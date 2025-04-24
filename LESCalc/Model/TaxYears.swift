@@ -7,6 +7,7 @@ final class TaxYears {
         taxYearData.map { $0.year }
     }
     
+    /// Private initializer for singleton object.
     private init() {}
     
     /// Retrieve tax data for a specified year.

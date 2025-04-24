@@ -11,11 +11,10 @@ struct TaxData: Decodable, Identifiable {
     // MARK: - Identifiable
     var id: Int { year }
     
-    /// Calculates federal income tax withholding for a wage using the percentage method for manual payroll systems with W-4 data
-    /// MyPay.
-    /// - Parameter wage: Monthly taxable wage
-    /// - Parameter myPayData: myPay data
-    /// - Returns: Federal income tax withholding
+    /// Calculate federal income tax withholding for a wage using the percentage method for manual payroll systems.
+    /// - Parameter wage: Monthly taxable wage in dollars.
+    /// - Parameter myPayData: myPay data.
+    /// - Returns: Federal income tax withholding in dollars.
     func calculateWithholding(for wage: Decimal, using myPayData: MyPayData) -> Decimal {
         let wageFrequency: Decimal = 12
         
@@ -46,7 +45,6 @@ struct TaxData: Decodable, Identifiable {
         
         // figure final withholding
         withholding += myPayData.extraWithholding
-        
         return withholding.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
 }
