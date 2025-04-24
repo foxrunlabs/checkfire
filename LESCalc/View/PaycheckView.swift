@@ -1,67 +1,28 @@
 import SwiftUI
 
 struct PaycheckView: View {
-    let paycheck: Paycheck
-    
-    @State private var name = ""
-    @State private var lesData = LESData()
-    @State private var myPayData = MyPayData()
-    @State private var tspData = TSPData()
-    
-    private var isUndoAndSaveEnabled: Bool {
-        (name != paycheck.name) || (lesData != paycheck.lesData) ||
-            (myPayData != paycheck.myPayData) || (tspData != paycheck.tspData)
-    }
+    @Bindable var paycheck: Paycheck
     
     var body: some View {
         TabView {
             Tab("LES", systemImage: "plus.forwardslash.minus") {
-                LESDataView(lesData: $lesData)
+                LESDataView(paycheck: paycheck)
             }
             
             Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
-                FederalWithholdingView(myPayData: $myPayData)
+                FederalWithholdingView(paycheck: paycheck)
             }
             
             Tab("TSP", systemImage: "dollarsign.bank.building") {
-                TSPDataView(tspData: $tspData)
+                TSPDataView(paycheck: paycheck)
             }
             
             Tab("Net Pay", systemImage: "dollarsign") {
                 NetPayView(paycheck: paycheck)
             }
         }
-        .navigationTitle($name)
+        .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItemGroup {
-                Button("Undo", systemImage: "arrow.uturn.backward.circle") {
-                    withAnimation {
-                        name = paycheck.name
-                        lesData = paycheck.lesData
-                        myPayData = paycheck.myPayData
-                        tspData = paycheck.tspData
-                    }
-                }
-                .disabled(!isUndoAndSaveEnabled)
-                
-                Button("Save", systemImage: "checkmark.circle") {
-                    withAnimation {
-                        paycheck.name = name
-                        paycheck.lesData = lesData
-                        paycheck.myPayData = myPayData
-                        paycheck.tspData = tspData
-                    }
-                }
-                .disabled(!isUndoAndSaveEnabled)
-            }
-        }
-        .onAppear {
-            name = paycheck.name
-            lesData = paycheck.lesData
-            myPayData = paycheck.myPayData
-            tspData = paycheck.tspData
-        }
     }
 }
 

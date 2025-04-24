@@ -1,39 +1,21 @@
 import SwiftUI
 
 struct LESDataView: View {
-    @Binding var lesData: LESData
+    @Bindable var paycheck: Paycheck
     
     @State private var isEditing = false
-    
-    private var dateRange: ClosedRange<Date> {
-        let startDate = DateComponents(
-            calendar: .current,
-            year: TaxYears.shared.years.first!,
-            month: 1,
-            day: 1
-        ).date!
-        
-        let lastDate = DateComponents(
-            calendar: .current,
-            year: TaxYears.shared.years.last!,
-            month: 12,
-            day: 31
-        ).date!
-        
-        return startDate...lastDate
-    }
     
     var body: some View {
         Form {
             Section {
                 PaycheckDatePicker(
                     "Pay Date",
-                    selection: $lesData.date,
+                    selection: $paycheck.lesData.date,
                     in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
                 )
                 .disabled(isEditing)
                 
-                LESItemView($lesData.basePay)
+                LESItemView($paycheck.lesData.basePay)
                     .disabled(isEditing)
             } header: {
                 HStack {
@@ -48,18 +30,33 @@ struct LESDataView: View {
                 }
             }
             
-            LESItemSectionView("Allowances", lesItems: $lesData.allowances, isEditing: $isEditing)
+            LESItemSectionView(
+                "Allowances",
+                lesItems: $paycheck.lesData.allowances,
+                isEditing: $isEditing
+            )
             
-            LESItemSectionView("Special Pays", lesItems: $lesData.specialPays, isEditing: $isEditing)
+            LESItemSectionView(
+                "Special Pays",
+                lesItems: $paycheck.lesData.specialPays,
+                isEditing: $isEditing
+            )
             
-            LESItemSectionView("Deductions", lesItems: $lesData.deductions, isEditing: $isEditing)
+            LESItemSectionView(
+                "Deductions",
+                lesItems: $paycheck.lesData.deductions,
+                isEditing: $isEditing
+            )
             
-            LESItemSectionView("Allotments", lesItems: $lesData.allotments, isEditing: $isEditing)
+            LESItemSectionView(
+                "Allotments",
+                lesItems: $paycheck.lesData.allotments,
+                isEditing: $isEditing
+            )
         }
     }
 }
 
 #Preview {
-    @Previewable @State var lesData = Paycheck.example.lesData
-    LESDataView(lesData: $lesData)
+    LESDataView(paycheck: Paycheck.example)
 }
