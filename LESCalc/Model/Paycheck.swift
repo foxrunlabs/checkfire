@@ -78,12 +78,19 @@ final class Paycheck: Identifiable {
     
     /// Creates a new paycheck from another paycheck.
     /// - Parameter paycheck: Paycheck to copy.
-    init(copyFrom paycheck: Paycheck) {
-        self.id = UUID()
-        self.name = paycheck.name
-        self.lesData = LESData(copyFrom: paycheck.lesData)
-        self.myPayData = paycheck.myPayData
-        self.tspData = paycheck.tspData
+    convenience init(_ other: Paycheck) {
+        var lesData = LESData()
+        lesData.date = other.lesData.date
+        lesData.basePay = LESItem(
+            name: other.lesData.basePay.name,
+            amount: other.lesData.basePay.amount
+        )
+        lesData.allowances = other.lesData.allowances.map { LESItem(name: $0.name, amount: $0.amount) }
+        lesData.specialPays = other.lesData.specialPays.map { LESItem(name: $0.name, amount: $0.amount) }
+        lesData.deductions = other.lesData.deductions.map { LESItem(name: $0.name, amount: $0.amount) }
+        lesData.allotments = other.lesData.allotments.map { LESItem(name: $0.name, amount: $0.amount) }
+        
+        self.init(name: other.name, lesData: lesData, myPayData: other.myPayData, tspData: other.tspData)
     }
     
     static let example = Paycheck(

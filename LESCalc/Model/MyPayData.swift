@@ -11,17 +11,6 @@ struct MyPayData: Codable, Equatable {
     var deductions: Decimal
     var extraWithholding: Decimal
     
-    /// Create myPay data as filing single, one job, all other values zeroed.
-    init() {
-        self.maritalStatus = .single
-        self.multipleJobs = false
-        self.childDependents = 0
-        self.otherDependents = 0
-        self.otherIncome = 0.00
-        self.deductions = 0.00
-        self.extraWithholding = 0.00
-    }
-    
     /// Create myPay data.
     /// - Parameters:
     ///   - maritalStatus: Marital status for federal tax filing.
@@ -32,13 +21,13 @@ struct MyPayData: Codable, Equatable {
     ///   - deductions: Deductions in dollars, not including the standard deduction.
     ///   - extraWithholding: Extra withholding per month in dollars.
     init(
-        maritalStatus: MaritalStatus,
-        multipleJobs: Bool,
-        childDependents: Int,
-        otherDependents: Int,
-        otherIncome: Decimal,
-        deductions: Decimal,
-        extraWithholding: Decimal
+        maritalStatus: MaritalStatus = .single,
+        multipleJobs: Bool = false,
+        childDependents: Int = 0,
+        otherDependents: Int = 0,
+        otherIncome: Decimal = 0.00,
+        deductions: Decimal = 0.00,
+        extraWithholding: Decimal = 0.00
     ) {
         self.maritalStatus = maritalStatus
         self.multipleJobs = multipleJobs

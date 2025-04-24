@@ -14,18 +14,6 @@ struct LESData: Codable, Equatable {
             + allowances.reduce(0.00) { $0 + $1.amount }
     }
     
-    /// Creates empty LES data with the date set to the current date and base pay set to $0.00.
-    init() {
-        var components = Calendar.current.dateComponents([.year, .month], from: .now)
-        components.day = 1
-        self.date = components.date ?? .now
-        self.basePay = LESItem(name: "Base Pay", amount: 0.00)
-        self.specialPays = []
-        self.allowances = []
-        self.deductions = []
-        self.allotments = []
-    }
-    
     /// Creates LES data.
     /// - Parameters:
     ///   - date: LES date.
@@ -35,12 +23,12 @@ struct LESData: Codable, Equatable {
     ///   - deductions: An array of deductions, not including federal tax, FICA tax, or TSP.
     ///   - allotments: An array of allotments.
     init(
-        date: Date,
-        basePay: Decimal,
-        specialPays: [LESItem],
-        allowances: [LESItem],
-        deductions: [LESItem],
-        allotments: [LESItem]
+        date: Date = .now,
+        basePay: Decimal = 0.00,
+        specialPays: [LESItem] = [],
+        allowances: [LESItem] = [],
+        deductions: [LESItem] = [],
+        allotments: [LESItem] = []
     ) {
         var components = Calendar.current.dateComponents([.year, .month], from: date)
         components.day = 1
@@ -50,17 +38,6 @@ struct LESData: Codable, Equatable {
         self.allowances = allowances
         self.deductions = deductions
         self.allotments = allotments
-    }
-    
-    /// Create LES data from existing LES data.
-    /// - Parameter lesData: LES data to copy.
-    init(copyFrom lesData: LESData) {
-        self.date = lesData.date
-        self.basePay = LESItem(name: "Base Pay", amount: lesData.basePay.amount)
-        self.specialPays = lesData.specialPays.map { LESItem(name: $0.name, amount: $0.amount) }
-        self.allowances = lesData.allowances.map { LESItem(name: $0.name, amount: $0.amount) }
-        self.deductions = lesData.deductions.map { LESItem(name: $0.name, amount: $0.amount) }
-        self.allotments = lesData.allotments.map { LESItem(name: $0.name, amount: $0.amount) }
     }
     
     static let example = LESData(
