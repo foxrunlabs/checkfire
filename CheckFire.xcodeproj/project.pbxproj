@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		94871EF32DA2F68D002976DA /* LESCalc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LESCalc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		94871EF32DA2F68D002976DA /* CheckFire.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CheckFire.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		94871EF52DA2F68D002976DA /* LESCalc */ = {
+		94871EF52DA2F68D002976DA /* CheckFire */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = LESCalc;
+			path = CheckFire;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		94871EEA2DA2F68D002976DA = {
 			isa = PBXGroup;
 			children = (
-				94871EF52DA2F68D002976DA /* LESCalc */,
+				94871EF52DA2F68D002976DA /* CheckFire */,
 				94871EF42DA2F68D002976DA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		94871EF42DA2F68D002976DA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				94871EF32DA2F68D002976DA /* LESCalc.app */,
+				94871EF32DA2F68D002976DA /* CheckFire.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		94871EF22DA2F68D002976DA /* LESCalc */ = {
+		94871EF22DA2F68D002976DA /* CheckFire */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 94871EFE2DA2F68F002976DA /* Build configuration list for PBXNativeTarget "LESCalc" */;
+			buildConfigurationList = 94871EFE2DA2F68F002976DA /* Build configuration list for PBXNativeTarget "CheckFire" */;
 			buildPhases = (
 				94871EEF2DA2F68D002976DA /* Sources */,
 				94871EF02DA2F68D002976DA /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				94871EF52DA2F68D002976DA /* LESCalc */,
+				94871EF52DA2F68D002976DA /* CheckFire */,
 			);
-			name = LESCalc;
+			name = CheckFire;
 			packageProductDependencies = (
 			);
 			productName = LESCalc;
-			productReference = 94871EF32DA2F68D002976DA /* LESCalc.app */;
+			productReference = 94871EF32DA2F68D002976DA /* CheckFire.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 94871EEE2DA2F68D002976DA /* Build configuration list for PBXProject "LESCalc" */;
+			buildConfigurationList = 94871EEE2DA2F68D002976DA /* Build configuration list for PBXProject "CheckFire" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				94871EF22DA2F68D002976DA /* LESCalc */,
+				94871EF22DA2F68D002976DA /* CheckFire */,
 			);
 		};
 /* End PBXProject section */
@@ -252,11 +252,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = WP957Y9Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "LES Calc";
+				INFOPLIST_KEY_CFBundleDisplayName = CheckFire;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -268,7 +269,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kj6msg.LESCalc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kj6msg.CheckFire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -285,11 +286,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = WP957Y9Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "LES Calc";
+				INFOPLIST_KEY_CFBundleDisplayName = CheckFire;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -301,7 +303,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kj6msg.LESCalc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kj6msg.CheckFire;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -315,7 +317,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		94871EEE2DA2F68D002976DA /* Build configuration list for PBXProject "LESCalc" */ = {
+		94871EEE2DA2F68D002976DA /* Build configuration list for PBXProject "CheckFire" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				94871EFC2DA2F68F002976DA /* Debug */,
@@ -324,7 +326,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		94871EFE2DA2F68F002976DA /* Build configuration list for PBXNativeTarget "LESCalc" */ = {
+		94871EFE2DA2F68F002976DA /* Build configuration list for PBXNativeTarget "CheckFire" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				94871EFF2DA2F68F002976DA /* Debug */,

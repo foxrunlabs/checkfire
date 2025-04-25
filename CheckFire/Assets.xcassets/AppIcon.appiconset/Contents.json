@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "logo_bigger_crosshair_dollar.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

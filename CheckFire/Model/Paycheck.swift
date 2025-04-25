@@ -20,7 +20,8 @@ final class Paycheck: Identifiable {
     }
     
     var wagePeriod: Decimal {
-        lesData.basePay.amount + lesData.specialPays.reduce(0.00) { $0 + $1.amount } - traditionalTspContribution
+        lesData.basePay.amount + lesData.specialPays.reduce(0.00) { $0 + $1.amount } -
+            traditionalTspContribution
     }
 
     var federalTaxes: Decimal {
@@ -36,7 +37,8 @@ final class Paycheck: Identifiable {
             fatalError("No tax data found for \(year.description)")
         }
         
-        return (lesData.basePay.amount * taxData.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        let medicateOwed = lesData.basePay.amount * taxData.medicareRate
+        return medicateOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var socialSecurity: Decimal {
@@ -44,20 +46,22 @@ final class Paycheck: Identifiable {
             fatalError("No tax data found for \(year.description)")
         }
         
-        return (lesData.basePay.amount * taxData.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        let socialSecurityOwed = lesData.basePay.amount * taxData.socialSecurityRate
+        return socialSecurityOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var netPay: Decimal {
         var net = lesData.grossPay
         net -= traditionalTspContribution + rothTspContribution
-        net -= lesData.deductions.reduce(0.00) { $0 + $1.amount } + lesData.allotments.reduce(0.00) { $0 + $1.amount }
+        net -= lesData.deductions.reduce(0.00) { $0 + $1.amount }
+        net -= lesData.allotments.reduce(0.00) { $0 + $1.amount }
         net -= federalTaxes
         net -= medicare + socialSecurity
         
         return net
     }
     
-    /// Creates a new paycheck.
+    /// Create a new paycheck.
     /// - Parameters:
     ///   - name: Name of paycheck.
     ///   - myPayData: myPay data for paycheck.
@@ -79,6 +83,7 @@ final class Paycheck: Identifiable {
     /// Creates a new paycheck from another paycheck.
     /// - Parameter paycheck: Paycheck to copy.
     convenience init(_ other: Paycheck) {
+        // deliberate copy of LESData due to UUIDs in LESItem.
         var lesData = LESData()
         lesData.date = other.lesData.date
         lesData.basePay = LESItem(
@@ -90,7 +95,12 @@ final class Paycheck: Identifiable {
         lesData.deductions = other.lesData.deductions.map { LESItem(name: $0.name, amount: $0.amount) }
         lesData.allotments = other.lesData.allotments.map { LESItem(name: $0.name, amount: $0.amount) }
         
-        self.init(name: other.name, lesData: lesData, myPayData: other.myPayData, tspData: other.tspData)
+        self.init(
+            name: other.name,
+            lesData: lesData,
+            myPayData: other.myPayData,
+            tspData: other.tspData
+        )
     }
     
     static let example = Paycheck(
