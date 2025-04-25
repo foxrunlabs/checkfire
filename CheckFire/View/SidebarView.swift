@@ -10,12 +10,18 @@ struct SidebarView: View {
         SortDescriptor(\Paycheck.name)
     ]
     
+    @State private var showSettings = false
+    
     var body: some View {
         QueryView(selectedPaycheck: $selectedPaycheck, sortBy: sortOrder)
             .navigationTitle("Paychecks")
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
+                        Button("Settings", systemImage: "gear") {
+                            showSettings.toggle()
+                        }
+                        
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortOrder) {
                                 Text("Date")
@@ -46,6 +52,9 @@ struct SidebarView: View {
                         addPaycheck()
                     }
                 }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
             }
     }
     
