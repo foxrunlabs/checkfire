@@ -25,30 +25,9 @@ struct AboutView: View {
                 }
                 
                 Section("Official Documentation") {
-                    Link(
-                        "DoD FMR Volume 7A",
-                        destination: URL(string: "https://comptroller.defense.gov/Portals/45/documents/fmr/Volume_07a.pdf")!
-                    )
-                    
-                    Link(
-                        "IRS Publication 15-T",
-                        destination: URL(string: "https://www.irs.gov/forms-pubs/about-publication-15-t")!
-                    )
-                    
-                    Link(
-                        "IRS Publication 501",
-                        destination: URL(string: "https://www.irs.gov/publications/p501")!
-                    )
-                    
-                    Link(
-                        "IRS Publication 505",
-                        destination: URL(string: "https://www.irs.gov/publications/p505")!
-                    )
-                    
-                    Link(
-                        "IRS Schedule 8812 (Form 1040)",
-                        destination: URL(string: "https://www.irs.gov/pub/irs-pdf/f1040s8.pdf")!
-                    )
+                    ForEach(documentation) { doc in
+                        Link(doc.name, destination: doc.url)
+                    }
                 }
             }
             .navigationTitle("About")
@@ -61,6 +40,41 @@ struct AboutView: View {
             }
         }
     }
+    
+    // MARK: - Documentation Data
+    private struct Documentation: Identifiable {
+        let id = UUID()
+        let name: String
+        let url: URL
+        
+        init(name: String, urlString: String) {
+            self.name = name
+            self.url = URL(string: urlString)!
+        }
+    }
+    
+    private let documentation = [
+        Documentation(
+            name: "DoD FMR Volume 7A",
+            urlString: "https://comptroller.defense.gov/Portals/45/documents/fmr/Volume_07a.pdf"
+        ),
+        Documentation(
+            name: "IRS Publication 15-T",
+            urlString: "https://www.irs.gov/forms-pubs/about-publication-15-t"
+        ),
+        Documentation(
+            name: "IRS Publication 501",
+            urlString: "https://www.irs.gov/publications/p501"
+        ),
+        Documentation(
+            name: "IRS Publication 505",
+            urlString: "https://www.irs.gov/publications/p505"
+        ),
+        Documentation(
+            name: "IRS Schedule 8812 (Form 1040)",
+            urlString: "https://www.irs.gov/pub/irs-pdf/f1040s8.pdf"
+        )
+    ]
 }
 
 #Preview {
