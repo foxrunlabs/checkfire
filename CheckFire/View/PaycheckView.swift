@@ -1,7 +1,11 @@
+import SwiftData
 import SwiftUI
 
 struct PaycheckView: View {
     @Bindable var paycheck: Paycheck
+    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         TabView {
@@ -23,6 +27,14 @@ struct PaycheckView: View {
         }
         .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .destructiveAction) {
+                Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
+                    modelContext.delete(paycheck)
+                    dismiss()
+                }
+            }
+        }
     }
 }
 
