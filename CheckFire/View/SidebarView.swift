@@ -10,7 +10,12 @@ struct SidebarView: View {
         SortDescriptor(\Paycheck.name)
     ]
     
-    @State private var showSettings = false
+    @State private var showAbout = false
+    
+    private var aboutString: String {
+        let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? ""
+        return "About " + appName
+    }
     
     var body: some View {
         QueryView(selectedPaycheck: $selectedPaycheck, sortBy: sortOrder)
@@ -18,8 +23,8 @@ struct SidebarView: View {
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Settings", systemImage: "gear") {
-                            showSettings.toggle()
+                        Button(aboutString, systemImage: "info.circle") {
+                            showAbout.toggle()
                         }
                         
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
@@ -53,8 +58,8 @@ struct SidebarView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
+            .sheet(isPresented: $showAbout) {
+                AboutView()
             }
     }
     

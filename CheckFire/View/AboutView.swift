@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SettingsView: View {
+struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     
@@ -14,7 +14,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("About") {
+                Section {
                     LabeledContent("Version") {
                         Text(version)
                     }
@@ -51,7 +51,7 @@ struct SettingsView: View {
                     )
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("About")
             .toolbar {
                 ToolbarItem {
                     Button("Done") {
@@ -64,5 +64,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    AboutView()
 }
