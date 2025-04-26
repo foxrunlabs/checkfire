@@ -66,10 +66,24 @@ struct SidebarView: View {
                 AboutView()
             }
             .alert("Delete Paychecks", isPresented: $showAlert) {
-                Button("Cancel", role: .cancel) { }
-                
-                Button("Delete", role: .destructive) {
-                    deleteAllPaychecks()
+                if ProcessInfo.processInfo.isiOSAppOnMac {
+                    Button("Delete") {
+                        deleteAllPaychecks()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    
+                    Button("Cancel") {
+                        
+                    }
+                    .keyboardShortcut(.cancelAction)
+                } else {
+                    Button("Cancel", role: .cancel) {
+                        
+                    }
+                    
+                    Button("Delete", role: .destructive) {
+                        deleteAllPaychecks()
+                    }
                 }
             } message: {
                 Text("Are you sure?")
