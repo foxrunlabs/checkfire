@@ -5,12 +5,14 @@ struct SidebarView: View {
     @Binding var selectedPaycheck: Paycheck?
     
     @Environment(\.modelContext) private var modelContext
+    @Query private var paychecks: [Paycheck]
     @State private var sortOrder = [
         SortDescriptor(\Paycheck.lesData.date),
         SortDescriptor(\Paycheck.name)
     ]
     
     @State private var showAbout = false
+    @State private var showAlert = false
     
     private var aboutString: String {
         let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? ""
@@ -27,25 +29,27 @@ struct SidebarView: View {
                             showAbout.toggle()
                         }
                         
-                        Menu("Sort By", systemImage: "arrow.up.arrow.down") {
-                            Picker("Sort By", selection: $sortOrder) {
-                                Text("Date")
-                                    .tag([
-                                        SortDescriptor(\Paycheck.lesData.date),
-                                        SortDescriptor(\Paycheck.name)
-                                    ])
-                                
-                                Text("Name")
-                                    .tag([
-                                        SortDescriptor(\Paycheck.name),
-                                        SortDescriptor(\Paycheck.lesData.date)
-                                    ])
+                        if !paychecks.isEmpty {
+                            Menu("Sort By", systemImage: "arrow.up.arrow.down") {
+                                Picker("Sort By", selection: $sortOrder) {
+                                    Text("Date")
+                                        .tag([
+                                            SortDescriptor(\Paycheck.lesData.date),
+                                            SortDescriptor(\Paycheck.name)
+                                        ])
+                                    
+                                    Text("Name")
+                                        .tag([
+                                            SortDescriptor(\Paycheck.name),
+                                            SortDescriptor(\Paycheck.lesData.date)
+                                        ])
+                                }
+                                .pickerStyle(.inline)
                             }
-                            .pickerStyle(.inline)
-                        }
                         
-                        Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
-                            deleteAllPaychecks()
+                            Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
+                                showAlert.toggle()
+                            }
                         }
                     }
                 }
@@ -60,6 +64,15 @@ struct SidebarView: View {
             }
             .sheet(isPresented: $showAbout) {
                 AboutView()
+            }
+            .alert("Delete Paychecks", isPresented: $showAlert) {
+                Button("Cancel", role: .cancel) { }
+                
+                Button("Delete", role: .destructive) {
+                    deleteAllPaychecks()
+                }
+            } message: {
+                Text("Are you sure?")
             }
     }
     
