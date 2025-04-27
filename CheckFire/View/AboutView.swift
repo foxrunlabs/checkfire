@@ -2,13 +2,13 @@ import SwiftUI
 
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
-    private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
+    
     private let contactURL = URL(string: "mailto:kj6msg@icloud.com")!
+    private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
     
     private var version: String {
         let number = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
-        
         return number + " (\(build))"
     }
     
@@ -16,9 +16,9 @@ struct AboutView: View {
         NavigationStack {
             List {
                 Section {
-                    LabeledContent("Version") {
-                        Text(version)
-                    }
+                    Text("Copyright © 2025 Ryan Clarke")
+                    
+                    Text("Version " + version)
                     
                     Link(destination: contactURL) {
                         Label("Contact", systemImage: "envelope")
@@ -38,9 +38,7 @@ struct AboutView: View {
             .navigationTitle("About")
             .toolbar {
                 ToolbarItem {
-                    Button("Done") {
-                        dismiss()
-                    }
+                    Button("Done") { dismiss() }
                 }
             }
         }

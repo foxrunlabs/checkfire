@@ -49,10 +49,14 @@ struct SidebarView: View {
                     Menu("Options", systemImage: "ellipsis.circle") {
                         Button(aboutLabel, systemImage: "info.circle") { showAbout.toggle() }
                         
-                        if !paychecks.isEmpty {
+                        if paychecks.count < 2 {
+                            Label("Sort By", systemImage: "arrow.up.arrow.down")
+                                .disabled(true)
+                        } else {
                             Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                                 Picker("Sort By", selection: $sortBy.animation()) {
-                                    Text("Date")                                        .tag(SortOption.date)
+                                    Text("Date")
+                                        .tag(SortOption.date)
                                     
                                     Text("Name")
                                         .tag(SortOption.name)
@@ -68,11 +72,12 @@ struct SidebarView: View {
                                 }
                                 .pickerStyle(.inline)
                             }
-                        
-                            Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
-                                showAlert.toggle()
-                            }
                         }
+                    
+                        Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
+                            showAlert.toggle()
+                        }
+                        .disabled(paychecks.isEmpty)
                     }
                 }
                 
