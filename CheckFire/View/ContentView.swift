@@ -6,7 +6,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            SidebarView(selectedPaycheck: $selectedPaycheck)
+            SidebarView(selection: $selectedPaycheck)
         } detail: {
             if let selectedPaycheck {
                 PaycheckView(paycheck: selectedPaycheck)
