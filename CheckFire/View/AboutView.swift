@@ -2,13 +2,14 @@ import SwiftUI
 
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.openURL) private var openURL
+    private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
+    private let contactURL = URL(string: "mailto:kj6msg@icloud.com")!
     
     private var version: String {
-        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+        let number = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
         
-        return short + " (\(build))"
+        return number + " (\(build))"
     }
     
     var body: some View {
@@ -19,14 +20,18 @@ struct AboutView: View {
                         Text(version)
                     }
                     
-                    Link(destination: URL(string: "mailto:kj6msg@icloud.com")!) {
+                    Link(destination: contactURL) {
                         Label("Contact", systemImage: "envelope")
+                            .tint(.primary)
                     }
                 }
                 
                 Section("Official Documentation") {
-                    ForEach(documentation) { doc in
-                        Link(doc.name, destination: doc.url)
+                    ForEach(sourceDocs) { doc in
+                        Link(destination: doc.url) {
+                            Label(doc.name, systemImage: "network")
+                                .tint(.primary)
+                        }
                     }
                 }
             }
@@ -40,41 +45,6 @@ struct AboutView: View {
             }
         }
     }
-    
-    // MARK: - Documentation Data
-    private struct Documentation: Identifiable {
-        let id = UUID()
-        let name: String
-        let url: URL
-        
-        init(name: String, urlString: String) {
-            self.name = name
-            self.url = URL(string: urlString)!
-        }
-    }
-    
-    private let documentation = [
-        Documentation(
-            name: "DoD FMR Volume 7A",
-            urlString: "https://comptroller.defense.gov/Portals/45/documents/fmr/Volume_07a.pdf"
-        ),
-        Documentation(
-            name: "IRS Publication 15-T",
-            urlString: "https://www.irs.gov/forms-pubs/about-publication-15-t"
-        ),
-        Documentation(
-            name: "IRS Publication 501",
-            urlString: "https://www.irs.gov/publications/p501"
-        ),
-        Documentation(
-            name: "IRS Publication 505",
-            urlString: "https://www.irs.gov/publications/p505"
-        ),
-        Documentation(
-            name: "IRS Schedule 8812 (Form 1040)",
-            urlString: "https://www.irs.gov/pub/irs-pdf/f1040s8.pdf"
-        )
-    ]
 }
 
 #Preview {
