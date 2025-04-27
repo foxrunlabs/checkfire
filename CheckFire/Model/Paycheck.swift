@@ -6,7 +6,7 @@ final class Paycheck: Identifiable {
     @Attribute(.unique) var id: UUID
     var name: String
     var lesData: LESData
-    var myPayData: MyPayData
+    var federalWithholdingData: FederalWithholdingData
     var tspData: TSPData
     
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
@@ -29,7 +29,7 @@ final class Paycheck: Identifiable {
             fatalError("No tax data found for \(year.description)")
         }
         
-        return taxData.calculateWithholding(for: wagePeriod, using: myPayData)
+        return taxData.calculateWithholding(for: wagePeriod, using: federalWithholdingData)
     }
     
     var medicare: Decimal {
@@ -64,19 +64,19 @@ final class Paycheck: Identifiable {
     /// Create a new paycheck.
     /// - Parameters:
     ///   - name: Name of paycheck.
-    ///   - myPayData: myPay data for paycheck.
+    ///   - federalWithholdingData: Federal withholding data for paycheck.
     ///   - tspData: TSP data for paycheck.
     ///   - lesData: LES data for paycheck.
     init(
         name: String,
         lesData: LESData = LESData(),
-        myPayData: MyPayData = MyPayData(),
+        federalWithholdingData: FederalWithholdingData = FederalWithholdingData(),
         tspData: TSPData = TSPData(),
     ) {
         self.id = UUID()
         self.name = name
         self.lesData = lesData
-        self.myPayData = myPayData
+        self.federalWithholdingData = federalWithholdingData
         self.tspData = tspData
     }
     
@@ -98,7 +98,7 @@ final class Paycheck: Identifiable {
         self.init(
             name: other.name,
             lesData: lesData,
-            myPayData: other.myPayData,
+            federalWithholdingData: other.federalWithholdingData,
             tspData: other.tspData
         )
     }
@@ -106,7 +106,7 @@ final class Paycheck: Identifiable {
     static let example = Paycheck(
         name: "Example",
         lesData: LESData.example,
-        myPayData: MyPayData.example,
+        federalWithholdingData: FederalWithholdingData.example,
         tspData: TSPData.example
     )
 }

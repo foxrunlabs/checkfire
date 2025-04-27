@@ -6,7 +6,7 @@ struct FederalWithholdingView: View {
     var body: some View {
         Form {
             Section {
-                Picker("Marital Status", selection: $paycheck.myPayData.maritalStatus) {
+                Picker("Marital Status", selection: $paycheck.federalWithholdingData.maritalStatus) {
                     ForEach(MaritalStatus.allCases) { status in
                         Text(status.description)
                             .tag(status)
@@ -14,19 +14,22 @@ struct FederalWithholdingView: View {
                 }
                 .pickerStyle(.menu)
                 
-                Toggle("Multiple Jobs or Spouse Works", isOn: $paycheck.myPayData.multipleJobs)
+                Toggle(
+                    "Multiple Jobs or Spouse Works",
+                    isOn: $paycheck.federalWithholdingData.multipleJobs
+                )
             }
             
             Section("Claim Dependents") {
                 Stepper(
-                    "^[\(paycheck.myPayData.childDependents) Additional Dependents](inflect: true) Under 17",
-                    value: $paycheck.myPayData.childDependents,
+                    "^[\(paycheck.federalWithholdingData.childDependents) Additional Dependents](inflect: true) Under 17",
+                    value: $paycheck.federalWithholdingData.childDependents,
                     in: 0...10
                 )
                 
                 Stepper(
-                    "^[\(paycheck.myPayData.otherDependents) Other Dependents](inflect: true)",
-                    value: $paycheck.myPayData.otherDependents,
+                    "^[\(paycheck.federalWithholdingData.otherDependents) Other Dependents](inflect: true)",
+                    value: $paycheck.federalWithholdingData.otherDependents,
                     in: 0...10
                 )
             }
@@ -35,7 +38,7 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Other Income Amount - Not From Jobs",
-                        value: $paycheck.myPayData.otherIncome,
+                        value: $paycheck.federalWithholdingData.otherIncome,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
@@ -46,7 +49,7 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Other Deductions",
-                        value: $paycheck.myPayData.deductions,
+                        value: $paycheck.federalWithholdingData.deductions,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)
@@ -57,7 +60,7 @@ struct FederalWithholdingView: View {
                 LabeledContent {
                     TextField(
                         "Extra Withholding Amount Monthly",
-                        value: $paycheck.myPayData.extraWithholding,
+                        value: $paycheck.federalWithholdingData.extraWithholding,
                         format: .currency(code: "USD")
                     )
                     .multilineTextAlignment(.trailing)

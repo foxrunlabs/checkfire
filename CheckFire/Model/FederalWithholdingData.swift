@@ -1,6 +1,6 @@
 import Foundation
 
-struct MyPayData: Codable, Equatable {
+struct FederalWithholdingData: Codable, Equatable {
     var maritalStatus: MaritalStatus
     var multipleJobs: Bool
     
@@ -38,7 +38,7 @@ struct MyPayData: Codable, Equatable {
         self.extraWithholding = extraWithholding
     }
     
-    static let example = MyPayData(
+    static let example = FederalWithholdingData(
         maritalStatus: .married,
         multipleJobs: true,
         childDependents: 2,

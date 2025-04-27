@@ -13,21 +13,24 @@ struct TaxData: Decodable, Identifiable {
     
     /// Calculate federal income tax withholding for a wage using the percentage method for manual payroll systems.
     /// - Parameter wage: Monthly taxable wage in dollars.
-    /// - Parameter myPayData: myPay data.
+    /// - Parameter federalWithholdingData: Federal withholding data from myPay.
     /// - Returns: Federal income tax withholding in dollars.
-    func calculateWithholding(for wage: Decimal, using myPayData: MyPayData) -> Decimal {
+    func calculateWithholding(
+        for wage: Decimal,
+        using federalWithholdingData: FederalWithholdingData
+    ) -> Decimal {
         let wageFrequency: Decimal = 12
         
         // adjust the wage amount
         var adjustedWage = wage
-        adjustedWage += myPayData.otherIncome / wageFrequency
-        adjustedWage -= myPayData.deductions / wageFrequency
+        adjustedWage += federalWithholdingData.otherIncome / wageFrequency
+        adjustedWage -= federalWithholdingData.deductions / wageFrequency
         adjustedWage = max(0.00, adjustedWage)
         
         // figure the tentative withholding amount
-        let withholdingSchedule: WithholdingSchedule = myPayData.multipleJobs ? .multipleJobs : .standard
-        guard let withholdingTable = withholdingTables[withholdingSchedule]?[myPayData.maritalStatus] else {
-            fatalError("No withholding table found for \(myPayData.maritalStatus.description)")
+        let withholdingSchedule: WithholdingSchedule = federalWithholdingData.multipleJobs ? .multipleJobs : .standard
+        guard let withholdingTable = withholdingTables[withholdingSchedule]?[federalWithholdingData.maritalStatus] else {
+            fatalError("No withholding table found for \(federalWithholdingData.maritalStatus.description)")
         }
         
         guard let withholdingData = withholdingTable.last(where: { adjustedWage >= $0.atLeast }) else {
@@ -38,13 +41,13 @@ struct TaxData: Decodable, Identifiable {
         withholding += (adjustedWage - withholdingData.atLeast) * withholdingData.rate
         
         // account for tax credits
-        var dependentCredits = Decimal(myPayData.childDependents) * childTaxCredit
-        dependentCredits += Decimal(myPayData.otherDependents) * otherDependentTaxCredit
+        var dependentCredits = Decimal(federalWithholdingData.childDependents) * childTaxCredit
+        dependentCredits += Decimal(federalWithholdingData.otherDependents) * otherDependentTaxCredit
         withholding -= dependentCredits / wageFrequency
         withholding = max(0.00, withholding)
         
         // figure final withholding
-        withholding += myPayData.extraWithholding
+        withholding += federalWithholdingData.extraWithholding
         return withholding.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
 }
