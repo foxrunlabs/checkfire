@@ -15,7 +15,7 @@ struct LESDataView: View {
                 )
                 .disabled(isEditing)
                 
-                LESItemView($paycheck.lesData.basePay)
+                LESItemField($paycheck.lesData.basePay)
                     .disabled(isEditing)
             } header: {
                 HStack {
@@ -30,33 +30,34 @@ struct LESDataView: View {
                 }
             }
             
-            LESItemSectionView(
+            LESItemSection(
                 "Allowances",
-                lesItems: $paycheck.lesData.allowances,
+                items: $paycheck.lesData.allowances,
                 isEditing: $isEditing
             )
             
-            LESItemSectionView(
+            LESItemSection(
                 "Special Pays",
-                lesItems: $paycheck.lesData.specialPays,
+                items: $paycheck.lesData.specialPays,
                 isEditing: $isEditing
             )
             
-            LESItemSectionView(
+            LESItemSection(
                 "Deductions",
-                lesItems: $paycheck.lesData.deductions,
+                items: $paycheck.lesData.deductions,
                 isEditing: $isEditing
             )
             
-            LESItemSectionView(
+            LESItemSection(
                 "Allotments",
-                lesItems: $paycheck.lesData.allotments,
+                items: $paycheck.lesData.allotments,
                 isEditing: $isEditing
             )
         }
     }
 }
 
+// MARK: - Preview
 #Preview {
     LESDataView(paycheck: Paycheck.example)
 }

@@ -30,14 +30,19 @@ struct PaycheckView: View {
         .toolbar {
             ToolbarItem(placement: .destructiveAction) {
                 Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
-                    modelContext.delete(paycheck)
+                    deletePaycheck(paycheck)
                     dismiss()
                 }
             }
         }
     }
+    
+    private func deletePaycheck(_ paycheck: Paycheck) {
+        modelContext.delete(paycheck)
+    }
 }
 
+// MARK: - Preview
 #Preview {
     PaycheckView(paycheck: Paycheck.example)
 }

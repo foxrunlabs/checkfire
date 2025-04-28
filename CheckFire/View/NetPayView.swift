@@ -6,64 +6,47 @@ struct NetPayView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent {
-                    Text(paycheck.lesData.grossPay.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Gross Pay")
-                }
-                
-                LabeledContent {
-                    Text(paycheck.wagePeriod.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Wage Period")
-                }
+                LabeledCurrency("Gross Pay", value: paycheck.lesData.grossPay)
+                LabeledCurrency("Wage Period", value: paycheck.wagePeriod)
             }
             
             Section {
-                LabeledContent {
-                    Text(paycheck.traditionalTspContribution.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Traditional TSP")
-                }
-                
-                LabeledContent {
-                    Text(paycheck.rothTspContribution.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Roth TSP")
-                }
+                LabeledCurrency("Traditional TSP", value: paycheck.traditionalTspContribution)
+                LabeledCurrency("Roth TSP", value: paycheck.rothTspContribution)
             }
             
             Section {
-                LabeledContent {
-                    Text(paycheck.federalTaxes.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Federal Taxes")
-                }
-                
-                LabeledContent {
-                    Text(paycheck.socialSecurity.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Social Security")
-                }
-                
-                LabeledContent {
-                    Text(paycheck.medicare.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Medicare")
-                }
+                LabeledCurrency("Federal Taxes", value: paycheck.federalTaxes)
+                LabeledCurrency("Social Security", value: paycheck.socialSecurity)
+                LabeledCurrency("Medicare", value: paycheck.medicare)
             }
             
             Section {
-                LabeledContent {
-                    Text(paycheck.netPay.formatted(.currency(code: "USD")))
-                } label: {
-                    Text("Net Pay")
-                }
+                LabeledCurrency("Net Pay", value: paycheck.netPay)
+            }
+        }
+    }
+    
+    private struct LabeledCurrency: View {
+        private let label: String
+        private let value: Decimal
+        
+        init(_ label: String, value: Decimal) {
+            self.label = label
+            self.value = value
+        }
+        
+        var body: some View {
+            LabeledContent {
+                Text(value.formatted(.currency(code: "USD")))
+            } label: {
+                Text(label)
             }
         }
     }
 }
 
+// MARK: - Preview
 #Preview {
     NetPayView(paycheck: Paycheck.example)
 }

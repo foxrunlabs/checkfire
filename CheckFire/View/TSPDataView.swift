@@ -28,6 +28,7 @@ struct TSPDataView: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     TSPDataView(paycheck: Paycheck.example)
 }

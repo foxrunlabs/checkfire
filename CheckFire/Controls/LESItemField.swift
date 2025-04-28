@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct LESItemView: View {
-    @Binding var lesItem: LESItem
-    let isEditing: Bool
-    let onDelete: () -> Void
+struct LESItemField: View {
+    @Binding private var lesItem: LESItem
+    private let isEditing: Bool
+    private let onDelete: () -> Void
     
     init(_ lesItem: Binding<LESItem>) {
         self._lesItem = lesItem
@@ -38,5 +38,22 @@ struct LESItemView: View {
                    .disabled(isEditing == false)
            }
        }
+    }
+}
+
+// MARK: - Preview
+#Preview {
+    @Previewable @State var item = LESItem(name: "Test Item", amount: 0.00)
+    @Previewable @State var isEditing = false
+    
+    VStack {
+        Button("Edit") {
+            withAnimation { isEditing.toggle() }
+        }
+        
+        List {
+            LESItemField($item)
+            LESItemField($item, isEditing: isEditing) { print("Delete") }
+        }
     }
 }

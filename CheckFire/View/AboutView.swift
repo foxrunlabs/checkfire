@@ -17,21 +17,13 @@ struct AboutView: View {
             List {
                 Section {
                     Text("Copyright © 2025 Ryan Clarke")
-                    
                     Text("Version " + version)
-                    
-                    Link(destination: contactURL) {
-                        Label("Contact", systemImage: "envelope")
-                            .tint(.primary)
-                    }
+                    LinkItem("Contact", systemImage: "envelope", url: contactURL)
                 }
                 
                 Section("Official Documentation") {
                     ForEach(sourceDocs) { doc in
-                        Link(destination: doc.url) {
-                            Label(doc.name, systemImage: "network")
-                                .tint(.primary)
-                        }
+                        LinkItem(doc.name, systemImage: "network", url: doc.url)
                     }
                 }
             }
@@ -43,8 +35,33 @@ struct AboutView: View {
             }
         }
     }
+    
+    private struct LinkItem: View {
+        let label: String
+        let systemImage: String
+        let url: URL
+        
+        init(_ label: String, systemImage: String, url: URL) {
+            self.label = label
+            self.systemImage = systemImage
+            self.url = url
+        }
+        
+        var body: some View {
+            Link(destination: url) {
+                Label(label, systemImage: systemImage)
+                    .tint(.primary)
+            }
+        }
+    }
 }
 
+// MARK: - Preview
 #Preview {
-    AboutView()
+    @Previewable @State var showAbout = true
+    
+    Button("Show About") { showAbout.toggle() }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
+        }
 }

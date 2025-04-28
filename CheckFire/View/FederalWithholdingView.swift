@@ -35,43 +35,49 @@ struct FederalWithholdingView: View {
             }
             
             Section("Other Adjustments") {
-                LabeledContent {
-                    TextField(
-                        "Other Income Amount - Not From Jobs",
-                        value: $paycheck.federalWithholdingData.otherIncome,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                } label: {
-                    Text("Other Income Amount - Not From Jobs")
-                }
+                CurrencyField(
+                    "Other Income Amount - Not From Jobs",
+                    value: $paycheck.federalWithholdingData.otherIncome
+                )
                 
-                LabeledContent {
-                    TextField(
-                        "Other Deductions",
-                        value: $paycheck.federalWithholdingData.deductions,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                } label: {
-                    Text("Other Deductions")
-                }
+                CurrencyField(
+                    "Other Deductions",
+                    value: $paycheck.federalWithholdingData.deductions
+                )
                 
-                LabeledContent {
-                    TextField(
-                        "Extra Withholding Amount Monthly",
-                        value: $paycheck.federalWithholdingData.extraWithholding,
-                        format: .currency(code: "USD")
-                    )
-                    .multilineTextAlignment(.trailing)
-                } label: {
-                    Text("Extra Withholding Amount Monthly")
-                }
+                CurrencyField(
+                    "Extra Withholding Amount Monthly",
+                    value: $paycheck.federalWithholdingData.extraWithholding
+                )
+            }
+        }
+    }
+    
+    private struct CurrencyField: View {
+        private let label: String
+        @Binding private var value: Decimal
+        
+        init(_ label: String, value: Binding<Decimal>) {
+            self.label = label
+            self._value = value
+        }
+        
+        var body: some View {
+            LabeledContent {
+                TextField(
+                    label,
+                    value: $value,
+                    format: .currency(code: "USD")
+                )
+                .multilineTextAlignment(.trailing)
+            } label: {
+                Text(label)
             }
         }
     }
 }
 
+// MARK: - Preview
 #Preview {
     FederalWithholdingView(paycheck: Paycheck.example)
 }

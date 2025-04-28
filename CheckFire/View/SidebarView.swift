@@ -131,8 +131,10 @@ struct SidebarView: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     @Previewable @State var paycheck: Paycheck? = Paycheck.example
+    
     SidebarView(selection: $paycheck)
         .modelContainer(PreviewController.container)
 }
