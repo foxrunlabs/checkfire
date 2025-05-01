@@ -6,23 +6,29 @@ struct TSPDataView: View {
     var body: some View {
         Form {
             Section("Traditional TSP") {
-                Stepper(
-                    "Base Pay \(paycheck.tspData.traditionalTspPercentage.formatted(.percent))",
-                    value: $paycheck.tspData.traditionalTspPercentage,
-                    in: 0...0.20,
-                    step: 0.01,
-                    format: .percent
-                )
+                TSPStepper("Base Pay", value: $paycheck.tspData.traditionalBasePay)
+                
+                TSPStepper("Special Pay", value: $paycheck.tspData.traditionalSpecialPay)
+                    .disabled(paycheck.tspData.traditionalBasePay == 0)
+                
+                TSPStepper("Incentive Pay", value: $paycheck.tspData.traditionalIncentivePay)
+                    .disabled(paycheck.tspData.traditionalBasePay == 0)
+                
+                TSPStepper("Bonus Pay", value: $paycheck.tspData.traditionalBonusPay)
+                    .disabled(paycheck.tspData.traditionalBasePay == 0)
             }
             
             Section("Roth TSP") {
-                Stepper(
-                    "Base Pay \(paycheck.tspData.rothTspPercentage.formatted(.percent))",
-                    value: $paycheck.tspData.rothTspPercentage,
-                    in: 0...0.20,
-                    step: 0.01,
-                    format: .percent
-                )
+                TSPStepper("Base Pay", value: $paycheck.tspData.rothBasePay)
+                
+                TSPStepper("Special Pay", value: $paycheck.tspData.rothSpecialPay)
+                    .disabled(paycheck.tspData.rothBasePay == 0)
+                
+                TSPStepper("Incentive Pay", value: $paycheck.tspData.rothIncentivePay)
+                    .disabled(paycheck.tspData.rothBasePay == 0)
+                
+                TSPStepper("Bonus Pay", value: $paycheck.tspData.rothBonusPay)
+                    .disabled(paycheck.tspData.rothBasePay == 0)
             }
         }
     }

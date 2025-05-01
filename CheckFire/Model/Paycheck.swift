@@ -12,11 +12,11 @@ final class Paycheck: Identifiable {
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
     
     var traditionalTspContribution: Decimal {
-        lesData.basePay.amount * Decimal(tspData.traditionalTspPercentage)
+        lesData.basePay.amount * Decimal(tspData.traditionalBasePay)
     }
     
     var rothTspContribution: Decimal {
-        lesData.basePay.amount * Decimal(tspData.rothTspPercentage)
+        lesData.basePay.amount * Decimal(tspData.rothBasePay)
     }
     
     var wagePeriod: Decimal {
