@@ -47,6 +47,7 @@ struct QueryView: View {
     
     private func copyPaycheck(_ paycheck: Paycheck) {
         let newPaycheck = Paycheck(paycheck)
+        newPaycheck.name += " copy"
         modelContext.insert(newPaycheck)
         
         do {

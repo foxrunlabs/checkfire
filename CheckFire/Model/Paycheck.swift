@@ -12,15 +12,18 @@ final class Paycheck: Identifiable {
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
     
     var traditionalTspContribution: Decimal {
+        // TODO: Compute other contributions
         lesData.basePay.amount * Decimal(tspData.traditionalBasePay)
     }
     
     var rothTspContribution: Decimal {
+        // TODO: Compute other contributions
         lesData.basePay.amount * Decimal(tspData.rothBasePay)
     }
     
     var wagePeriod: Decimal {
-        lesData.basePay.amount + lesData.specialPays.reduce(0.00) { $0 + $1.amount } -
+        let taxableEntitlements = lesData.entitlements.filter { $0.itemType != .allowance }
+        return lesData.basePay.amount + taxableEntitlements.reduce(0.00) { $0 + $1.amount } -
             traditionalTspContribution
     }
 
@@ -87,13 +90,19 @@ final class Paycheck: Identifiable {
         var lesData = LESData()
         lesData.date = other.lesData.date
         lesData.basePay = LESItem(
-            name: other.lesData.basePay.name,
-            amount: other.lesData.basePay.amount
+            name: "Base Pay",
+            amount: other.lesData.basePay.amount,
+            itemType: .basePay
         )
-        lesData.allowances = other.lesData.allowances.map { LESItem(name: $0.name, amount: $0.amount) }
-        lesData.specialPays = other.lesData.specialPays.map { LESItem(name: $0.name, amount: $0.amount) }
-        lesData.deductions = other.lesData.deductions.map { LESItem(name: $0.name, amount: $0.amount) }
-        lesData.allotments = other.lesData.allotments.map { LESItem(name: $0.name, amount: $0.amount) }
+        lesData.entitlements = other.lesData.entitlements.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)
+        }
+        lesData.deductions = other.lesData.deductions.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: .deduction)
+        }
+        lesData.allotments = other.lesData.allotments.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: .allotment)
+        }
         
         self.init(
             name: other.name,

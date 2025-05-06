@@ -8,7 +8,7 @@ struct FederalWithholdingView: View {
             Section {
                 Picker("Marital Status", selection: $paycheck.federalWithholdingData.maritalStatus) {
                     ForEach(MaritalStatus.allCases) { status in
-                        Text(status.description)
+                        Text(String(describing: status))
                             .tag(status)
                     }
                 }

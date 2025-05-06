@@ -3,7 +3,9 @@ import SwiftUI
 struct LESDataView: View {
     @Bindable var paycheck: Paycheck
     
-    @State private var isEditing = false
+    @State private var isEditingEntitlements = false
+    @State private var isEditingDeductions = false
+    @State private var isEditingAllotments = false
     
     var body: some View {
         Form {
@@ -13,46 +15,48 @@ struct LESDataView: View {
                     selection: $paycheck.lesData.date,
                     in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
                 )
-                .disabled(isEditing)
                 
                 LESItemField($paycheck.lesData.basePay)
-                    .disabled(isEditing)
-            } header: {
-                HStack {
-                    Spacer()
-                    
-                    Button {
-                        withAnimation { isEditing.toggle() }
-                    } label: {
-                        Text(isEditing ? "Done" : "Edit")
-                            .font(.body.smallCaps())
-                    }
-                }
             }
             
             LESItemSection(
-                "Allowances",
-                items: $paycheck.lesData.allowances,
-                isEditing: $isEditing
-            )
-            
-            LESItemSection(
-                "Special Pays",
-                items: $paycheck.lesData.specialPays,
-                isEditing: $isEditing
-            )
+                "Entitlements",
+                items: $paycheck.lesData.entitlements,
+                isEditing: $isEditingEntitlements
+            ) {
+                let newEntitlement = LESItem(
+                    name: "New Entitlement",
+                    amount: 0.00,
+                    itemType: .specialPay
+                )
+                withAnimation { paycheck.lesData.entitlements.append(newEntitlement) }
+            }
             
             LESItemSection(
                 "Deductions",
                 items: $paycheck.lesData.deductions,
-                isEditing: $isEditing
-            )
+                isEditing: $isEditingDeductions
+            ) {
+                let newDeduction = LESItem(
+                    name: "New Deduction",
+                    amount: 0.00,
+                    itemType: .deduction
+                )
+                withAnimation { paycheck.lesData.deductions.append(newDeduction) }
+            }
             
             LESItemSection(
                 "Allotments",
                 items: $paycheck.lesData.allotments,
-                isEditing: $isEditing
-            )
+                isEditing: $isEditingAllotments
+            ) {
+                let newAllotment = LESItem(
+                    name: "New Allotment",
+                    amount: 0.00,
+                    itemType: .allotment
+                )
+                withAnimation { paycheck.lesData.allotments.append(newAllotment) }
+            }
         }
     }
 }
