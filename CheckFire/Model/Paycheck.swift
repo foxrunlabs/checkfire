@@ -12,13 +12,17 @@ final class Paycheck: Identifiable {
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
     
     var traditionalTspContribution: Decimal {
-        // TODO: Compute other contributions
-        lesData.basePay.amount * Decimal(tspData.traditionalBasePay)
+        lesData.basePay.amount * Decimal(tspData.traditionalBasePay) +
+            lesData.entitlementPay(for: .specialPay) * Decimal(tspData.traditionalSpecialPay) +
+            lesData.entitlementPay(for: .incentivePay) * Decimal(tspData.traditionalIncentivePay) +
+            lesData.entitlementPay(for: .bonusPay) * Decimal(tspData.traditionalBonusPay)
     }
     
     var rothTspContribution: Decimal {
-        // TODO: Compute other contributions
-        lesData.basePay.amount * Decimal(tspData.rothBasePay)
+        lesData.basePay.amount * Decimal(tspData.rothBasePay) +
+            lesData.entitlementPay(for: .specialPay) * Decimal(tspData.rothSpecialPay) +
+            lesData.entitlementPay(for: .incentivePay) * Decimal(tspData.rothIncentivePay) +
+            lesData.entitlementPay(for: .bonusPay) * Decimal(tspData.rothBonusPay)
     }
     
     var wagePeriod: Decimal {

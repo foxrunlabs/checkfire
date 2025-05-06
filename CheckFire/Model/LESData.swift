@@ -35,6 +35,10 @@ struct LESData: Codable, Equatable {
         self.allotments = allotments
     }
     
+    func entitlementPay(for entitlementType: LESItemType) -> Decimal {
+        entitlements.filter({ $0.itemType == entitlementType }).reduce(0.00) { $0 + $1.amount }
+    }
+    
     static let example = LESData(
         date: DateComponents(calendar: .current, year: 2025, month: 1, day: 1).date!,
         basePay: 11592.30,
