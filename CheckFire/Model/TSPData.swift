@@ -14,7 +14,15 @@ struct TSPData: Codable, Equatable {
     // the traditional percentages and the Roth percentages must not be more than 100%, combined.
     var traditionalBasePay: Double {
         get { _traditionalBasePay }
-        set { _traditionalBasePay = min(newValue, 1 - _rothBasePay) }
+        set {
+            _traditionalBasePay = min(newValue, 1 - _rothBasePay)
+            
+            if _traditionalBasePay == 0.0 {
+                _traditionalSpecialPay = 0.0
+                _traditionalIncentivePay = 0.0
+                _traditionalBonusPay = 0.0
+            }
+        }
     }
     
     var traditionalSpecialPay: Double {
@@ -34,7 +42,16 @@ struct TSPData: Codable, Equatable {
     
     var rothBasePay: Double {
         get { _rothBasePay }
-        set { _rothBasePay = min(newValue, 1 - _traditionalBasePay) }
+        set {
+            _rothBasePay = min(newValue, 1 - _traditionalBasePay)
+            
+            if _rothBasePay == 0.0 {
+                _rothSpecialPay = 0.0
+                _rothIncentivePay = 0.0
+                _rothBonusPay = 0.0
+            }
+            
+        }
     }
     
     var rothSpecialPay: Double {
