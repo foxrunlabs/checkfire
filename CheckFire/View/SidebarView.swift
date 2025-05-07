@@ -13,14 +13,13 @@ struct SidebarView: View {
     @State private var showAbout = false
     @State private var showAlert = false
     
+    init(selection: Binding<Paycheck?>) {
+        self._selectedPaycheck = selection
+    }
+    
     private enum SortOption {
         case date
         case name
-    }
-    
-    private var aboutLabel: String {
-        let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "App"
-        return "About " + appName
     }
     
     private var sort: [SortDescriptor<Paycheck>] {
@@ -34,12 +33,13 @@ struct SidebarView: View {
         }
     }
     
+    private var aboutLabel: String {
+        let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "App"
+        return "About " + appName
+    }
+    
     private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
     private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
-    
-    init(selection: Binding<Paycheck?>) {
-        self._selectedPaycheck = selection
-    }
     
     var body: some View {
         QueryView(selection: $selectedPaycheck, sort: sort)
@@ -135,6 +135,8 @@ struct SidebarView: View {
 #Preview {
     @Previewable @State var paycheck: Paycheck? = Paycheck.example
     
-    SidebarView(selection: $paycheck)
-        .modelContainer(PreviewController.container)
+    NavigationStack {
+        SidebarView(selection: $paycheck)
+            .modelContainer(PreviewController.container)
+    }
 }
