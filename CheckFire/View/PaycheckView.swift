@@ -11,18 +11,22 @@ struct PaycheckView: View {
         TabView {
             Tab("LES", systemImage: "plus.forwardslash.minus") {
                 LESDataView(paycheck: paycheck)
+                    .toolbarBackgroundVisibility(.visible, for: .tabBar, .navigationBar)
             }
             
             Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
                 FederalWithholdingView(paycheck: paycheck)
+                    .toolbarBackgroundVisibility(.visible, for: .tabBar, .navigationBar)
             }
             
             Tab("TSP", systemImage: "dollarsign.bank.building") {
                 TSPDataView(paycheck: paycheck)
+                    .toolbarBackgroundVisibility(.visible, for: .tabBar, .navigationBar)
             }
             
             Tab("Net Pay", systemImage: "dollarsign") {
                 NetPayView(paycheck: paycheck)
+                    .toolbarBackgroundVisibility(.visible, for: .tabBar, .navigationBar)
             }
         }
         .navigationTitle($paycheck.name)

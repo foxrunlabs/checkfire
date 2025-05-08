@@ -23,7 +23,9 @@ struct QueryView: View {
                 Button("Copy", systemImage: "document.on.document") { copyPaycheck(paycheck) }
                     .tint(.blue)
             }
+            .checkFireListRowStyle()
         }
+        .checkFireListStyle()
         .listStyle(.inset)
     }
     

@@ -5,52 +5,56 @@ struct FederalWithholdingView: View {
     
     var body: some View {
         Form {
-            Section {
-                Picker("Marital Status", selection: $paycheck.federalWithholdingData.maritalStatus) {
-                    ForEach(MaritalStatus.allCases) { status in
-                        Text(String(describing: status))
-                            .tag(status)
+            Group {
+                Section {
+                    Picker("Marital Status", selection: $paycheck.federalWithholdingData.maritalStatus) {
+                        ForEach(MaritalStatus.allCases) { status in
+                            Text(String(describing: status))
+                                .tag(status)
+                        }
                     }
+                    .pickerStyle(.menu)
+                    
+                    Toggle(
+                        "Multiple Jobs or Spouse Works",
+                        isOn: $paycheck.federalWithholdingData.multipleJobs
+                    )
                 }
-                .pickerStyle(.menu)
                 
-                Toggle(
-                    "Multiple Jobs or Spouse Works",
-                    isOn: $paycheck.federalWithholdingData.multipleJobs
-                )
+                Section("Claim Dependents") {
+                    Stepper(
+                        "^[\(paycheck.federalWithholdingData.childDependents) Additional Dependents](inflect: true) Under 17",
+                        value: $paycheck.federalWithholdingData.childDependents,
+                        in: 0...10
+                    )
+                    
+                    Stepper(
+                        "^[\(paycheck.federalWithholdingData.otherDependents) Other Dependents](inflect: true)",
+                        value: $paycheck.federalWithholdingData.otherDependents,
+                        in: 0...10
+                    )
+                }
+                
+                Section("Other Adjustments") {
+                    CurrencyField(
+                        "Other Income Amount - Not From Jobs",
+                        value: $paycheck.federalWithholdingData.otherIncome
+                    )
+                    
+                    CurrencyField(
+                        "Other Deductions",
+                        value: $paycheck.federalWithholdingData.deductions
+                    )
+                    
+                    CurrencyField(
+                        "Extra Withholding Amount Monthly",
+                        value: $paycheck.federalWithholdingData.extraWithholding
+                    )
+                }
             }
-            
-            Section("Claim Dependents") {
-                Stepper(
-                    "^[\(paycheck.federalWithholdingData.childDependents) Additional Dependents](inflect: true) Under 17",
-                    value: $paycheck.federalWithholdingData.childDependents,
-                    in: 0...10
-                )
-                
-                Stepper(
-                    "^[\(paycheck.federalWithholdingData.otherDependents) Other Dependents](inflect: true)",
-                    value: $paycheck.federalWithholdingData.otherDependents,
-                    in: 0...10
-                )
-            }
-            
-            Section("Other Adjustments") {
-                CurrencyField(
-                    "Other Income Amount - Not From Jobs",
-                    value: $paycheck.federalWithholdingData.otherIncome
-                )
-                
-                CurrencyField(
-                    "Other Deductions",
-                    value: $paycheck.federalWithholdingData.deductions
-                )
-                
-                CurrencyField(
-                    "Extra Withholding Amount Monthly",
-                    value: $paycheck.federalWithholdingData.extraWithholding
-                )
-            }
+            .checkFireListRowStyle()
         }
+        .checkFireListStyle()
     }
     
     private struct CurrencyField: View {

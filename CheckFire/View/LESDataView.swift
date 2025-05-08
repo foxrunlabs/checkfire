@@ -9,55 +9,59 @@ struct LESDataView: View {
     
     var body: some View {
         Form {
-            Section {
-                PaycheckDatePicker(
-                    "Pay Date",
-                    selection: $paycheck.lesData.date,
-                    in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
-                )
+            Group {
+                Section {
+                    PaycheckDatePicker(
+                        "Pay Date",
+                        selection: $paycheck.lesData.date,
+                        in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
+                    )
+                    
+                    LESItemField($paycheck.lesData.basePay)
+                }
                 
-                LESItemField($paycheck.lesData.basePay)
+                LESItemSection(
+                    "Entitlements",
+                    items: $paycheck.lesData.entitlements,
+                    isEditing: $isEditingEntitlements
+                ) {
+                    let newEntitlement = LESItem(
+                        name: "New Entitlement",
+                        amount: 0.00,
+                        itemType: .specialPay
+                    )
+                    withAnimation { paycheck.lesData.entitlements.append(newEntitlement) }
+                }
+                
+                LESItemSection(
+                    "Deductions",
+                    items: $paycheck.lesData.deductions,
+                    isEditing: $isEditingDeductions
+                ) {
+                    let newDeduction = LESItem(
+                        name: "New Deduction",
+                        amount: 0.00,
+                        itemType: .deduction
+                    )
+                    withAnimation { paycheck.lesData.deductions.append(newDeduction) }
+                }
+                
+                LESItemSection(
+                    "Allotments",
+                    items: $paycheck.lesData.allotments,
+                    isEditing: $isEditingAllotments
+                ) {
+                    let newAllotment = LESItem(
+                        name: "New Allotment",
+                        amount: 0.00,
+                        itemType: .allotment
+                    )
+                    withAnimation { paycheck.lesData.allotments.append(newAllotment) }
+                }
             }
-            
-            LESItemSection(
-                "Entitlements",
-                items: $paycheck.lesData.entitlements,
-                isEditing: $isEditingEntitlements
-            ) {
-                let newEntitlement = LESItem(
-                    name: "New Entitlement",
-                    amount: 0.00,
-                    itemType: .specialPay
-                )
-                withAnimation { paycheck.lesData.entitlements.append(newEntitlement) }
-            }
-            
-            LESItemSection(
-                "Deductions",
-                items: $paycheck.lesData.deductions,
-                isEditing: $isEditingDeductions
-            ) {
-                let newDeduction = LESItem(
-                    name: "New Deduction",
-                    amount: 0.00,
-                    itemType: .deduction
-                )
-                withAnimation { paycheck.lesData.deductions.append(newDeduction) }
-            }
-            
-            LESItemSection(
-                "Allotments",
-                items: $paycheck.lesData.allotments,
-                isEditing: $isEditingAllotments
-            ) {
-                let newAllotment = LESItem(
-                    name: "New Allotment",
-                    amount: 0.00,
-                    itemType: .allotment
-                )
-                withAnimation { paycheck.lesData.allotments.append(newAllotment) }
-            }
+            .checkFireListRowStyle()
         }
+        .checkFireListStyle()
     }
 }
 

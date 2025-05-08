@@ -5,26 +5,30 @@ struct NetPayView: View {
     
     var body: some View {
         List {
-            Section {
-                LabeledCurrency("Gross Pay", value: paycheck.lesData.grossPay)
-                LabeledCurrency("Wage Period", value: paycheck.wagePeriod)
+            Group {
+                Section {
+                    LabeledCurrency("Gross Pay", value: paycheck.lesData.grossPay)
+                    LabeledCurrency("Wage Period", value: paycheck.wagePeriod)
+                }
+                
+                Section {
+                    LabeledCurrency("Traditional TSP", value: paycheck.traditionalTspContribution)
+                    LabeledCurrency("Roth TSP", value: paycheck.rothTspContribution)
+                }
+                
+                Section {
+                    LabeledCurrency("Federal Taxes", value: paycheck.federalTaxes)
+                    LabeledCurrency("Social Security", value: paycheck.socialSecurity)
+                    LabeledCurrency("Medicare", value: paycheck.medicare)
+                }
+                
+                Section {
+                    LabeledCurrency("Net Pay", value: paycheck.netPay)
+                }
             }
-            
-            Section {
-                LabeledCurrency("Traditional TSP", value: paycheck.traditionalTspContribution)
-                LabeledCurrency("Roth TSP", value: paycheck.rothTspContribution)
-            }
-            
-            Section {
-                LabeledCurrency("Federal Taxes", value: paycheck.federalTaxes)
-                LabeledCurrency("Social Security", value: paycheck.socialSecurity)
-                LabeledCurrency("Medicare", value: paycheck.medicare)
-            }
-            
-            Section {
-                LabeledCurrency("Net Pay", value: paycheck.netPay)
-            }
+            .checkFireListRowStyle()
         }
+        .checkFireListStyle()
     }
     
     private struct LabeledCurrency: View {

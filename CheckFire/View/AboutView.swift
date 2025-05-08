@@ -15,25 +15,29 @@ struct AboutView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    Text("Copyright © 2025 Ryan Clarke")
-                    
-                    Text("Version " + version)
-                    
-                    Link(destination: contactURL) {
-                        Label("Contact", systemImage: "envelope")
+                Group {
+                    Section {
+                        Text("Copyright © 2025 Ryan Clarke")
+                        
+                        Text("Version " + version)
+                        
+                        Link(destination: contactURL) {
+                            Label("Contact", systemImage: "envelope")
+                        }
                     }
-                }
-                
-                Section("Official Documentation") {
-                    ForEach(sourceDocs) { doc in
-                        Link(destination: doc.url) {
-                            Label(doc.name, systemImage: "network")
+                    
+                    Section("Official Documentation") {
+                        ForEach(sourceDocs) { doc in
+                            Link(destination: doc.url) {
+                                Label(doc.name, systemImage: "network")
+                            }
                         }
                     }
                 }
+                .checkFireListRowStyle()
             }
             .navigationTitle("About")
+            .checkFireListStyle()
             .toolbar {
                 ToolbarItem {
                     Button("Done") { dismiss() }
