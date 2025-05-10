@@ -3,6 +3,8 @@ import SwiftUI
 struct LESDataView: View {
     @Bindable var paycheck: Paycheck
     
+    @Environment(ThemeManager.self) private var themeManager
+    
     @State private var isEditingEntitlements = false
     @State private var isEditingDeductions = false
     @State private var isEditingAllotments = false
@@ -59,13 +61,14 @@ struct LESDataView: View {
                     withAnimation { paycheck.lesData.allotments.append(newAllotment) }
                 }
             }
-            .checkFireListRowStyle()
+            .checkFireListRowStyle(themeManager: themeManager)
         }
-        .checkFireListStyle()
+        .checkFireListBackground(themeManager: themeManager)
     }
 }
 
 // MARK: - Preview
 #Preview {
     LESDataView(paycheck: Paycheck.example)
+        .environment(ThemeManager(theme: .system))
 }

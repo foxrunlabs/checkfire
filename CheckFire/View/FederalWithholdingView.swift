@@ -3,6 +3,8 @@ import SwiftUI
 struct FederalWithholdingView: View {
     @Bindable var paycheck: Paycheck
     
+    @Environment(ThemeManager.self) private var themeManager
+    
     var body: some View {
         Form {
             Group {
@@ -19,6 +21,7 @@ struct FederalWithholdingView: View {
                         "Multiple Jobs or Spouse Works",
                         isOn: $paycheck.federalWithholdingData.multipleJobs
                     )
+                    .tint(themeManager.theme == .system ? nil : .accentColor)
                 }
                 
                 Section("Claim Dependents") {
@@ -52,9 +55,9 @@ struct FederalWithholdingView: View {
                     )
                 }
             }
-            .checkFireListRowStyle()
+            .checkFireListRowStyle(themeManager: themeManager)
         }
-        .checkFireListStyle()
+        .checkFireListBackground(themeManager: themeManager)
     }
     
     private struct CurrencyField: View {
@@ -83,5 +86,8 @@ struct FederalWithholdingView: View {
 
 // MARK: - Preview
 #Preview {
-    FederalWithholdingView(paycheck: Paycheck.example)
+    @Previewable @State var paycheck = Paycheck.example
+    
+    FederalWithholdingView(paycheck: paycheck)
+        .environment(ThemeManager(theme: .system))
 }

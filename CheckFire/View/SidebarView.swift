@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct SidebarView: View {
+    @Binding private var selectedTheme: Theme
     @Binding private var selectedPaycheck: Paycheck?
     
     @Environment(\.modelContext) private var modelContext
@@ -13,7 +14,10 @@ struct SidebarView: View {
     @State private var showAbout = false
     @State private var showAlert = false
     
-    init(selection: Binding<Paycheck?>) {
+    @Environment(ThemeManager.self) private var themeManager
+    
+    init(theme: Binding<Theme>, selection: Binding<Paycheck?>) {
+        self._selectedTheme = theme
         self._selectedPaycheck = selection
     }
     
@@ -33,11 +37,6 @@ struct SidebarView: View {
         }
     }
     
-    private var aboutLabel: String {
-        let appName = Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "App"
-        return "About " + appName
-    }
-    
     private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
     private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
     
@@ -47,7 +46,17 @@ struct SidebarView: View {
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
-                        Button(aboutLabel, systemImage: "info.circle") { showAbout.toggle() }
+                        Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
+                        
+                        Menu("Theme") {
+                            Picker("Theme", selection: $selectedTheme) {
+                                ForEach(Theme.allCases) { theme in
+                                    Text(String(describing: theme))
+                                        .tag(theme)
+                                }
+                            }
+                            .pickerStyle(.inline)
+                        }
                         
                         if paychecks.count < 2 {
                             Label("Sort By", systemImage: "arrow.up.arrow.down")
@@ -77,6 +86,7 @@ struct SidebarView: View {
                         Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
                             showAlert.toggle()
                         }
+                        .tint(.red)
                         .disabled(paychecks.isEmpty)
                     }
                 }
@@ -104,6 +114,9 @@ struct SidebarView: View {
                 }
             } message: {
                 Text("Are you sure?")
+            }
+            .onChange(of: selectedTheme) {
+                withAnimation { themeManager.theme = selectedTheme }
             }
     }
     
@@ -133,10 +146,12 @@ struct SidebarView: View {
 
 // MARK: - Preview
 #Preview {
+    @Previewable @State var theme = Theme.system
     @Previewable @State var paycheck: Paycheck? = Paycheck.example
     
     NavigationStack {
-        SidebarView(selection: $paycheck)
+        SidebarView(theme: $theme, selection: $paycheck)
             .modelContainer(PreviewController.container)
     }
+    .environment(ThemeManager(theme: .system))
 }

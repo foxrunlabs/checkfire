@@ -6,6 +6,7 @@ struct QueryView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
+    @Environment(ThemeManager.self) private var themeManager
     
     init(selection: Binding<Paycheck?>, sort: [SortDescriptor<Paycheck>]) {
         self._selectedPaycheck = selection
@@ -17,16 +18,22 @@ struct QueryView: View {
             NavigationLink(value: paycheck) {
                 PaycheckItem(paycheck)
             }
-            .swipeActions {
-                Button("Delete", systemImage: "trash", role: .destructive) { deletePaycheck(paycheck) }
+            .checkFireListRowStyle(themeManager: themeManager)
+            .swipeActions(allowsFullSwipe: false) {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    deletePaycheck(paycheck)
+                }
+                .tint(.red)
                 
-                Button("Copy", systemImage: "document.on.document") { copyPaycheck(paycheck) }
-                    .tint(.blue)
+                Button("Copy", systemImage: "document.on.document")
+                {
+                    copyPaycheck(paycheck)
+                }
+                .tint(.accentColor)
             }
-            .checkFireListRowStyle()
         }
-        .checkFireListStyle()
         .listStyle(.inset)
+        .checkFireListBackground(themeManager: themeManager)
     }
     
     private struct PaycheckItem: View {
@@ -76,4 +83,5 @@ struct QueryView: View {
         QueryView(selection: $paycheck, sort: sort)
             .modelContainer(PreviewController.container)
     }
+    .environment(ThemeManager(theme: .system))
 }

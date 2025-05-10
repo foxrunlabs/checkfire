@@ -2,11 +2,18 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
+    @Binding private var theme: Theme
+    private let themeManager: ThemeManager
     @State private var selectedPaycheck: Paycheck?
+    
+    init(theme: Binding<Theme>) {
+        self._theme = theme
+        self.themeManager = .init(theme: theme.wrappedValue)
+    }
     
     var body: some View {
         NavigationSplitView {
-            SidebarView(selection: $selectedPaycheck)
+            SidebarView(theme: $theme, selection: $selectedPaycheck)
         } detail: {
             if let selectedPaycheck {
                 PaycheckView(paycheck: selectedPaycheck)
@@ -15,14 +22,19 @@ struct ContentView: View {
                     "Select a paycheck from the sidebar",
                     systemImage: "sidebar.left"
                 )
+                .background(themeManager.systemBackground)
             }
         }
-        .colorScheme(.dark)
+        .preferredColorScheme(themeManager.colorScheme)
+        .tint(themeManager.tint)
+        .environment(themeManager)
     }
 }
 
 // MARK: - Preview
 #Preview {
-    ContentView()
+    @Previewable @State var theme = Theme.system
+    
+    ContentView(theme: $theme)
         .modelContainer(PreviewController.container)
 }

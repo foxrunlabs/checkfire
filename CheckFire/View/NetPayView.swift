@@ -3,6 +3,8 @@ import SwiftUI
 struct NetPayView: View {
     let paycheck: Paycheck
     
+    @Environment(ThemeManager.self) private var themeManager
+    
     var body: some View {
         List {
             Group {
@@ -26,9 +28,9 @@ struct NetPayView: View {
                     LabeledCurrency("Net Pay", value: paycheck.netPay)
                 }
             }
-            .checkFireListRowStyle()
+            .checkFireListRowStyle(themeManager: themeManager)
         }
-        .checkFireListStyle()
+        .checkFireListBackground(themeManager: themeManager)
     }
     
     private struct LabeledCurrency: View {
@@ -53,4 +55,5 @@ struct NetPayView: View {
 // MARK: - Preview
 #Preview {
     NetPayView(paycheck: Paycheck.example)
+        .environment(ThemeManager(theme: .system))
 }

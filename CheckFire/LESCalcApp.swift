@@ -3,9 +3,11 @@ import SwiftUI
 
 @main
 struct LESCalcApp: App {
+    @AppStorage("theme") private var theme: Theme = .system
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(theme: $theme)
         }
         .modelContainer(for: Paycheck.self)
     }

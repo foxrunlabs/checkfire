@@ -3,6 +3,8 @@ import SwiftUI
 struct TSPDataView: View {
     @Bindable var paycheck: Paycheck
     
+    @Environment(ThemeManager.self) private var themeManager
+    
     var body: some View {
         Form {
             Group {
@@ -32,13 +34,14 @@ struct TSPDataView: View {
                         .disabled(paycheck.tspData.rothBasePay == 0)
                 }
             }
-            .checkFireListRowStyle()
+            .checkFireListRowStyle(themeManager: themeManager)
         }
-        .checkFireListStyle()
+        .checkFireListBackground(themeManager: themeManager)
     }
 }
 
 // MARK: - Preview
 #Preview {
     TSPDataView(paycheck: Paycheck.example)
+        .environment(ThemeManager(theme: .system))
 }
