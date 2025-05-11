@@ -15,15 +15,7 @@ struct ContentView: View {
         NavigationSplitView {
             SidebarView(theme: $theme, selection: $selectedPaycheck)
         } detail: {
-            if let selectedPaycheck {
-                PaycheckView(paycheck: selectedPaycheck)
-            } else {
-                ContentUnavailableView(
-                    "Select a paycheck from the sidebar",
-                    systemImage: "sidebar.left"
-                )
-                .background(themeManager.systemBackground)
-            }
+            PaycheckView(paycheck: $selectedPaycheck)
         }
         .preferredColorScheme(themeManager.colorScheme)
         .tint(themeManager.tint)

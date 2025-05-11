@@ -15,22 +15,38 @@ struct QueryView: View {
     
     var body: some View {
         List(paychecks, selection: $selectedPaycheck.animation()) { paycheck in
-            NavigationLink(value: paycheck) {
-                PaycheckItem(paycheck)
-            }
-            .checkFireListRowStyle(themeManager: themeManager)
-            .swipeActions(allowsFullSwipe: false) {
-                Button("Delete", systemImage: "trash", role: .destructive) {
-                    deletePaycheck(paycheck)
+            PaycheckItem(paycheck)
+                .listRowBackground(selectedPaycheck == paycheck ? themeManager.listSelection : Color.clear)
+                .listRowSeparatorTint(themeManager.listRowSeparator)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                .contentShape(.rect)
+                .overlay {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                .tint(.red)
-                
-                Button("Copy", systemImage: "document.on.document")
-                {
-                    copyPaycheck(paycheck)
+                .onTapGesture {
+                    withAnimation { selectedPaycheck = paycheck }
                 }
-                .tint(.accentColor)
-            }
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 0.2).onEnded { _ in
+                        withAnimation { selectedPaycheck = paycheck }
+                    }
+                )
+                .swipeActions(allowsFullSwipe: false) {
+                    Button("Delete", systemImage: "trash", role: .destructive) {
+                        deletePaycheck(paycheck)
+                    }
+                    .tint(.red)
+                    
+                    Button("Copy", systemImage: "document.on.document")
+                    {
+                        copyPaycheck(paycheck)
+                    }
+                    .tint(.accentColor)
+                }
         }
         .listStyle(.inset)
         .checkFireListBackground(themeManager: themeManager)

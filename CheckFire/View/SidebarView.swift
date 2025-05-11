@@ -49,7 +49,7 @@ struct SidebarView: View {
                         Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
                         
                         Menu("Theme") {
-                            Picker("Theme", selection: $selectedTheme) {
+                            Picker("Theme", selection: $selectedTheme.animation()) {
                                 ForEach(Theme.allCases) { theme in
                                     Text(String(describing: theme))
                                         .tag(theme)

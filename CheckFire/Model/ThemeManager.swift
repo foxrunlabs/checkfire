@@ -55,6 +55,7 @@ final class ThemeManager {
     var listBackground: Color { themeData.listBackground }
     var listRowBackground: Color? { themeData.listRowBackground }
     var listRowSeparator: Color? { themeData.listRowSeparator }
+    var listSelection: Color { themeData.listSelection }
     
     private struct ThemeData {
         let colorScheme: ColorScheme?
@@ -66,6 +67,7 @@ final class ThemeManager {
         let listBackground: Color
         let listRowBackground: Color?
         let listRowSeparator: Color?
+        let listSelection: Color
         
         static let systemTheme = ThemeData(
             colorScheme: nil,
@@ -76,7 +78,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .automatic,
             listBackground: Color(uiColor: .systemBackground),
             listRowBackground: nil,
-            listRowSeparator: nil
+            listRowSeparator: nil,
+            listSelection: Color(uiColor: .systemFill)
         )
         
         static let usafTheme = ThemeData(
@@ -88,7 +91,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .automatic,
             listBackground: Color(uiColor: .systemBackground),
             listRowBackground: nil,
-            listRowSeparator: nil
+            listRowSeparator: nil,
+            listSelection: Color(uiColor: .systemFill)
         )
         
         static let usaTheme = ThemeData(
@@ -100,7 +104,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .hidden,
             listBackground: .armyGreen,
             listRowBackground: .armyTan.opacity(0.2),
-            listRowSeparator: .armyTan.opacity(0.5)
+            listRowSeparator: .armyTan.opacity(0.5),
+            listSelection: .armyTan.opacity(0.2)
         )
         
         static let uscgTheme = ThemeData(
@@ -112,7 +117,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .automatic,
             listBackground: Color(uiColor: .systemBackground),
             listRowBackground: nil,
-            listRowSeparator: nil
+            listRowSeparator: nil,
+            listSelection: Color(uiColor: .systemFill)
         )
         
         static let usmcTheme = ThemeData(
@@ -124,7 +130,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .hidden,
             listBackground: .marineRed,
             listRowBackground: .armyTan.opacity(0.2),
-            listRowSeparator: .armyTan.opacity(0.5)
+            listRowSeparator: .armyTan.opacity(0.5),
+            listSelection: .armyTan.opacity(0.2)
         )
         
         static let usnTheme = ThemeData(
@@ -136,7 +143,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .hidden,
             listBackground: .navyBlue,
             listRowBackground: .armyTan.opacity(0.2),
-            listRowSeparator: .armyTan.opacity(0.5)
+            listRowSeparator: .armyTan.opacity(0.5),
+            listSelection: .armyTan.opacity(0.2)
         )
         
         static let ussfTheme = ThemeData(
@@ -148,7 +156,8 @@ final class ThemeManager {
             scrollBackgroundVisibility: .automatic,
             listBackground: Color(uiColor: .systemBackground),
             listRowBackground: nil,
-            listRowSeparator: nil
+            listRowSeparator: nil,
+            listSelection: Color(uiColor: .systemFill)
         )
     }
 }
