@@ -13,40 +13,30 @@ struct QueryView: View {
         self._paychecks = Query(sort: sort)
     }
     
+    private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+    
     var body: some View {
         List(paychecks, selection: $selectedPaycheck.animation()) { paycheck in
-            PaycheckItem(paycheck)
-                .listRowBackground(selectedPaycheck == paycheck ? themeManager.listSelection : Color.clear)
-                .listRowSeparatorTint(themeManager.listRowSeparator)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                .contentShape(.rect)
-                .overlay {
-                    HStack {
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.secondary)
-                    }
+            NavigationLink(value: paycheck) {
+                PaycheckItem(paycheck)
+            }
+            .listRowBackground(
+                isPhone ? (selectedPaycheck == paycheck ? themeManager.listSelection :  Color.clear)
+                        : nil
+            )
+            .listRowSeparatorTint(themeManager.listRowSeparator)
+            .swipeActions(allowsFullSwipe: false) {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    deletePaycheck(paycheck)
                 }
-                .onTapGesture {
-                    withAnimation { selectedPaycheck = paycheck }
+                .tint(.red)
+                
+                Button("Copy", systemImage: "document.on.document")
+                {
+                    copyPaycheck(paycheck)
                 }
-                .simultaneousGesture(
-                    LongPressGesture(minimumDuration: 0.2).onEnded { _ in
-                        withAnimation { selectedPaycheck = paycheck }
-                    }
-                )
-                .swipeActions(allowsFullSwipe: false) {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        deletePaycheck(paycheck)
-                    }
-                    .tint(.red)
-                    
-                    Button("Copy", systemImage: "document.on.document")
-                    {
-                        copyPaycheck(paycheck)
-                    }
-                    .tint(.accentColor)
-                }
+                .tint(.accentColor)
+            }
         }
         .listStyle(.inset)
         .checkFireListBackground(themeManager: themeManager)

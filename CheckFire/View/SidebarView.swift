@@ -43,6 +43,10 @@ struct SidebarView: View {
     var body: some View {
         QueryView(selection: $selectedPaycheck, sort: sort)
             .navigationTitle("Paychecks")
+            .navigationBarTitleDisplayMode(
+                UIDevice.current.userInterfaceIdiom == .pad ? .inline : .automatic
+            )
+            .checkFireNavigationBarStyle(themeManager: themeManager)
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {

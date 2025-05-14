@@ -2,56 +2,47 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckView: View {
-    @Binding var paycheck: Paycheck?
+    @Bindable var paycheck: Paycheck
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(ThemeManager.self) private var themeManager
     
+    private var isPhone: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+    
     var body: some View {
-        if let paycheck {
-            TabView {
-                Tab("LES", systemImage: "plus.forwardslash.minus") {
-                    LESDataView(paycheck: paycheck)
-                        .checkFireTabViewStyle(themeManager: themeManager)
-                        .tint(themeManager.tint)
-                }
-                
-                Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
-                    FederalWithholdingView(paycheck: paycheck)
-                        .checkFireTabViewStyle(themeManager: themeManager)
-                        .tint(themeManager.tint)
-                }
-                
-                Tab("TSP", systemImage: "dollarsign.bank.building") {
-                    TSPDataView(paycheck: paycheck)
-                        .checkFireTabViewStyle(themeManager: themeManager)
-                        .tint(themeManager.tint)
-                }
-                
-                Tab("Net Pay", systemImage: "dollarsign") {
-                    NetPayView(paycheck: paycheck)
-                        .checkFireTabViewStyle(themeManager: themeManager)
-                        .tint(themeManager.tint)
+        TabView {
+            Tab("LES", systemImage: "plus.forwardslash.minus") {
+                LESDataView(paycheck: paycheck)
+                    .checkFireTabStyle(themeManager: themeManager)
+            }
+            
+            Tab("Withholding", systemImage: "pencil.and.list.clipboard") {
+                FederalWithholdingView(paycheck: paycheck)
+                    .checkFireTabStyle(themeManager: themeManager)
+            }
+            
+            Tab("TSP", systemImage: "dollarsign.bank.building") {
+                TSPDataView(paycheck: paycheck)
+                    .checkFireTabStyle(themeManager: themeManager)
+            }
+            
+            Tab("Net Pay", systemImage: "dollarsign") {
+                NetPayView(paycheck: paycheck)
+                    .checkFireTabStyle(themeManager: themeManager)
+            }
+        }
+        .navigationTitle($paycheck.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .checkFireNavigationBarStyle(themeManager: themeManager)
+        .tint(themeManager.tabViewTint)
+        .toolbar {
+            ToolbarItem(placement: .destructiveAction) {
+                Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
+                    deletePaycheck(paycheck)
+                    dismiss()
                 }
             }
-            .navigationTitle(paycheck.name)
-            .navigationBarTitleDisplayMode(.inline)
-            .tint(themeManager.tabViewTint)
-            .toolbar {
-                ToolbarItem(placement: .destructiveAction) {
-                    Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
-                        deletePaycheck(paycheck)
-                        dismiss()
-                    }
-                }
-            }
-        } else {
-            ContentUnavailableView(
-                "Select a paycheck from the sidebar",
-                systemImage: "sidebar.left"
-            )
-            .background(themeManager.systemBackground)
         }
     }
     
@@ -62,8 +53,10 @@ struct PaycheckView: View {
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var paycheck: Paycheck? = Paycheck.example
+    @Previewable @State var paycheck = Paycheck.example
     
-    PaycheckView(paycheck: $paycheck)
-        .environment(ThemeManager(theme: .system))
+    NavigationStack {
+        PaycheckView(paycheck: paycheck)
+            .environment(ThemeManager(theme: .uscg))
+    }
 }
