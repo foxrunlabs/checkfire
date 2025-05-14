@@ -48,11 +48,11 @@ struct SidebarView: View {
             )
             .checkFireNavigationBarStyle(themeManager: themeManager)
             .toolbar {
-                ToolbarItem {
+                ToolbarItem(placement: .topBarLeading) {
                     Menu("Options", systemImage: "ellipsis.circle") {
                         Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
                         
-                        Menu("Theme") {
+                        Menu("Theme", systemImage: "paintbrush") {
                             Picker("Theme", selection: $selectedTheme.animation()) {
                                 ForEach(Theme.allCases) { theme in
                                     Text(String(describing: theme))
@@ -95,7 +95,7 @@ struct SidebarView: View {
                     }
                 }
                 
-                ToolbarItemGroup(placement: .bottomBar) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Spacer()
                     
                     Button("Add Paycheck", systemImage: "square.and.pencil") { addPaycheck() }
@@ -118,6 +118,15 @@ struct SidebarView: View {
                 }
             } message: {
                 Text("Are you sure?")
+            }
+            .overlay {
+                if paychecks.isEmpty {
+                    ContentUnavailableView(
+                        "No Paychecks",
+                        systemImage: "dollarsign",
+                        description: Text("Enter your first paycheck.")
+                    )
+                }
             }
             .onChange(of: selectedTheme) {
                 withAnimation { themeManager.theme = selectedTheme }

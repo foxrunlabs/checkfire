@@ -19,8 +19,9 @@ struct ContentView: View {
                 PaycheckView(paycheck: selectedPaycheck)
             } else {
                 ContentUnavailableView(
-                    "Select a paycheck from the sidebar",
-                    systemImage: "sidebar.left"
+                    "No Paycheck Selected",
+                    systemImage: "sidebar.left",
+                    description: Text("Please select a paycheck.")
                 )
                 .background(themeManager.systemBackground)
                 .navigationTitle("CheckFire")

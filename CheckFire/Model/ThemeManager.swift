@@ -119,7 +119,7 @@ final class ThemeManager {
             systemBackground: Color(uiColor: .systemBackground),
             navigationBarColorScheme: .dark,
             toolbarBackground: .uscgRed,
-            tabViewTint: UIDevice.current.userInterfaceIdiom == .phone ? .uscgBlue : nil,
+            tabViewTint: UIDevice.current.userInterfaceIdiom == .phone ? .white : nil,
             scrollBackgroundVisibility: .automatic,
             listBackground: Color(uiColor: .systemBackground),
             listRowBackground: nil,
