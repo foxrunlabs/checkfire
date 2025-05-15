@@ -58,6 +58,7 @@ struct FederalWithholdingView: View {
             .checkFireListRowStyle(themeManager: themeManager)
         }
         .checkFireListBackground(themeManager: themeManager)
+        .scrollDismissesKeyboard(.immediately)
     }
     
     private struct CurrencyField: View {
@@ -77,6 +78,7 @@ struct FederalWithholdingView: View {
                     format: .currency(code: "USD")
                 )
                 .multilineTextAlignment(.trailing)
+                .keyboardType(.decimalPad)
             } label: {
                 Text(label)
             }

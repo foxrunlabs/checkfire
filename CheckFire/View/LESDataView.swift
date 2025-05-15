@@ -64,6 +64,7 @@ struct LESDataView: View {
             .checkFireListRowStyle(themeManager: themeManager)
         }
         .checkFireListBackground(themeManager: themeManager)
+        .scrollDismissesKeyboard(.immediately)
     }
 }
 

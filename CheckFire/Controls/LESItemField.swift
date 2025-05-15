@@ -59,6 +59,7 @@ struct LESItemField: View {
             LabeledContent {
                 TextField(lesItem.name, value: $lesItem.amount, format: .currency(code: "USD"))
                     .multilineTextAlignment(.trailing)
+                    .keyboardType(.decimalPad)
             } label: {
                 HStack {
                     if lesItem.isEntitlement {

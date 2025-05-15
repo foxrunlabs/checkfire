@@ -98,7 +98,7 @@ struct SidebarView: View {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Spacer()
                     
-                    Button("Add Paycheck", systemImage: "square.and.pencil") { addPaycheck() }
+                    Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
                 }
             }
             .sheet(isPresented: $showAbout) {
