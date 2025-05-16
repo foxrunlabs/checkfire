@@ -3,11 +3,59 @@ import SwiftData
 
 @Model
 final class Paycheck: Identifiable {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var lesData: LESData
-    var federalWithholdingData: FederalWithholdingData
-    var tspData: TSPData
+    var id = UUID()
+    var name = ""
+    var lesData = LESData()
+    var federalWithholdingData = FederalWithholdingData()
+    var tspData = TSPData()
+    
+    /// Create a new paycheck.
+    /// - Parameters:
+    ///   - name: Name of paycheck.
+    ///   - federalWithholdingData: Federal withholding data for paycheck.
+    ///   - tspData: TSP data for paycheck.
+    ///   - lesData: LES data for paycheck.
+    init(
+        name: String,
+        lesData: LESData = LESData(),
+        federalWithholdingData: FederalWithholdingData = FederalWithholdingData(),
+        tspData: TSPData = TSPData(),
+    ) {
+        self.id = UUID()
+        self.name = name
+        self.lesData = lesData
+        self.federalWithholdingData = federalWithholdingData
+        self.tspData = tspData
+    }
+    
+    /// Creates a new paycheck from another paycheck.
+    /// - Parameter paycheck: Paycheck to copy.
+    convenience init(_ other: Paycheck) {
+        // deliberate copy of LESData due to UUIDs in LESItem.
+        var lesData = LESData()
+        lesData.date = other.lesData.date
+        lesData.basePay = LESItem(
+            name: "Base Pay",
+            amount: other.lesData.basePay.amount,
+            itemType: .basePay
+        )
+        lesData.entitlements = other.lesData.entitlements.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)
+        }
+        lesData.deductions = other.lesData.deductions.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: .deduction)
+        }
+        lesData.allotments = other.lesData.allotments.map {
+            LESItem(name: $0.name, amount: $0.amount, itemType: .allotment)
+        }
+        
+        self.init(
+            name: other.name,
+            lesData: lesData,
+            federalWithholdingData: other.federalWithholdingData,
+            tspData: other.tspData
+        )
+    }
     
     private var year: Int { Calendar.current.component(.year, from: lesData.date) }
     
@@ -66,54 +114,6 @@ final class Paycheck: Identifiable {
         net -= medicare + socialSecurity
         
         return net
-    }
-    
-    /// Create a new paycheck.
-    /// - Parameters:
-    ///   - name: Name of paycheck.
-    ///   - federalWithholdingData: Federal withholding data for paycheck.
-    ///   - tspData: TSP data for paycheck.
-    ///   - lesData: LES data for paycheck.
-    init(
-        name: String,
-        lesData: LESData = LESData(),
-        federalWithholdingData: FederalWithholdingData = FederalWithholdingData(),
-        tspData: TSPData = TSPData(),
-    ) {
-        self.id = UUID()
-        self.name = name
-        self.lesData = lesData
-        self.federalWithholdingData = federalWithholdingData
-        self.tspData = tspData
-    }
-    
-    /// Creates a new paycheck from another paycheck.
-    /// - Parameter paycheck: Paycheck to copy.
-    convenience init(_ other: Paycheck) {
-        // deliberate copy of LESData due to UUIDs in LESItem.
-        var lesData = LESData()
-        lesData.date = other.lesData.date
-        lesData.basePay = LESItem(
-            name: "Base Pay",
-            amount: other.lesData.basePay.amount,
-            itemType: .basePay
-        )
-        lesData.entitlements = other.lesData.entitlements.map {
-            LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)
-        }
-        lesData.deductions = other.lesData.deductions.map {
-            LESItem(name: $0.name, amount: $0.amount, itemType: .deduction)
-        }
-        lesData.allotments = other.lesData.allotments.map {
-            LESItem(name: $0.name, amount: $0.amount, itemType: .allotment)
-        }
-        
-        self.init(
-            name: other.name,
-            lesData: lesData,
-            federalWithholdingData: other.federalWithholdingData,
-            tspData: other.tspData
-        )
     }
     
     static let example = Paycheck(
