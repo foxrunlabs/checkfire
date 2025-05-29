@@ -2,6 +2,8 @@ import Foundation
 
 struct LESData: Codable, Equatable {
     var date: Date
+    var payGrade: PayGrade
+    var yearsOfService: YearsOfService
     var basePay: LESItem
     var entitlements: [LESItem]
     var deductions: [LESItem]
@@ -14,12 +16,16 @@ struct LESData: Codable, Equatable {
     /// Creates LES data.
     /// - Parameters:
     ///   - date: LES date.
+    ///   - payGrade: Pay grade.
+    ///   - yearsOfService: Years of cumulative service.
     ///   - basePay: Base pay in dollars.
     ///   - entitlements: An array of entitlements, not including base pay.
     ///   - deductions: An array of deductions, not including federal tax, FICA tax, or TSP.
     ///   - allotments: An array of allotments.
     init(
         date: Date = .now,
+        payGrade: PayGrade = .e1,
+        yearsOfService: YearsOfService = .lessThanOrEqual2,
         basePay: Decimal = 0.00,
         entitlements: [LESItem] = [],
         deductions: [LESItem] = [],
@@ -29,6 +35,8 @@ struct LESData: Codable, Equatable {
         var components = Calendar.current.dateComponents([.calendar, .year, .month], from: date)
         components.day = 1
         self.date = components.date ?? date
+        self.payGrade = payGrade
+        self.yearsOfService = yearsOfService
         self.basePay = LESItem(name: "Base Pay", amount: basePay, itemType: .basePay)
         self.entitlements = entitlements
         self.deductions = deductions
@@ -41,6 +49,8 @@ struct LESData: Codable, Equatable {
     
     static let example = LESData(
         date: DateComponents(calendar: .current, year: 2025, month: 1, day: 1).date!,
+        payGrade: .o5,
+        yearsOfService: .over20,
         basePay: 11592.30,
         entitlements: [
             LESItem(name: "Fly Pay", amount: 840.00, itemType: .incentivePay),

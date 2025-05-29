@@ -9,6 +9,13 @@ struct LESDataView: View {
     @State private var isEditingDeductions = false
     @State private var isEditingAllotments = false
     
+    private var yearsOfService: [YearsOfService] {
+        PayTables.shared.yearsOfServiceAvailable(
+            for: paycheck.lesData.date.year,
+            as: paycheck.lesData.payGrade
+        )
+    }
+    
     var body: some View {
         Form {
             Group {
@@ -18,6 +25,28 @@ struct LESDataView: View {
                         selection: $paycheck.lesData.date,
                         in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
                     )
+                    
+                    Picker("Pay Grade", selection: $paycheck.lesData.payGrade) {
+                        ForEach(PayGrade.allCases) { grade in
+                            Text(String(describing: grade))
+                                .tag(grade)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    
+                    if yearsOfService.isEmpty {
+                        LabeledContent("Years of Service") {
+                            Text("No Data")
+                        }
+                    } else {
+                        Picker("Years of Service", selection: $paycheck.lesData.yearsOfService) {
+                            ForEach(yearsOfService) { serviceYears in
+                                Text(String(describing: serviceYears))
+                                    .tag(serviceYears)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    }
                     
                     LESItemField($paycheck.lesData.basePay)
                 }
@@ -65,6 +94,26 @@ struct LESDataView: View {
         }
         .checkFireListBackground(themeManager: themeManager)
         .scrollDismissesKeyboard(.immediately)
+        .onChange(of: paycheck.lesData.payGrade) {
+            updateBasePay(
+                for: paycheck.lesData.payGrade,
+                yearsOfService: paycheck.lesData.yearsOfService
+            )
+        }
+        .onChange(of: paycheck.lesData.yearsOfService) {
+            updateBasePay(
+                for: paycheck.lesData.payGrade,
+                yearsOfService: paycheck.lesData.yearsOfService
+            )
+        }
+    }
+    
+    private func updateBasePay(for grade: PayGrade, yearsOfService: YearsOfService) {
+        paycheck.lesData.basePay.amount = PayTables.shared.basePay(
+            for: paycheck.lesData.date.year,
+            as: paycheck.lesData.payGrade,
+            with: paycheck.lesData.yearsOfService
+        ) ?? 0.00
     }
 }
 
