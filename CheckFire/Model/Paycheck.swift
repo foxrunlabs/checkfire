@@ -34,6 +34,8 @@ final class Paycheck: Identifiable {
         // deliberate copy of LESData due to UUIDs in LESItem.
         var lesData = LESData()
         lesData.date = other.lesData.date
+        lesData.payGrade = other.lesData.payGrade
+        lesData.yearsOfService = other.lesData.yearsOfService
         lesData.basePay = LESItem(
             name: "Base Pay",
             amount: other.lesData.basePay.amount,
