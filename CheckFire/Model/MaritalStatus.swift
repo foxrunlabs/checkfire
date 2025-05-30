@@ -1,6 +1,13 @@
 import Foundation
 
-enum MaritalStatus: String, CaseIterable, Codable, CustomStringConvertible, Identifiable {
+enum MaritalStatus:
+    String,
+    CaseIterable,
+    Codable,
+    CodingKeyRepresentable,
+    CustomStringConvertible,
+    Identifiable
+{
     case single
     case married
     case headOfHousehold

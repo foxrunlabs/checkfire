@@ -23,7 +23,7 @@ struct LESDataView: View {
                     PaycheckDatePicker(
                         "Pay Date",
                         selection: $paycheck.lesData.date,
-                        in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
+                        in: WithholdingTables.shared.years.first!...WithholdingTables.shared.years.last!
                     )
                     
                     Picker("Pay Grade", selection: $paycheck.lesData.payGrade) {

@@ -127,7 +127,7 @@ extension PaycheckDatePicker {
         PaycheckDatePicker(
             "Pay Date",
             selection: $date,
-            in: TaxYears.shared.years.first!...TaxYears.shared.years.last!
+            in: WithholdingTables.shared.years.first!...WithholdingTables.shared.years.last!
         )
     }
 }

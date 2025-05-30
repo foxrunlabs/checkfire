@@ -80,28 +80,26 @@ final class Paycheck: Identifiable {
     }
 
     var federalTaxes: Decimal {
-        guard let taxData = TaxYears.shared.taxData(for: year) else {
-            fatalError("No tax data found for \(year.description)")
-        }
-        
-        return taxData.calculateWithholding(for: wagePeriod, using: federalWithholdingData)
+        WithholdingTables.shared.calculateWithholding(
+            for: year,
+            wage: wagePeriod,
+            using: federalWithholdingData
+        )
     }
     
     var medicare: Decimal {
-        guard let taxData = TaxYears.shared.taxData(for: year) else {
-            fatalError("No tax data found for \(year.description)")
-        }
-        
-        let medicateOwed = lesData.basePay.amount * taxData.medicareRate
-        return medicateOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
+        let medicareOwed = WithholdingTables.shared.calculateMedicare(
+            for: year,
+            wage: lesData.basePay.amount
+        )
+        return medicareOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var socialSecurity: Decimal {
-        guard let taxData = TaxYears.shared.taxData(for: year) else {
-            fatalError("No tax data found for \(year.description)")
-        }
-        
-        let socialSecurityOwed = lesData.basePay.amount * taxData.socialSecurityRate
+        let socialSecurityOwed = WithholdingTables.shared.calculateSocialSecurity(
+            for: year,
+            wage: lesData.basePay.amount
+        )
         return socialSecurityOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
