@@ -1,7 +1,6 @@
 import Foundation
 
-struct LESItem: Codable, Equatable, Identifiable {
-    let id = UUID()
+struct LESItem: Codable, Equatable {
     var name: String
     var amount: Decimal
     var itemType: LESItemType

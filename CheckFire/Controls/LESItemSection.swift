@@ -20,9 +20,9 @@ struct LESItemSection: View {
     
     var body: some View {
         Section {
-            ForEach($lesItems) { $lesItem in
-                LESItemField($lesItem, isEditing: isEditing) {
-                    lesItems.removeAll { $0.id == lesItem.id }
+            ForEach(lesItems.indices, id: \.self) { index in
+                LESItemField($lesItems[index], isEditing: isEditing) {
+                    lesItems.remove(at: index)
                 }
             }
             
