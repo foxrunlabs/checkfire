@@ -3,8 +3,9 @@ import Foundation
 final class WithholdingTables {
     private let withholdingTables: [WithholdingTable] = Bundle.main.decode(from: "withholding_tables.json")
     
-    var years: [Int] {
-        withholdingTables.map({ $0.year }).sorted()
+    var years: ClosedRange<Int> {
+        let allYears = withholdingTables.map({ $0.year }).sorted()
+        return allYears.first!...allYears.last!
     }
     
     /// Private initializer for singleton object.
@@ -52,14 +53,14 @@ final class WithholdingTables {
     func calculateWithholding(
         for year: Int,
         wage: Decimal,
-        using federalWithholdingData: FederalWithholdingData
+        using withholdingForm: WithholdingForm
     ) -> Decimal {
         let wageFrequency: Decimal = 12
         
         // adjust the wage amount
         var adjustedWage = wage
-        adjustedWage += federalWithholdingData.otherIncome / wageFrequency
-        adjustedWage -= federalWithholdingData.deductions / wageFrequency
+        adjustedWage += withholdingForm.otherIncome / wageFrequency
+        adjustedWage -= withholdingForm.deductions / wageFrequency
         adjustedWage = max(0.00, adjustedWage)
         
         // figure the tentative withholding amount
@@ -67,8 +68,8 @@ final class WithholdingTables {
             fatalError("No withholding table found for " + String(describing: year))
         }
         
-        let schedule: WithholdingSchedule = federalWithholdingData.multipleJobs ? .multipleJobs : .standard
-        let brackets = table.taxBrackets[schedule]?[federalWithholdingData.maritalStatus]
+        let schedule: WithholdingSchedule = withholdingForm.multipleJobs ? .multipleJobs : .standard
+        let brackets = table.taxBrackets[schedule]?[withholdingForm.maritalStatus]
         
         guard let bracket = brackets?.last(where: { adjustedWage >= $0.atLeast }) else {
             fatalError("No withholding data found for " + String(describing: adjustedWage))
@@ -78,13 +79,13 @@ final class WithholdingTables {
         withholding += (adjustedWage - bracket.atLeast) * bracket.rate
         
         // account for tax credits
-        var dependentCredits = Decimal(federalWithholdingData.childDependents) * table.childTaxCredit
-        dependentCredits += Decimal(federalWithholdingData.otherDependents) * table.otherDependentTaxCredit
+        var dependentCredits = Decimal(withholdingForm.childDependents) * table.childTaxCredit
+        dependentCredits += Decimal(withholdingForm.otherDependents) * table.otherDependentTaxCredit
         withholding -= dependentCredits / wageFrequency
         withholding = max(0.00, withholding)
         
         // figure final withholding
-        withholding += federalWithholdingData.extraWithholding
+        withholding += withholdingForm.extraWithholding
         return withholding.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     

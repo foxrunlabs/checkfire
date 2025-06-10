@@ -8,7 +8,8 @@ enum PayGrade:
     CustomStringConvertible,
     Identifiable
 {
-    case o10, o9, o8, o7, o6, o5, o4, o3, o3E, o2, o2E, o1, o1E
+    case o10, o9, o8, o7, o6, o5, o4, o3, o2, o1
+    case o3E, o2E, o1E
     case w5, w4, w3, w2, w1
     case o0
     case e9, e8, e7, e6, e5, e4, e3, e2, e1
@@ -23,10 +24,10 @@ enum PayGrade:
         case .o5: "O-5"
         case .o4: "O-4"
         case .o3: "O-3"
-        case .o3E: "O-3E"
         case .o2: "O-2"
-        case .o2E: "O-2E"
         case .o1: "O-1"
+        case .o3E: "O-3E"
+        case .o2E: "O-2E"
         case .o1E: "O-1E"
         case .w5: "W-5"
         case .w4: "W-4"

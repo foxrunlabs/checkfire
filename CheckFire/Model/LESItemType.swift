@@ -1,29 +1,15 @@
 import Foundation
 
-enum LESItemType: String, Codable, CustomStringConvertible, Identifiable {
-    case basePay
-    case specialPay
-    case incentivePay
-    case bonusPay
-    case allowance
+enum LESItemType: Codable, CustomStringConvertible, Hashable, Identifiable {
+    case entitlement(EntitlementType)
     case deduction
     case allotment
-    
-    static var entitlements: [Self] { [.specialPay, .incentivePay, .bonusPay, .allowance] }
     
     // MARK: - Custom String Convertible
     var description: String {
         switch self {
-        case .basePay:
-            "Base Pay"
-        case .specialPay:
-            "Special Pay"
-        case .incentivePay:
-            "Incentive Pay"
-        case .bonusPay:
-            "Bonus Pay"
-        case .allowance:
-            "Allowance"
+        case .entitlement(let entitlementType):
+            String(describing: entitlementType)
         case .deduction:
             "Deduction"
         case .allotment:

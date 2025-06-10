@@ -5,27 +5,31 @@ import SwiftData
 final class Paycheck: Identifiable {
     var id = UUID()
     var name = ""
-    var lesData = LESData()
-    var federalWithholdingData = FederalWithholdingData()
-    var tspData = TSPData()
+    var date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
     
-    /// Create a new paycheck.
-    /// - Parameters:
-    ///   - name: Name of paycheck.
-    ///   - federalWithholdingData: Federal withholding data for paycheck.
-    ///   - tspData: TSP data for paycheck.
-    ///   - lesData: LES data for paycheck.
+    var payGrade = PayGrade.e1
+    var yearsOfService = YearsOfService.lessThanOrEqual2
+    var basePay: Decimal = 0.00
+    
+    @Relationship(deleteRule: .cascade, inverse: \LESItem.paycheck) var lesItems: [LESItem]? = []
+    
     init(
         name: String,
-        lesData: LESData = LESData(),
-        federalWithholdingData: FederalWithholdingData = FederalWithholdingData(),
-        tspData: TSPData = TSPData(),
+        date: Date,
+        payGrade: PayGrade,
+        yearsOfService: YearsOfService,
+        basePay: Decimal,
+        lesItems: [LESItem]? = nil,
     ) {
         self.id = UUID()
         self.name = name
-        self.lesData = lesData
-        self.federalWithholdingData = federalWithholdingData
-        self.tspData = tspData
+        self.date = Calendar.current.lastDateOfMonth(from: date) ?? date
+        
+        self.payGrade = payGrade
+        self.yearsOfService = yearsOfService
+        self.basePay = basePay
+        
+        self.lesItems = lesItems
     }
     
     /// Creates a new paycheck from another paycheck.
@@ -33,73 +37,18 @@ final class Paycheck: Identifiable {
     convenience init(_ other: Paycheck) {
         self.init(
             name: other.name,
-            lesData: other.lesData,
-            federalWithholdingData: other.federalWithholdingData,
-            tspData: other.tspData
+            date: other.date,
+            payGrade: other.payGrade,
+            yearsOfService: other.yearsOfService,
+            basePay: other.basePay
         )
-    }
-    
-    private var year: Int { Calendar.current.component(.year, from: lesData.date) }
-    
-    var traditionalTspContribution: Decimal {
-        lesData.basePay.amount * Decimal(tspData.traditionalBasePay) +
-            lesData.entitlementPay(for: .specialPay) * Decimal(tspData.traditionalSpecialPay) +
-            lesData.entitlementPay(for: .incentivePay) * Decimal(tspData.traditionalIncentivePay) +
-            lesData.entitlementPay(for: .bonusPay) * Decimal(tspData.traditionalBonusPay)
-    }
-    
-    var rothTspContribution: Decimal {
-        lesData.basePay.amount * Decimal(tspData.rothBasePay) +
-            lesData.entitlementPay(for: .specialPay) * Decimal(tspData.rothSpecialPay) +
-            lesData.entitlementPay(for: .incentivePay) * Decimal(tspData.rothIncentivePay) +
-            lesData.entitlementPay(for: .bonusPay) * Decimal(tspData.rothBonusPay)
-    }
-    
-    var wagePeriod: Decimal {
-        let taxableEntitlements = lesData.entitlements.filter { $0.itemType != .allowance }
-        return lesData.basePay.amount + taxableEntitlements.reduce(0.00) { $0 + $1.amount } -
-            traditionalTspContribution
-    }
-
-    var federalTaxes: Decimal {
-        WithholdingTables.shared.calculateWithholding(
-            for: year,
-            wage: wagePeriod,
-            using: federalWithholdingData
-        )
-    }
-    
-    var medicare: Decimal {
-        let medicareOwed = WithholdingTables.shared.calculateMedicare(
-            for: year,
-            wage: lesData.basePay.amount
-        )
-        return medicareOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
-    }
-    
-    var socialSecurity: Decimal {
-        let socialSecurityOwed = WithholdingTables.shared.calculateSocialSecurity(
-            for: year,
-            wage: lesData.basePay.amount
-        )
-        return socialSecurityOwed.rounded(.toNearestOrAwayFromZero, digits: 2)
-    }
-    
-    var netPay: Decimal {
-        var net = lesData.grossPay
-        net -= traditionalTspContribution + rothTspContribution
-        net -= lesData.deductions.reduce(0.00) { $0 + $1.amount }
-        net -= lesData.allotments.reduce(0.00) { $0 + $1.amount }
-        net -= federalTaxes
-        net -= medicare + socialSecurity
-        
-        return net
     }
     
     static let example = Paycheck(
         name: "Example",
-        lesData: LESData.example,
-        federalWithholdingData: FederalWithholdingData.example,
-        tspData: TSPData.example
+        date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
+        payGrade: .o5,
+        yearsOfService: .over20,
+        basePay: 11592.30
     )
 }

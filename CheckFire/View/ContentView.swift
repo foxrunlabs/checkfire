@@ -2,43 +2,75 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @Binding private var theme: Theme
-    private let themeManager: ThemeManager
-    @State private var selectedPaycheck: Paycheck?
-    
-    init(theme: Binding<Theme>) {
-        self._theme = theme
-        self.themeManager = .init(theme: theme.wrappedValue)
-    }
+    @State private var selectedNavigation: SidebarNavigation?
+    @State private var selectedPayComponent: PayComponent?
     
     var body: some View {
         NavigationSplitView {
-            SidebarView(theme: $theme, selection: $selectedPaycheck)
+            SidebarView(selectedNavigation: $selectedNavigation)
+        } content: {
+            ContentViewController(
+                selectedNavigation: selectedNavigation,
+                selectedPayComponent: $selectedPayComponent
+            )
         } detail: {
-            if let selectedPaycheck {
-                PaycheckView(paycheck: selectedPaycheck)
+            DetailViewController(selectedPayComponent: selectedPayComponent)
+        }
+        .onChange(of: selectedNavigation) {
+            selectedPayComponent = nil
+        }
+    }
+    
+    private struct ContentViewController: View {
+        let selectedNavigation: SidebarNavigation?
+        @Binding var selectedPayComponent: PayComponent?
+        
+        var body: some View {
+            if let selectedNavigation {
+                switch selectedNavigation {
+                case .paychecks:
+                    PaychecksListView(selectedPayComponent: $selectedPayComponent)
+                case .withholdingForms:
+                    WithholdingFormsListView(selectedPayComponent: $selectedPayComponent)
+                case .thriftSavingsPlans:
+                    TSPListView(selectedPayComponent: $selectedPayComponent)
+                }
             } else {
                 ContentUnavailableView(
-                    "No Paycheck Selected",
+                    "Nothing Selected",
                     systemImage: "sidebar.left",
-                    description: Text("Please select a paycheck.")
+                    description: Text("Please select a sidebar item.")
                 )
-                .background(themeManager.systemBackground)
-                .navigationTitle("CheckFire")
-                .navigationBarTitleDisplayMode(.inline)
-                .checkFireNavigationBarStyle(themeManager: themeManager)
             }
         }
-        .preferredColorScheme(themeManager.colorScheme)
-        .tint(themeManager.tint)
-        .environment(themeManager)
+    }
+    
+    private struct DetailViewController: View {
+        let selectedPayComponent: PayComponent?
+        
+        var body: some View {
+            if let selectedPayComponent {
+                switch selectedPayComponent {
+                case .paycheck(let selectedPaycheck):
+                    PaycheckDetailView(paycheck: selectedPaycheck)
+                case .withholdingForm(let selectedWithholdingForm):
+                    WithholdingFormDetailView(withholdingForm: selectedWithholdingForm)
+                case .thriftSavingsPlan(let selectedTSP):
+                    TSPDetailView(tsp: selectedTSP)
+                }
+            } else {
+                ContentUnavailableView(
+                    "Nothing Selected",
+                    systemImage: "document",
+                    description: Text("Please make a selection.")
+                )
+            }
+        }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var theme = Theme.system
-    
-    ContentView(theme: $theme)
+    ContentView()
         .modelContainer(PreviewController.container)
 }

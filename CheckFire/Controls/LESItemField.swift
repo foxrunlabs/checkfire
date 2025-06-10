@@ -1,12 +1,38 @@
 import SwiftUI
 
 struct LESItemField: View {
-    @Binding private var lesItem: LESItem
-    private let isEditing: Bool
-    private let onDelete: () -> Void
+    @Bindable var lesItem: LESItem
     
-    var symbol: String {
-        switch lesItem.itemType {
+    var body: some View {
+        LabeledContent {
+            TextField(lesItem.name, value: $lesItem.amount, format: .currency(code: "USD"))
+                .multilineTextAlignment(.trailing)
+                .keyboardType(.decimalPad)
+        } label: {
+            HStack {
+                if case .entitlement(let entitlement) = lesItem.itemType {
+                    Menu {
+                        Picker("Entitlement Type", selection: $lesItem.itemType) {
+                            ForEach(EntitlementType.allCases) { entitlementType in
+                                LabeledContent(String(describing: entitlementType)) {
+                                    Image(systemName: icon(for: entitlementType))
+                                }
+                                .tag(LESItemType.entitlement(entitlementType))
+                            }
+                        }
+                        .pickerStyle(.inline)
+                    } label: {
+                        Image(systemName: icon(for: entitlement))
+                    }
+                }
+                
+                TextField("Item Name", text: $lesItem.name)
+            }
+        }
+    }
+    
+    private func icon(for entitlementType: EntitlementType) -> String {
+        switch entitlementType {
         case .specialPay:
             "s.square"
         case .incentivePay:
@@ -15,80 +41,31 @@ struct LESItemField: View {
             "b.square"
         case .allowance:
             "a.square"
-        default:
-            ""
         }
-    }
-    
-    init(_ lesItem: Binding<LESItem>) {
-        self._lesItem = lesItem
-        self.isEditing = false
-        self.onDelete = {}
-    }
-    
-    init(_ lesItem: Binding<LESItem>, isEditing: Bool, onDelete: @escaping () -> Void) {
-        self._lesItem = lesItem
-        self.isEditing = isEditing
-        self.onDelete = onDelete
-    }
-    
-    var body: some View {
-        if isEditing {
-            HStack {
-                Button(role: .destructive) {
-                    withAnimation { onDelete() }
-                } label: {
-                    Image(systemName: "trash")
-                }
-                .buttonStyle(.borderless)
-                
-                TextField("Item Name", text: $lesItem.name)
-                
-                if lesItem.isEntitlement {
-                    Picker("Entitlement Type", selection: $lesItem.itemType) {
-                        ForEach(LESItemType.entitlements) { entitlement in
-                            Text(String(describing: entitlement))
-                                .tag(entitlement)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .labelsHidden()
-                }
-            }
-        } else {
-            LabeledContent {
-                TextField(lesItem.name, value: $lesItem.amount, format: .currency(code: "USD"))
-                    .multilineTextAlignment(.trailing)
-                    .keyboardType(.decimalPad)
-            } label: {
-                HStack {
-                    if lesItem.isEntitlement {
-                        Image(systemName: symbol)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Text(lesItem.name)
-                }
-            }
-        }
-        
     }
 }
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var basePay = LESItem(name: "Base Pay", amount: 2.00, itemType: .basePay)
-    @Previewable @State var allowance = LESItem(name: "Allowance", amount: 1.00, itemType: .allowance)
-    @Previewable @State var isEditing = false
+    @Previewable @State var entitlement = LESItem(
+        name: "Entitlement",
+        amount: 1.00,
+        itemType: .entitlement(.allowance)
+    )
+    @Previewable @State var deduction = LESItem(
+        name: "Deduction",
+        amount: 2.00,
+        itemType: .deduction
+    )
+    @Previewable @State var allotment = LESItem(
+        name: "Allotment",
+        amount: 3.00,
+        itemType: .allotment
+    )
     
-    VStack {
-        Button("Edit") {
-            withAnimation { isEditing.toggle() }
-        }
-        
-        List {
-            LESItemField($basePay)
-            LESItemField($allowance, isEditing: isEditing) { print("Delete") }
-        }
+    List {
+        LESItemField(lesItem: entitlement)
+        LESItemField(lesItem: deduction)
+        LESItemField(lesItem: allotment)
     }
 }

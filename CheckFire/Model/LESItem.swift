@@ -1,19 +1,23 @@
 import Foundation
+import SwiftData
 
-struct LESItem: Codable, Equatable {
-    var name: String
-    var amount: Decimal
-    var itemType: LESItemType
+@Model
+final class LESItem: Identifiable {
+    var id = UUID()
+    var name = ""
     
-    var isEntitlement: Bool {
-        // Does not include base pay.
-        itemType != .basePay && itemType != .deduction && itemType != .allotment
-    }
+    var amount: Decimal = 0.00
+    var itemType = LESItemType.entitlement(.specialPay)
     
-    // MARK: - Codable
-    enum CodingKeys: String, CodingKey {
-        case name
-        case amount
-        case itemType
+    var paycheck: Paycheck? = nil
+    
+    init(name: String, amount: Decimal, itemType: LESItemType, paycheck: Paycheck? = nil) {
+        self.id = UUID()
+        self.name = name
+        
+        self.amount = amount
+        self.itemType = itemType
+        
+        self.paycheck = paycheck
     }
 }

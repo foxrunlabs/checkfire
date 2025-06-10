@@ -2,169 +2,108 @@ import SwiftData
 import SwiftUI
 
 struct SidebarView: View {
-    @Binding private var selectedTheme: Theme
-    @Binding private var selectedPaycheck: Paycheck?
+    @Binding var selectedNavigation: SidebarNavigation?
     
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
-    
-    @State private var sortBy = SortOption.date
-    @State private var sortOrder = SortOrder.forward
+    @Query private var withholdingForms: [WithholdingForm]
+    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var showAbout = false
-    @State private var showAlert = false
+    @State private var showDeleteAlert = false
     
-    @Environment(ThemeManager.self) private var themeManager
-    
-    init(theme: Binding<Theme>, selection: Binding<Paycheck?>) {
-        self._selectedTheme = theme
-        self._selectedPaycheck = selection
+    var isDeleteDisabled: Bool {
+        paychecks.isEmpty && withholdingForms.isEmpty && thriftSavingsPlans.isEmpty
     }
-    
-    private enum SortOption {
-        case date
-        case name
-    }
-    
-    private var sort: [SortDescriptor<Paycheck>] {
-        switch sortBy {
-        case .date:
-                [SortDescriptor(\Paycheck.lesData.date, order: sortOrder),
-                SortDescriptor(\Paycheck.name, order: sortOrder)]
-        case .name:
-                [SortDescriptor(\Paycheck.name, order: sortOrder),
-                SortDescriptor(\Paycheck.lesData.date, order: sortOrder)]
-        }
-    }
-    
-    private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
-    private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
     
     var body: some View {
-        QueryView(selection: $selectedPaycheck, sort: sort)
-            .navigationTitle("Paychecks")
-            .navigationBarTitleDisplayMode(
-                UIDevice.current.userInterfaceIdiom == .pad ? .inline : .automatic
-            )
-            .checkFireNavigationBarStyle(themeManager: themeManager)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
-                        
-                        Menu("Theme", systemImage: "paintbrush") {
-                            Picker("Theme", selection: $selectedTheme.animation()) {
-                                ForEach(Theme.allCases) { theme in
-                                    Text(String(describing: theme))
-                                        .tag(theme)
-                                }
-                            }
-                            .pickerStyle(.inline)
-                        }
-                        
-                        if paychecks.count < 2 {
-                            Label("Sort By", systemImage: "arrow.up.arrow.down")
-                                .disabled(true)
-                        } else {
-                            Menu("Sort By", systemImage: "arrow.up.arrow.down") {
-                                Picker("Sort By", selection: $sortBy.animation()) {
-                                    Text("Date")
-                                        .tag(SortOption.date)
-                                    
-                                    Text("Name")
-                                        .tag(SortOption.name)
-                                }
-                                .pickerStyle(.inline)
-                                
-                                Picker("Sort Order", selection: $sortOrder.animation()) {
-                                    Text(ascendingLabel)
-                                        .tag(SortOrder.forward)
-                                    
-                                    Text(descendingLabel)
-                                        .tag(SortOrder.reverse)
-                                }
-                                .pickerStyle(.inline)
-                            }
-                        }
-                    
-                        Button("Delete Paychecks", systemImage: "trash", role: .destructive) {
-                            showAlert.toggle()
-                        }
-                        .tint(.red)
-                        .disabled(paychecks.isEmpty)
-                    }
-                }
-                
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Spacer()
-                    
-                    Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
-                }
-            }
-            .sheet(isPresented: $showAbout) {
-                AboutView()
-            }
-            .alert("Delete Paychecks", isPresented: $showAlert) {
-                if ProcessInfo.processInfo.isiOSAppOnMac {
-                    Button("Delete") { deleteAllPaychecks() }
-                        .keyboardShortcut(.defaultAction)
-                    
-                    Button("Cancel") { }
-                        .keyboardShortcut(.cancelAction)
-                } else {
-                    Button("Cancel", role: .cancel) { }
-                    
-                    Button("Delete", role: .destructive) { deleteAllPaychecks() }
-                }
-            } message: {
-                Text("Are you sure?")
-            }
-            .overlay {
-                if paychecks.isEmpty {
-                    ContentUnavailableView(
-                        "No Paychecks",
-                        systemImage: "dollarsign",
-                        description: Text("Enter your first paycheck.")
+        List(selection: $selectedNavigation) {
+            Section("Pay Data") {
+                ForEach(SidebarNavigation.allCases) { navigationItem in
+                    PayDataListRow(
+                        navigation: navigationItem,
+                        badge: badgeCount(for: navigationItem)
                     )
                 }
             }
-            .onChange(of: selectedTheme) {
-                withAnimation { themeManager.theme = selectedTheme }
+        }
+        .navigationTitle("CheckFire")
+        .toolbar {
+            ToolbarItem {
+                Menu("Options", systemImage: "ellipsis.circle") {
+                    Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
+                    
+                    Button("Delete All Data", systemImage: "trash", role: .destructive) {
+                        showDeleteAlert.toggle()
+                    }
+                    .disabled(isDeleteDisabled)
+                }
             }
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
+        }
+        .alert("Delete All Data", isPresented: $showDeleteAlert) {
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                Button("Delete") { deleteAllData() }
+                    .keyboardShortcut(.defaultAction)
+
+                Button("Cancel") { }
+                    .keyboardShortcut(.cancelAction)
+            } else {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) { deleteAllData() }
+            }
+        } message: {
+            Text("Are you sure?")
+        }
     }
     
-    private func addPaycheck() {
-        let newPaycheck = Paycheck(name: "New Paycheck")
-        modelContext.insert(newPaycheck)
+    private struct PayDataListRow: View {
+        let navigation: SidebarNavigation
+        let badge: Int
         
-        do {
-            try modelContext.save()
-        } catch {
-            fatalError(error.localizedDescription)
+        private var icon: String {
+            switch navigation {
+            case .paychecks: "dollarsign"
+            case .withholdingForms: "pencil.and.list.clipboard"
+            case .thriftSavingsPlans: "dollarsign.bank.building"
+            }
         }
         
-        withAnimation { selectedPaycheck = newPaycheck }
+        var body: some View {
+            NavigationLink(value: navigation) {
+                Label {
+                    Text(String(describing: navigation))
+                        .badge(badge)
+                } icon: {
+                    Image(systemName: icon)
+                }
+            }
+        }
     }
     
-    private func deleteAllPaychecks() {
-        do {
-            try modelContext.delete(model: Paycheck.self)
-        } catch {
-            fatalError(error.localizedDescription)
+    private func badgeCount(for navigation: SidebarNavigation) -> Int {
+        switch navigation {
+        case .paychecks: paychecks.count
+        case .withholdingForms: withholdingForms.count
+        case .thriftSavingsPlans: thriftSavingsPlans.count
         }
-        
-        withAnimation { selectedPaycheck = nil }
+    }
+    
+    private func deleteAllData() {
+        paychecks.forEach { modelContext.delete($0) }
+        withholdingForms.forEach { modelContext.delete($0) }
+        thriftSavingsPlans.forEach { modelContext.delete($0) }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var theme = Theme.system
-    @Previewable @State var paycheck: Paycheck? = Paycheck.example
+    @Previewable @State var selectedNavigation: SidebarNavigation?
     
     NavigationStack {
-        SidebarView(theme: $theme, selection: $paycheck)
-            .modelContainer(PreviewController.container)
+        SidebarView(selectedNavigation: $selectedNavigation)
     }
-    .environment(ThemeManager(theme: .system))
+    .modelContainer(PreviewController.container)
 }

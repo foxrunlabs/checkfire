@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct TSPStepper: View {
-    let title: String
-    @Binding var value: Double
+    private let title: String
+    @Binding private var value: Double
     
     init(_ title: String, value: Binding<Double>) {
         self.title = title
@@ -24,9 +24,9 @@ struct TSPStepper: View {
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var tspData = TSPData.example
+    @Previewable @State var tsp = ThriftSavingsPlan.example
     
     Form {
-        TSPStepper("Base Pay", value: $tspData.traditionalBasePay)
+        TSPStepper("Base Pay", value: $tsp.traditionalBasePay)
     }
 }

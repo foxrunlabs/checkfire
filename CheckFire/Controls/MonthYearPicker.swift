@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PaycheckDatePicker: View {
+struct MonthYearPicker: View {
     private let title: String
     @Binding private var selection: Date
     private let yearRange: ClosedRange<Int>
@@ -15,19 +15,20 @@ struct PaycheckDatePicker: View {
     
     var body: some View {
         LabeledContent {
-            Button(selection.formatted(.dateTime.month().year())) { showPicker.toggle() }
-                .buttonStyle(.borderless)
-                .popover(isPresented: $showPicker, arrowEdge: .top) {
-                    PickerView(selection: $selection, in: yearRange)
-                        .presentationCompactAdaptation(.popover)
-                }
+            Button(selection.formatted(.dateTime.month().year()))
+            {
+                showPicker.toggle()
+            }
+            .buttonStyle(.borderless)
+            .popover(isPresented: $showPicker, arrowEdge: .top) {
+                PickerView(selection: $selection, in: yearRange)
+                    .presentationCompactAdaptation(.popover)
+            }
         } label: {
             Text(title)
         }
     }
-}
-
-extension PaycheckDatePicker {
+    
     private struct PickerView: View {
         @Binding private var selection: Date
         private let yearRange: ClosedRange<Int>
@@ -55,9 +56,7 @@ extension PaycheckDatePicker {
             .padding()
         }
     }
-}
-
-extension PaycheckDatePicker {
+    
     private struct YearStepper: View {
         @Binding private var selection: Date
         private let yearRange: ClosedRange<Int>
@@ -67,33 +66,51 @@ extension PaycheckDatePicker {
             self.yearRange = yearRange
         }
         
+        private var selectionYear: Int { Calendar.current.component(.year, from: selection) }
+        
         var body: some View {
             HStack {
                 Button {
-                    selection.year = max(yearRange.lowerBound, selection.year - 1)
+                    decrement()
                 } label: {
                     Image(systemName: "chevron.left")
                         .bold()
                 }
-                .disabled(selection.year == yearRange.lowerBound)
+                .disabled(selectionYear == yearRange.lowerBound)
                 
                 Text(selection.formatted(.dateTime.year()))
                     .foregroundStyle(.primary)
                     .bold()
                 
                 Button {
-                    selection.year = min(selection.year + 1, yearRange.upperBound)
+                    increment()
                 } label: {
                     Image(systemName: "chevron.right")
                         .bold()
                 }
-                .disabled(selection.year == yearRange.upperBound)
+                .disabled(selectionYear == yearRange.upperBound)
+            }
+        }
+        
+        private func decrement() {
+            let year = Calendar.current.component(.year, from: selection)
+            
+            if year > yearRange.lowerBound {
+                selection = Calendar.current.date(byAdding: .year, value: -1, to: selection) ?? selection
+                selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
+            }
+        }
+        
+        private func increment() {
+            let year = Calendar.current.component(.year, from: selection)
+            
+            if year < yearRange.upperBound {
+                selection = Calendar.current.date(byAdding: .year, value: 1, to: selection) ?? selection
+                selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
             }
         }
     }
-}
 
-extension PaycheckDatePicker {
     private struct MonthPicker: View {
         private let month: Int
         @Binding private var selection: Date
@@ -105,29 +122,42 @@ extension PaycheckDatePicker {
             self._selection = selection
         }
         
+        private var selectionMonth: Int { Calendar.current.component(.month, from: selection) }
+        
         var body: some View {
             Text(months[month - 1])
                 .frame(width: 50, height: 35)
-                .bold(selection.month == month)
-                .foregroundStyle(selection.month == month ? Color.accentColor : .primary)
-                .background(selection.month == month ? Color.accentColor.opacity(0.25) : .clear)
+                .bold(selectionMonth == month)
+                .foregroundStyle(selectionMonth == month ? Color.accentColor : .primary)
+                .background(selectionMonth == month ? Color.accentColor.opacity(0.25) : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .onTapGesture {
-                    selection.month = month
+                    setMonth()
                 }
+        }
+        
+        private func setMonth() {
+            var components = Calendar.current.dateComponents(
+                [.calendar, .year, .month],
+                from: selection
+            )
+            components.month = month
+            selection = components.date ?? selection
+            selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
         }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var date: Date = .now
+    @Previewable @State var date = DateComponents(
+        calendar: .current,
+        year: 2025,
+        month: 2,
+        day: 28
+    ).date!
     
     Form {
-        PaycheckDatePicker(
-            "Pay Date",
-            selection: $date,
-            in: WithholdingTables.shared.years.first!...WithholdingTables.shared.years.last!
-        )
+        MonthYearPicker("Pay Date", selection: $date, in: WithholdingTables.shared.years)
     }
 }
