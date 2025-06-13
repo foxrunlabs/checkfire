@@ -7,27 +7,27 @@ final class ThriftSavingsPlan: Identifiable {
     var name = ""
     var date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
     
-    var traditionalBasePay: Double = 0.00
-    var traditionalSpecialPay: Double = 0.00
-    var traditionalIncentivePay: Double = 0.00
-    var traditionalBonusPay: Double = 0.00
+    var traditionalBasePay: Decimal = 0.00
+    var traditionalSpecialPay: Decimal = 0.00
+    var traditionalIncentivePay: Decimal = 0.00
+    var traditionalBonusPay: Decimal = 0.00
     
-    var rothBasePay: Double = 0.00
-    var rothSpecialPay: Double = 0.00
-    var rothIncentivePay: Double = 0.00
-    var rothBonusPay: Double = 0.00
+    var rothBasePay: Decimal = 0.00
+    var rothSpecialPay: Decimal = 0.00
+    var rothIncentivePay: Decimal = 0.00
+    var rothBonusPay: Decimal = 0.00
     
     init(
         name: String,
         date: Date,
-        traditionalBasePay: Double,
-        traditionalSpecialPay: Double,
-        traditionalIncentivePay: Double,
-        traditionalBonusPay: Double,
-        rothBasePay: Double,
-        rothSpecialPay: Double,
-        rothIncentivePay: Double,
-        rothBonusPay: Double,
+        traditionalBasePay: Decimal,
+        traditionalSpecialPay: Decimal,
+        traditionalIncentivePay: Decimal,
+        traditionalBonusPay: Decimal,
+        rothBasePay: Decimal,
+        rothSpecialPay: Decimal,
+        rothIncentivePay: Decimal,
+        rothBonusPay: Decimal,
     ) {
         self.id = UUID()
         self.name = name
