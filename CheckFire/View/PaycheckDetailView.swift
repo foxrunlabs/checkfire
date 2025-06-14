@@ -4,7 +4,6 @@ import SwiftUI
 struct PaycheckDetailView: View {
     @Bindable var paycheck: Paycheck
     
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query private var lesItems: [LESItem]
     
@@ -152,23 +151,13 @@ struct PaycheckDetailView: View {
                 }
             }
         }
-        .navigationTitle($paycheck.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem {
-                Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
-                    deletePaycheck()
-                    dismiss()
-                }
-            }
-        }
         .onChange(of: paycheck.date) {
             paycheck.basePay = PayTables.shared.basePay(for: paycheck) ?? paycheck.basePay
         }
         .onChange(of: paycheck.payGrade) {
+            // check if the current years of service exists for the paygrade, and
+            // if it does not, select the first available
             if !yearsOfService.contains(paycheck.yearsOfService) {
-                // check if the current years of service exists for the paygrade, and
-                // if it does not, select the first available
                 paycheck.yearsOfService = yearsOfService.first!
             }
             
@@ -210,10 +199,6 @@ struct PaycheckDetailView: View {
         )
         
         modelContext.insert(newAllotment)
-    }
-    
-    private func deletePaycheck() {
-        modelContext.delete(paycheck)
     }
     
     private func deleteEntitlement(at indices: IndexSet) {

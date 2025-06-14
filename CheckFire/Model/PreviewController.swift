@@ -16,7 +16,12 @@ class PreviewController {
         paycheck.lesItems?.append(contentsOf: lesItems)
         
         let withholdingForm = WithholdingForm.example
+        withholdingForm.paychecks?.append(paycheck)
+        paycheck.withholdingForm = withholdingForm
+        
         let thriftSavingsPlan = ThriftSavingsPlan.example
+        thriftSavingsPlan.paychecks?.append(paycheck)
+        paycheck.thriftSavingsPlan = thriftSavingsPlan
         
         do {
             let config = ModelConfiguration(isStoredInMemoryOnly: true)

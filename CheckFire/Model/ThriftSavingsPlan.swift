@@ -17,6 +17,9 @@ final class ThriftSavingsPlan: Identifiable {
     var rothIncentivePay: Decimal = 0.00
     var rothBonusPay: Decimal = 0.00
     
+    @Relationship(deleteRule: .noAction, inverse: \Paycheck.thriftSavingsPlan)
+    var paychecks: [Paycheck]? = []
+    
     init(
         name: String,
         date: Date,
@@ -28,6 +31,7 @@ final class ThriftSavingsPlan: Identifiable {
         rothSpecialPay: Decimal,
         rothIncentivePay: Decimal,
         rothBonusPay: Decimal,
+        paychecks: [Paycheck]? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -42,6 +46,8 @@ final class ThriftSavingsPlan: Identifiable {
         self.rothSpecialPay = rothSpecialPay
         self.rothIncentivePay = rothIncentivePay
         self.rothBonusPay = rothBonusPay
+        
+        self.paychecks = paychecks
     }
     
     static let example = ThriftSavingsPlan(

@@ -52,7 +52,7 @@ struct ContentView: View {
             if let selectedPayComponent {
                 switch selectedPayComponent {
                 case .paycheck(let selectedPaycheck):
-                    PaycheckDetailView(paycheck: selectedPaycheck)
+                    PaycheckTabView(paycheck: selectedPaycheck)
                 case .withholdingForm(let selectedWithholdingForm):
                     WithholdingFormDetailView(withholdingForm: selectedWithholdingForm)
                 case .thriftSavingsPlan(let selectedTSP):

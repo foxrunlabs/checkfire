@@ -12,6 +12,8 @@ final class Paycheck: Identifiable {
     var basePay: Decimal = 0.00
     
     @Relationship(deleteRule: .cascade, inverse: \LESItem.paycheck) var lesItems: [LESItem]? = []
+    var withholdingForm: WithholdingForm? = nil
+    var thriftSavingsPlan: ThriftSavingsPlan? = nil
     
     init(
         name: String,
@@ -20,6 +22,8 @@ final class Paycheck: Identifiable {
         yearsOfService: YearsOfService,
         basePay: Decimal,
         lesItems: [LESItem]? = nil,
+        withholdingForm: WithholdingForm? = nil,
+        thriftSavingsPlan: ThriftSavingsPlan? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -30,6 +34,8 @@ final class Paycheck: Identifiable {
         self.basePay = basePay
         
         self.lesItems = lesItems
+        self.withholdingForm = withholdingForm
+        self.thriftSavingsPlan = thriftSavingsPlan
     }
     
     /// Creates a new paycheck from another paycheck.
@@ -42,6 +48,137 @@ final class Paycheck: Identifiable {
             yearsOfService: other.yearsOfService,
             basePay: other.basePay
         )
+    }
+    
+    var grossPay: Decimal {
+        guard let lesItems else { return basePay }
+        
+        return basePay + lesItems.reduce(0.00) {
+            if case .entitlement = $1.itemType {
+                $0 + $1.amount
+            } else {
+                $0
+            }
+        }
+    }
+    
+    var traditionalTSPContribution: Decimal {
+        guard let tsp = thriftSavingsPlan else { return 0.00 }
+        
+        var contribution = basePay * tsp.traditionalBasePay
+        guard let lesItems else { return contribution }
+        
+        contribution += lesItems.reduce(0.00) {
+            if case .entitlement(let entitlement) = $1.itemType {
+                let rate = switch entitlement {
+                case .specialPay:
+                    tsp.traditionalSpecialPay
+                case .incentivePay:
+                    tsp.traditionalIncentivePay
+                case .bonusPay:
+                    tsp.traditionalBonusPay
+                default:
+                    Decimal(0.00)
+                }
+                
+                return $0 + $1.amount * rate
+            } else {
+                return $0
+            }
+        }
+        
+        return contribution
+    }
+    
+    var rothTSPContribution: Decimal {
+        guard let tsp = thriftSavingsPlan else { return 0.00 }
+        
+        var contribution = basePay * tsp.rothBasePay
+        guard let lesItems else { return contribution }
+        
+        contribution += lesItems.reduce(0.00) {
+            if case .entitlement(let entitlement) = $1.itemType {
+                let rate = switch entitlement {
+                case .specialPay:
+                    tsp.rothSpecialPay
+                case .incentivePay:
+                    tsp.rothIncentivePay
+                case .bonusPay:
+                    tsp.rothBonusPay
+                default:
+                    Decimal(0.00)
+                }
+                
+                return $0 + $1.amount * rate
+            } else {
+                return $0
+            }
+        }
+        
+        return contribution
+    }
+    
+    var wagePeriod: Decimal {
+        var taxableWage = basePay - traditionalTSPContribution
+        guard let lesItems else { return taxableWage }
+        
+        taxableWage += lesItems.reduce(0.00) {
+            if case .entitlement(let entitlement) = $1.itemType {
+                (entitlement != .allowance) ? $0 + $1.amount : $0
+            } else {
+                $0
+            }
+        }
+        
+        return taxableWage
+    }
+    
+    var federalTaxes: Decimal {
+        guard let withholdingForm else { return 0.00 }
+        
+        return WithholdingTables.shared.calculateWithholding(
+            for: Calendar.current.component(.year, from: date),
+            wage: wagePeriod,
+            using: withholdingForm
+        )
+    }
+    
+    var socialSecurity: Decimal {
+        WithholdingTables.shared.calculateSocialSecurity(
+            for: Calendar.current.component(.year, from: date),
+            wage: basePay
+        )
+        .rounded(.toNearestOrAwayFromZero, digits: 2)
+    }
+    
+    var medicare: Decimal {
+        WithholdingTables.shared.calculateMedicare(
+            for: Calendar.current.component(.year, from: date),
+            wage: basePay
+        )
+        .rounded(.toNearestOrAwayFromZero, digits: 2)
+    }
+    
+    var netPay: Decimal {
+        var net = grossPay
+        net -= traditionalTSPContribution
+        net -= rothTSPContribution
+        
+        if let lesItems {
+            net -= lesItems.reduce(0.00) {
+                if case .entitlement = $1.itemType {
+                    $0
+                } else {
+                    $0 + $1.amount
+                }
+            }
+        }
+        
+        net -= federalTaxes
+        net -= medicare
+        net -= socialSecurity
+        
+        return net
     }
     
     static let example = Paycheck(
