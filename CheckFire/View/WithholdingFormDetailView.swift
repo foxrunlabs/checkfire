@@ -6,6 +6,8 @@ struct WithholdingFormDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
+    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
 
     var body: some View {
         Form {
@@ -62,10 +64,27 @@ struct WithholdingFormDetailView: View {
                     value: $withholdingForm.extraWithholding
                 )
             }
+
+            if let paychecks = withholdingForm.paychecks {
+                if paychecks.isEmpty == false {
+                    Section("Paychecks") {
+                        ForEach(paychecks) { paycheck in
+                            LabeledContent {
+                                Text(paycheck.date, format: .dateTime.month().year())
+                            } label: {
+                                Text(paycheck.name)
+                            }
+                        }
+                    }
+                }
+            }
         }
         .scrollDismissesKeyboard(.immediately)
         .navigationTitle($withholdingForm.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: withholdingForm.date) {
+            updatePaychecks()
+        }
         .toolbar {
             ToolbarItem {
                 Button("Delete Withholding Form", systemImage: "trash", role: .destructive) {
@@ -75,33 +94,27 @@ struct WithholdingFormDetailView: View {
             }
         }
     }
-
-    private struct CurrencyField: View {
-        private let label: String
-        @Binding private var value: Decimal
-
-        init(_ label: String, value: Binding<Decimal>) {
-            self.label = label
-            self._value = value
+    
+    private func deleteWithholdingForm() {
+        let paychecks = withholdingForm.paychecks
+        modelContext.delete(withholdingForm)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
         }
-
-        var body: some View {
-            LabeledContent {
-                TextField(
-                    label,
-                    value: $value,
-                    format: .currency(code: "USD")
-                )
-                .multilineTextAlignment(.trailing)
-                .keyboardType(.decimalPad)
-            } label: {
-                Text(label)
+        
+        if let paychecks {
+            paychecks.forEach { paycheck in
+                paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
             }
         }
     }
     
-    private func deleteWithholdingForm() {
-        modelContext.delete(withholdingForm)
+    private func updatePaychecks() {
+        let applicablePaychecks = paychecks.filter { $0.date >= withholdingForm.date }
+        withholdingForm.paychecks = applicablePaychecks
     }
 }
 
@@ -112,4 +125,5 @@ struct WithholdingFormDetailView: View {
     NavigationStack {
         WithholdingFormDetailView(withholdingForm: withholdingForm)
     }
+    .modelContainer(PreviewController.container)
 }

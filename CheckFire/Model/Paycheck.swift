@@ -87,7 +87,7 @@ final class Paycheck: Identifiable {
             }
         }
         
-        return contribution
+        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var rothTSPContribution: Decimal {
@@ -115,7 +115,7 @@ final class Paycheck: Identifiable {
             }
         }
         
-        return contribution
+        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var wagePeriod: Decimal {
@@ -148,7 +148,6 @@ final class Paycheck: Identifiable {
             for: Calendar.current.component(.year, from: date),
             wage: basePay
         )
-        .rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var medicare: Decimal {
@@ -156,7 +155,6 @@ final class Paycheck: Identifiable {
             for: Calendar.current.component(.year, from: date),
             wage: basePay
         )
-        .rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     var netPay: Decimal {

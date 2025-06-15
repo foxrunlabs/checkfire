@@ -6,6 +6,8 @@ struct PaychecksListView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
+    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
+    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     var body: some View {
         List(selection: $selectedPayComponent) {
@@ -52,12 +54,21 @@ struct PaychecksListView: View {
     }
     
     private func addPaycheck() {
+        let newDate = Calendar.current.lastDateOfMonth(from: .now) ?? .now
+        let withholdingForm = withholdingForms.last { $0.date <= newDate }
+        let tsp = thriftSavingsPlans.last { $0.date <= newDate }
+        
+        let year = Calendar.current.component(.year, from: newDate)
+        let basePay = PayTables.shared.basePay(for: year, as: .e1, with: .lessThanOrEqual2) ?? 0.00
+        
         let newPaycheck = Paycheck(
             name: "New Paycheck",
             date: .now,
             payGrade: .e1,
             yearsOfService: .lessThanOrEqual2,
-            basePay: 0.00
+            basePay: basePay,
+            withholdingForm: withholdingForm,
+            thriftSavingsPlan: tsp
         )
         
         modelContext.insert(newPaycheck)

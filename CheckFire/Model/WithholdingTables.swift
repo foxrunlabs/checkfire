@@ -28,7 +28,7 @@ final class WithholdingTables {
             fatalError("No withholding table found for \(year.description)")
         }
         
-        return wage * table.medicareRate
+        return (wage * table.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     /// Calculate Social Security tax.
@@ -41,7 +41,7 @@ final class WithholdingTables {
             fatalError("No withholding table found for \(year.description)")
         }
         
-        return wage * table.socialSecurityRate
+        return (wage * table.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     /// Calculate federal income tax withholding for a wage using the percentage method for manual payroll systems.

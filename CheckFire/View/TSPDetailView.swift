@@ -6,6 +6,8 @@ struct TSPDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
+    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
 
     var body: some View {
         Form {
@@ -18,141 +20,87 @@ struct TSPDetailView: View {
             }
             
             Section("Traditional TSP") {
-                Stepper(
-                    value: $tsp.traditionalBasePay,
-                    in: 0.00...(1 - tsp.rothBasePay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Base Pay")
-                        Spacer()
-                        Text(tsp.traditionalBasePay.formatted(.percent))
-                    }
-                }
+                TSPStepper("Base Pay", value: $tsp.traditionalBasePay, max: 1 - tsp.rothBasePay)
                 
-                Stepper(
+                TSPStepper(
+                    "Special Pay",
                     value: $tsp.traditionalSpecialPay,
-                    in: 0.00...(1 - tsp.rothSpecialPay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Special Pay")
-                        Spacer()
-                        Text(tsp.traditionalSpecialPay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.rothSpecialPay
+                )
                 .disabled(tsp.traditionalBasePay.isZero)
                 
-                Stepper(
+                TSPStepper(
+                    "Incentive Pay",
                     value: $tsp.traditionalIncentivePay,
-                    in: 0.00...(1 - tsp.rothIncentivePay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Incentive Pay")
-                        Spacer()
-                        Text(tsp.traditionalIncentivePay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.rothIncentivePay
+                )
                 .disabled(tsp.traditionalBasePay.isZero)
                 
-                Stepper(
+                TSPStepper(
+                    "Bonus Pay",
                     value: $tsp.traditionalBonusPay,
-                    in: 0.00...(1 - tsp.rothBonusPay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Bonus Pay")
-                        Spacer()
-                        Text(tsp.traditionalBonusPay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.rothBonusPay
+                )
                 .disabled(tsp.traditionalBasePay.isZero)
             }
 
             Section("Roth TSP") {
-                Stepper(
-                    value: $tsp.rothBasePay,
-                    in: 0.00...(1 - tsp.traditionalBasePay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Base Pay")
-                        Spacer()
-                        Text(tsp.rothBasePay.formatted(.percent))
-                    }
-                }
+                TSPStepper("Base Pay", value: $tsp.rothBasePay, max: 1 - tsp.traditionalBasePay)
 
-                Stepper(
+                TSPStepper(
+                    "Special Pay",
                     value: $tsp.rothSpecialPay,
-                    in: 0.00...(1 - tsp.traditionalSpecialPay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Special Pay")
-                        Spacer()
-                        Text(tsp.rothSpecialPay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.traditionalSpecialPay
+                )
                 .disabled(tsp.rothBasePay.isZero)
-
-                Stepper(
+                
+                TSPStepper(
+                    "Incentive Pay",
                     value: $tsp.rothIncentivePay,
-                    in: 0.00...(1 - tsp.traditionalIncentivePay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Incentive Pay")
-                        Spacer()
-                        Text(tsp.rothIncentivePay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.traditionalIncentivePay
+                )
                 .disabled(tsp.rothBasePay.isZero)
 
-                Stepper(
+                TSPStepper(
+                    "Bonus Pay",
                     value: $tsp.rothBonusPay,
-                    in: 0.00...(1 - tsp.traditionalBonusPay),
-                    step: 0.01
-                ) {
-                    HStack {
-                        Text("Bonus Pay")
-                        Spacer()
-                        Text(tsp.rothBonusPay.formatted(.percent))
-                    }
-                }
+                    max: 1 - tsp.traditionalBonusPay
+                )
                 .disabled(tsp.rothBasePay.isZero)
+
             }
             
             Section {
                 Button("Reset") {
-                    tsp.traditionalBasePay = 0.00
-                    tsp.traditionalSpecialPay = 0.00
-                    tsp.traditionalIncentivePay = 0.00
-                    tsp.traditionalBonusPay = 0.00
-
-                    tsp.rothBasePay = 0.00
-                    tsp.rothSpecialPay = 0.00
-                    tsp.rothIncentivePay = 0.00
-                    tsp.rothBonusPay = 0.00
+                    resetTSP()
                 }
                 .frame(maxWidth: .infinity)
+            }
+            
+            if let paychecks = tsp.paychecks {
+                if paychecks.isEmpty == false {
+                    Section("Paychecks") {
+                        ForEach(paychecks) { paycheck in
+                            LabeledContent {
+                                Text(paycheck.date, format: .dateTime.month().year())
+                            } label: {
+                                Text(paycheck.name)
+                            }
+                        }
+                    }
+                }
             }
         }
         .navigationTitle($tsp.name)
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: tsp.traditionalBasePay) {
-            if tsp.traditionalBasePay.isZero {
-                tsp.traditionalSpecialPay = 0.00
-                tsp.traditionalIncentivePay = 0.00
-                tsp.traditionalBonusPay = 0.00
-            }
+            validateTraditional()
         }
         .onChange(of: tsp.rothBasePay) {
-            if tsp.rothBasePay.isZero {
-                tsp.rothSpecialPay = 0.00
-                tsp.rothIncentivePay = 0.00
-                tsp.rothBonusPay = 0.00
-            }
+            validateRoth()
+        }
+        .onChange(of: tsp.date) {
+            updatePaychecks()
         }
         .toolbar {
             ToolbarItem {
@@ -165,7 +113,46 @@ struct TSPDetailView: View {
     }
     
     private func deleteTSP() {
+        let paychecks = tsp.paychecks
         modelContext.delete(tsp)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        if let paychecks {
+            paychecks.forEach { paycheck in
+                paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
+            }
+        }
+    }
+    
+    private func resetTSP() {
+        tsp.traditionalBasePay = 0.00
+        tsp.rothBasePay = 0.00
+    }
+    
+    private func validateTraditional() {
+        if tsp.traditionalBasePay.isZero {
+            tsp.traditionalSpecialPay = 0.00
+            tsp.traditionalIncentivePay = 0.00
+            tsp.traditionalBonusPay = 0.00
+        }
+    }
+    
+    private func validateRoth() {
+        if tsp.rothBasePay.isZero {
+            tsp.rothSpecialPay = 0.00
+            tsp.rothIncentivePay = 0.00
+            tsp.rothBonusPay = 0.00
+        }
+    }
+    
+    private func updatePaychecks() {
+        let applicablePaychecks = paychecks.filter { $0.date >= tsp.date }
+        tsp.paychecks = applicablePaychecks
     }
 }
 
@@ -176,4 +163,5 @@ struct TSPDetailView: View {
     NavigationStack {
         TSPDetailView(tsp: tsp)
     }
+    .modelContainer(PreviewController.container)
 }

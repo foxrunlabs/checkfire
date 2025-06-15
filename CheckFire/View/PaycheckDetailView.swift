@@ -6,6 +6,8 @@ struct PaycheckDetailView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query private var lesItems: [LESItem]
+    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
+    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     init(paycheck: Paycheck) {
         self.paycheck = paycheck
@@ -14,7 +16,8 @@ struct PaycheckDetailView: View {
         self._lesItems = Query(
             filter: #Predicate<LESItem> { lesItem in
                 lesItem.paycheck?.persistentModelID == paycheckID
-            }
+            },
+            sort: \LESItem.name
         )
     }
     
@@ -33,19 +36,14 @@ struct PaycheckDetailView: View {
                 false
             }
         }
-        .sorted(by: { $0.name < $1.name })
     }
     
     private var deductions: [LESItem] {
-        lesItems.filter {
-            $0.itemType == .deduction
-        }.sorted(by: { $0.name < $1.name })
+        lesItems.filter { $0.itemType == .deduction }
     }
     
     private var allotments: [LESItem] {
-        lesItems.filter {
-            $0.itemType == .allotment
-        }.sorted(by: { $0.name < $1.name })
+        lesItems.filter { $0.itemType == .allotment }
     }
     
     var body: some View {
@@ -152,19 +150,15 @@ struct PaycheckDetailView: View {
             }
         }
         .onChange(of: paycheck.date) {
-            paycheck.basePay = PayTables.shared.basePay(for: paycheck) ?? paycheck.basePay
+            updateBasePay()
+            updateWithholdingAndTSP()
         }
         .onChange(of: paycheck.payGrade) {
-            // check if the current years of service exists for the paygrade, and
-            // if it does not, select the first available
-            if !yearsOfService.contains(paycheck.yearsOfService) {
-                paycheck.yearsOfService = yearsOfService.first!
-            }
-            
-            paycheck.basePay = PayTables.shared.basePay(for: paycheck) ?? paycheck.basePay
+            updateYearsOfService()
+            updateBasePay()
         }
         .onChange(of: paycheck.yearsOfService) {
-            paycheck.basePay = PayTables.shared.basePay(for: paycheck) ?? paycheck.basePay
+            updateBasePay()
         }
     }
     
@@ -217,6 +211,29 @@ struct PaycheckDetailView: View {
         indices.forEach { index in
             modelContext.delete(allotments[index])
         }
+    }
+    
+    private func updateBasePay() {
+        let year = Calendar.current.component(.year, from: paycheck.date)
+        
+        paycheck.basePay = PayTables.shared.basePay(
+            for: year,
+            as: paycheck.payGrade,
+            with: paycheck.yearsOfService
+        ) ?? paycheck.basePay
+    }
+    
+    private func updateYearsOfService() {
+        // check if the current years of service exists for the paygrade, and
+        // if it does not, select the first available
+        if yearsOfService.contains(paycheck.yearsOfService) == false {
+            paycheck.yearsOfService = yearsOfService.first!
+        }
+    }
+    
+    private func updateWithholdingAndTSP() {
+        paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
+        paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
     }
 }
 

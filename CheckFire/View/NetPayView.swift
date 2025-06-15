@@ -25,6 +25,28 @@ struct NetPayView: View {
                 Section {
                     LabeledCurrency("Net Pay", value: paycheck.netPay)
                 }
+                
+                Section {
+                    LabeledContent {
+                        if let withholdingForm = paycheck.withholdingForm {
+                            Text(withholdingForm.date, format: .dateTime.month().year())
+                        } else {
+                            Text("No Data")
+                        }
+                    } label: {
+                        Text("Withholding Form")
+                    }
+                    
+                    LabeledContent {
+                        if let tsp = paycheck.thriftSavingsPlan {
+                            Text(tsp.date, format: .dateTime.month().year())
+                        } else {
+                            Text("No Data")
+                        }
+                    } label: {
+                        Text("Thrift Savings Plan")
+                    }
+                }
             }
         }
     }

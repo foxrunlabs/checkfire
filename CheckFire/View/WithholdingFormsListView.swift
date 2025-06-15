@@ -5,6 +5,7 @@ struct WithholdingFormsListView: View {
     @Binding var selectedPayComponent: PayComponent?
     
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     
     var body: some View {
@@ -52,6 +53,9 @@ struct WithholdingFormsListView: View {
     }
     
     private func addWithholdingForm() {
+        let newDate = Calendar.current.lastDateOfMonth(from: .now) ?? .now
+        let applicablePaychecks = paychecks.filter { $0.date >= newDate }
+        
         let newWithholdingForm = WithholdingForm(
             name: "New Withholding",
             date: .now,
@@ -61,7 +65,8 @@ struct WithholdingFormsListView: View {
             otherDependents: 0,
             otherIncome: 0.00,
             deductions: 0.00,
-            extraWithholding: 0.00
+            extraWithholding: 0.00,
+            paychecks: applicablePaychecks
         )
         
         modelContext.insert(newWithholdingForm)
@@ -69,7 +74,21 @@ struct WithholdingFormsListView: View {
     }
     
     private func deleteWithholdingForm(_ withholdingForm: WithholdingForm) {
+        let paychecks = withholdingForm.paychecks
         modelContext.delete(withholdingForm)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        if let paychecks {
+            paychecks.forEach { paycheck in
+                paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
+            }
+        }
+        
         selectedPayComponent = nil
     }
 }

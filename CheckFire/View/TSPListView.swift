@@ -5,6 +5,7 @@ struct TSPListView: View {
     @Binding var selectedPayComponent: PayComponent?
     
     @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     var body: some View {
@@ -52,6 +53,9 @@ struct TSPListView: View {
     }
     
     private func addTSP() {
+        let newDate = Calendar.current.lastDateOfMonth(from: .now) ?? .now
+        let applicablePaychecks = paychecks.filter { $0.date >= newDate }
+        
         let newTSP = ThriftSavingsPlan(
             name: "New TSP",
             date: .now,
@@ -62,7 +66,8 @@ struct TSPListView: View {
             rothBasePay: 0.00,
             rothSpecialPay: 0.00,
             rothIncentivePay: 0.00,
-            rothBonusPay: 0.00
+            rothBonusPay: 0.00,
+            paychecks: applicablePaychecks
         )
         
         modelContext.insert(newTSP)
@@ -70,7 +75,21 @@ struct TSPListView: View {
     }
     
     private func deleteTSP(_ tsp: ThriftSavingsPlan) {
+        let paychecks = tsp.paychecks
         modelContext.delete(tsp)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        if let paychecks {
+            paychecks.forEach { paycheck in
+                paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
+            }
+        }
+        
         selectedPayComponent = nil
     }
 }
