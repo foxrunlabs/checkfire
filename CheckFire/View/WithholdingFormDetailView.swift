@@ -81,7 +81,6 @@ struct WithholdingFormDetailView: View {
                 }
             }
         }
-        .scrollDismissesKeyboard(.interactively)
         .navigationTitle($withholdingForm.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -89,6 +88,20 @@ struct WithholdingFormDetailView: View {
                 Button("Delete Withholding Form", systemImage: "trash", role: .destructive) {
                     deleteWithholdingForm()
                     dismiss()
+                }
+            }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                
+                // dismiss the keyboard
+                Button("Done") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil,
+                        from: nil,
+                        for: nil
+                    )
                 }
             }
         }

@@ -138,7 +138,6 @@ struct PaycheckDetailView: View {
                 }
             }
         }
-        .scrollDismissesKeyboard(.interactively)
         .onChange(of: paycheck.date) {
             updateYearsOfService()
             updateBasePay()
