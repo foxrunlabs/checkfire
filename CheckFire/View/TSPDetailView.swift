@@ -2,13 +2,17 @@ import SwiftData
 import SwiftUI
 
 struct TSPDetailView: View {
-    @Bindable var tsp: ThriftSavingsPlan
+    @Bindable private var tsp: ThriftSavingsPlan
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
 
+    init(for tsp: ThriftSavingsPlan) {
+        self.tsp = tsp
+    }
+    
     var body: some View {
         Form {
             Section {
@@ -78,13 +82,11 @@ struct TSPDetailView: View {
             }
             
             if let paychecks = tsp.paychecks {
-                if paychecks.isEmpty == false {
+                if !paychecks.isEmpty {
                     Section("Paychecks") {
                         ForEach(paychecks) { paycheck in
-                            LabeledContent {
+                            LabeledContent(paycheck.name) {
                                 Text(paycheck.date, format: .dateTime.month().year())
-                            } label: {
-                                Text(paycheck.name)
                             }
                         }
                     }
@@ -99,9 +101,6 @@ struct TSPDetailView: View {
         .onChange(of: tsp.rothBasePay) {
             validateRoth()
         }
-        .onChange(of: tsp.date) {
-            updatePaychecks()
-        }
         .toolbar {
             ToolbarItem {
                 Button("Delete Thrift Savings Plan", systemImage: "trash", role: .destructive) {
@@ -113,7 +112,6 @@ struct TSPDetailView: View {
     }
     
     private func deleteTSP() {
-        let paychecks = tsp.paychecks
         modelContext.delete(tsp)
         
         do {
@@ -122,9 +120,10 @@ struct TSPDetailView: View {
             fatalError(error.localizedDescription)
         }
         
-        if let paychecks {
-            paychecks.forEach { paycheck in
-                paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
+        // re-associate paychecks to remaining TSPs
+        thriftSavingsPlans.forEach { plan in
+            plan.paychecks = paychecks.filter { paycheck in
+                paycheck.date >= plan.date
             }
         }
     }
@@ -149,11 +148,6 @@ struct TSPDetailView: View {
             tsp.rothBonusPay = 0.00
         }
     }
-    
-    private func updatePaychecks() {
-        let applicablePaychecks = paychecks.filter { $0.date >= tsp.date }
-        tsp.paychecks = applicablePaychecks
-    }
 }
 
 // MARK: - Preview
@@ -161,7 +155,7 @@ struct TSPDetailView: View {
     @Previewable @State var tsp = ThriftSavingsPlan.example
     
     NavigationStack {
-        TSPDetailView(tsp: tsp)
+        TSPDetailView(for: tsp)
     }
     .modelContainer(PreviewController.container)
 }

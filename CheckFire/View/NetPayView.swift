@@ -3,6 +3,14 @@ import SwiftUI
 struct NetPayView: View {
     let paycheck: Paycheck
     
+    private var withholdingFormDate: String {
+        paycheck.withholdingForm?.date.formatted(.dateTime.month().year()) ?? "No Data"
+    }
+    
+    private var tspDate: String {
+        paycheck.thriftSavingsPlan?.date.formatted(.dateTime.month().year()) ?? "No Data"
+    }
+    
     var body: some View {
         List {
             Group {
@@ -27,24 +35,12 @@ struct NetPayView: View {
                 }
                 
                 Section {
-                    LabeledContent {
-                        if let withholdingForm = paycheck.withholdingForm {
-                            Text(withholdingForm.date, format: .dateTime.month().year())
-                        } else {
-                            Text("No Data")
-                        }
-                    } label: {
-                        Text("Withholding Form")
+                    LabeledContent("Withholding Form") {
+                        Text(withholdingFormDate)
                     }
                     
-                    LabeledContent {
-                        if let tsp = paycheck.thriftSavingsPlan {
-                            Text(tsp.date, format: .dateTime.month().year())
-                        } else {
-                            Text("No Data")
-                        }
-                    } label: {
-                        Text("Thrift Savings Plan")
+                    LabeledContent("Thrift Savings Plan") {
+                        Text(tspDate)
                     }
                 }
             }

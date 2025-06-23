@@ -17,7 +17,7 @@ final class ThriftSavingsPlan: Identifiable {
     var rothIncentivePay: Decimal = 0.00
     var rothBonusPay: Decimal = 0.00
     
-    @Relationship(deleteRule: .noAction, inverse: \Paycheck.thriftSavingsPlan)
+    @Relationship(deleteRule: .nullify, inverse: \Paycheck.thriftSavingsPlan)
     var paychecks: [Paycheck]? = []
     
     init(
@@ -50,9 +50,24 @@ final class ThriftSavingsPlan: Identifiable {
         self.paychecks = paychecks
     }
     
+    convenience init() {
+        self.init(
+            name: "New TSP",
+            date: .now,
+            traditionalBasePay: 0.00,
+            traditionalSpecialPay: 0.00,
+            traditionalIncentivePay: 0.00,
+            traditionalBonusPay: 0.00,
+            rothBasePay: 0.00,
+            rothSpecialPay: 0.00,
+            rothIncentivePay: 0.00,
+            rothBonusPay: 0.00
+        )
+    }
+    
     static let example = ThriftSavingsPlan(
         name: "Example",
-        date: DateComponents(calendar: .current, year: 2025, month: 1, day: 1).date!,
+        date: DateComponents(calendar: .current, year: 2025, month: 1, day: 31).date!,
         traditionalBasePay: 0.11,
         traditionalSpecialPay: 0.00,
         traditionalIncentivePay: 0.00,

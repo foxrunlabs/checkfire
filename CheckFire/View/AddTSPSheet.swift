@@ -1,0 +1,113 @@
+import SwiftData
+import SwiftUI
+
+struct AddTSPSheet: View {
+    @Binding var selectedPayComponent: PayComponent?
+    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
+    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
+    
+    @State private var name = "New Thrift Savings Plan"
+    @State private var date = Calendar.current.lastDateOfMonth(from: .now)!
+    @State private var template: ThriftSavingsPlan?
+    
+    @State private var showAlert = false
+    
+    private var tspExists: Bool {
+        thriftSavingsPlans.contains { $0.date == date }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                LabeledContent("Name") {
+                    TextField("Name", text: $name)
+                        .multilineTextAlignment(.trailing)
+                }
+                
+                MonthYearPicker(
+                    "Effective Date",
+                    selection: $date,
+                    in: WithholdingTables.shared.years
+                )
+                
+                Picker("Template", selection: $template) {
+                    Text("None")
+                        .tag(nil as ThriftSavingsPlan?)
+                    
+                    ForEach(thriftSavingsPlans) { tsp in
+                        Text(tsp.name)
+                            .tag(tsp)
+                    }
+                }
+                .pickerStyle(.menu)
+                .disabled(thriftSavingsPlans.isEmpty)
+            }
+            .navigationTitle("Add Thrift Savings Plan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        if tspExists {
+                            showAlert.toggle()
+                        } else {
+                            addTSP()
+                            dismiss()
+                        }
+                    }
+                }
+            }
+            .alert("Error", isPresented: $showAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Effective date already exists.")
+            }
+        }
+    }
+    
+    private func addTSP() {
+        let newTSP = ThriftSavingsPlan()
+        newTSP.name = name
+        newTSP.date = date
+        
+        if let template {
+            newTSP.traditionalBasePay = template.traditionalBasePay
+            newTSP.traditionalSpecialPay = template.traditionalSpecialPay
+            newTSP.traditionalIncentivePay = template.traditionalIncentivePay
+            newTSP.traditionalBonusPay = template.traditionalBonusPay
+            newTSP.rothBasePay = template.rothBasePay
+            newTSP.rothSpecialPay = template.rothSpecialPay
+            newTSP.rothIncentivePay = template.rothIncentivePay
+            newTSP.rothBonusPay = template.rothBonusPay
+        }
+        
+        newTSP.paychecks = paychecks.filter { $0.date >= date }
+        
+        modelContext.insert(newTSP)
+        selectedPayComponent = .thriftSavingsPlan(newTSP)
+    }
+}
+
+// MARK: - Preview
+#Preview {
+    @Previewable @State var selectedPayComponent: PayComponent?
+    @Previewable @State var showSheet = true
+    
+    Button("Show Sheet") {
+        showSheet.toggle()
+    }
+    .sheet(isPresented: $showSheet) {
+        AddTSPSheet(selectedPayComponent: $selectedPayComponent)
+            .presentationDetents([.medium])
+    }
+    .modelContainer(PreviewController.container)
+}
+

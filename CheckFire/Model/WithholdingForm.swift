@@ -47,6 +47,20 @@ final class WithholdingForm: Identifiable {
         self.paychecks = paychecks
     }
     
+    convenience init() {
+        self.init(
+            name: "New Withholding",
+            date: .now,
+            maritalStatus: .single,
+            multipleJobs: false,
+            childDependents: 0,
+            otherDependents: 0,
+            otherIncome: 0.00,
+            deductions: 0.00,
+            extraWithholding: 0.00
+        )
+    }
+    
     static let example = WithholdingForm(
         name: "Example",
         date: DateComponents(calendar: .current, year: 2025, month: 1, day: 1).date!,

@@ -2,15 +2,19 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckTabView: View {
-    @Bindable var paycheck: Paycheck
+    @Bindable private var paycheck: Paycheck
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
+    init(for paycheck: Paycheck) {
+        self.paycheck = paycheck
+    }
+    
     var body: some View {
         TabView {
             Tab("Paycheck", systemImage: "dollarsign") {
-                PaycheckDetailView(paycheck: paycheck)
+                PaycheckDetailView(for: paycheck)
             }
             
             Tab("Net Pay", systemImage: "plus.forwardslash.minus") {
@@ -38,7 +42,7 @@ struct PaycheckTabView: View {
     @Previewable @State var paycheck = Paycheck.example
     
     NavigationStack {
-        PaycheckTabView(paycheck: paycheck)
+        PaycheckTabView(for: paycheck)
     }
     .modelContainer(PreviewController.container)
 }

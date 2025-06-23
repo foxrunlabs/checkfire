@@ -8,21 +8,24 @@ struct WithholdingFormsListView: View {
     @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     
+    @State private var showAddWithholdingSheet = false
+    
     var body: some View {
-        List(selection: $selectedPayComponent) {
-            ForEach(withholdingForms) { withholdingForm in
-                WithholdingFormsListRow(withholdingForm: withholdingForm)
-                    .swipeActions(allowsFullSwipe: false) {
-                        Button("Delete", systemImage: "trash", role: .destructive) {
-                            deleteWithholdingForm(withholdingForm)
-                        }
-
-                        Button("Copy", systemImage: "document.on.document")
-                        {
-                            
-                        }
-                        .tint(.accentColor)
+        Group {
+            if withholdingForms.isEmpty {
+                ContentUnavailableView(
+                    "No Forms Found",
+                    systemImage: "pencil.and.list.clipboard",
+                    description: Text("Please add a new form.")
+                )
+            } else {
+                List(selection: $selectedPayComponent) {
+                    ForEach(withholdingForms) { withholdingForm in
+                        WithholdingFormsListRow(for: withholdingForm)
+                            .tag(PayComponent.withholdingForm(withholdingForm))
                     }
+                    .onDelete(perform: deleteWithholdingForm)
+                }
             }
         }
         .listStyle(.inset)
@@ -30,66 +33,53 @@ struct WithholdingFormsListView: View {
         .toolbar {
             ToolbarItem {
                 Button("Add Withholding", systemImage: "plus") {
-                    addWithholdingForm()
+                    showAddWithholdingSheet.toggle()
                 }
             }
+        }
+        .sheet(isPresented: $showAddWithholdingSheet) {
+            AddWithholdingFormSheet(selectedPayComponent: $selectedPayComponent)
+                .presentationDetents([.medium])
         }
     }
     
     private struct WithholdingFormsListRow: View {
         let withholdingForm: WithholdingForm
         
+        init(for withholdingForm: WithholdingForm) {
+            self.withholdingForm = withholdingForm
+        }
+        
         var body: some View {
             NavigationLink(value: withholdingForm) {
                 VStack(alignment: .leading) {
                     Text(withholdingForm.name)
                         .font(.headline)
-                    Text(withholdingForm.date.formatted(date: .long, time: .omitted))
+                    
+                    Text(withholdingForm.date, format: .dateTime.month(.wide).year())
                         .font(.subheadline)
                 }
             }
-            .tag(PayComponent.withholdingForm(withholdingForm))
         }
     }
     
-    private func addWithholdingForm() {
-        let newDate = Calendar.current.lastDateOfMonth(from: .now) ?? .now
-        let applicablePaychecks = paychecks.filter { $0.date >= newDate }
-        
-        let newWithholdingForm = WithholdingForm(
-            name: "New Withholding",
-            date: .now,
-            maritalStatus: .single,
-            multipleJobs: false,
-            childDependents: 0,
-            otherDependents: 0,
-            otherIncome: 0.00,
-            deductions: 0.00,
-            extraWithholding: 0.00,
-            paychecks: applicablePaychecks
-        )
-        
-        modelContext.insert(newWithholdingForm)
-        selectedPayComponent = .withholdingForm(newWithholdingForm)
-    }
-    
-    private func deleteWithholdingForm(_ withholdingForm: WithholdingForm) {
-        let paychecks = withholdingForm.paychecks
-        modelContext.delete(withholdingForm)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-        
-        if let paychecks {
-            paychecks.forEach { paycheck in
-                paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
+    private func deleteWithholdingForm(at indices: IndexSet) {
+        indices.forEach { index in
+            modelContext.delete(withholdingForms[index])
+            
+            do {
+                try modelContext.save()
+            } catch {
+                fatalError(error.localizedDescription)
+            }
+            
+            // re-associate paychecks to remaining withholding forms
+            withholdingForms.forEach { withholdingForm in
+                withholdingForm.paychecks = paychecks.filter { paycheck in
+                    paycheck.date >= withholdingForm.date
+                }
             }
         }
-        
-        selectedPayComponent = nil
     }
 }
 

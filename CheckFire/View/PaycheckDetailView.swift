@@ -2,30 +2,26 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckDetailView: View {
-    @Bindable var paycheck: Paycheck
+    @Bindable private var paycheck: Paycheck
     
     @Environment(\.modelContext) private var modelContext
     @Query private var lesItems: [LESItem]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
-    init(paycheck: Paycheck) {
+    init(for paycheck: Paycheck) {
         self.paycheck = paycheck
         
         let paycheckID = paycheck.persistentModelID
         self._lesItems = Query(
-            filter: #Predicate<LESItem> { lesItem in
-                lesItem.paycheck?.persistentModelID == paycheckID
-            },
+            filter: #Predicate<LESItem> { $0.paycheck?.persistentModelID == paycheckID },
             sort: \LESItem.name
         )
     }
     
-    private var yearsOfService: [YearsOfService] {
-        PayTables.shared.yearsOfServiceAvailable(
-            for: Calendar.current.component(.year, from: paycheck.date),
-            as: paycheck.payGrade
-        )
+    private var availableYearsOfService: [YearsOfService] {
+        let year = Calendar.current.component(.year, from: paycheck.date)
+        return PayTables.shared.yearsOfServiceAvailable(for: year, as: paycheck.payGrade)
     }
     
     private var entitlements: [LESItem] {
@@ -63,26 +59,19 @@ struct PaycheckDetailView: View {
                 }
                 .pickerStyle(.menu)
                 
-                if yearsOfService.isEmpty {
-                    LabeledContent("Years of Service") {
-                       Text("No Data")
-                    }
-                } else {
-                    Picker("Years of Service", selection: $paycheck.yearsOfService) {
-                       ForEach(yearsOfService) { serviceYears in
-                           Text(String(describing: serviceYears))
-                               .tag(serviceYears)
-                       }
-                   }
-                   .pickerStyle(.menu)
-                }
                 
-                LabeledContent {
+                Picker("Years of Service", selection: $paycheck.yearsOfService) {
+                   ForEach(availableYearsOfService) { serviceYears in
+                       Text(String(describing: serviceYears))
+                           .tag(serviceYears)
+                   }
+                }
+                .pickerStyle(.menu)
+
+                LabeledContent("Base Pay") {
                     TextField("Base Pay", value: $paycheck.basePay, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                } label: {
-                        Text("Base Pay")
                 }
             }
             
@@ -149,7 +138,9 @@ struct PaycheckDetailView: View {
                 }
             }
         }
+        .scrollDismissesKeyboard(.interactively)
         .onChange(of: paycheck.date) {
+            updateYearsOfService()
             updateBasePay()
             updateWithholdingAndTSP()
         }
@@ -196,28 +187,25 @@ struct PaycheckDetailView: View {
     }
     
     private func deleteEntitlement(at indices: IndexSet) {
-        indices.forEach { index in
-            modelContext.delete(entitlements[index])
-        }
+        indices.forEach { modelContext.delete(entitlements[$0]) }
     }
     
     private func deleteDeduction(at indices: IndexSet) {
-        indices.forEach { index in
-            modelContext.delete(deductions[index])
-        }
+        indices.forEach { modelContext.delete(deductions[$0]) }
     }
     
     private func deleteAllotment(at indices: IndexSet) {
-        indices.forEach { index in
-            modelContext.delete(allotments[index])
-        }
+        indices.forEach { modelContext.delete(allotments[$0]) }
+    }
+    
+    private func updateWithholdingAndTSP() {
+        paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
+        paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
     }
     
     private func updateBasePay() {
-        let year = Calendar.current.component(.year, from: paycheck.date)
-        
         paycheck.basePay = PayTables.shared.basePay(
-            for: year,
+            for: Calendar.current.component(.year, from: paycheck.date),
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
         ) ?? paycheck.basePay
@@ -226,14 +214,9 @@ struct PaycheckDetailView: View {
     private func updateYearsOfService() {
         // check if the current years of service exists for the paygrade, and
         // if it does not, select the first available
-        if yearsOfService.contains(paycheck.yearsOfService) == false {
-            paycheck.yearsOfService = yearsOfService.first!
+        if availableYearsOfService.contains(paycheck.yearsOfService) == false {
+            paycheck.yearsOfService = availableYearsOfService.first!
         }
-    }
-    
-    private func updateWithholdingAndTSP() {
-        paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
-        paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
     }
 }
 
@@ -242,7 +225,7 @@ struct PaycheckDetailView: View {
     @Previewable @State var paycheck = Paycheck.example
 
     NavigationStack {
-        PaycheckDetailView(paycheck: paycheck)
+        PaycheckDetailView(for: paycheck)
     }
     .modelContainer(PreviewController.container)
 }

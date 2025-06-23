@@ -31,7 +31,10 @@ struct SidebarView: View {
         .toolbar {
             ToolbarItem {
                 Menu("Options", systemImage: "ellipsis.circle") {
-                    Button("About CheckFire", systemImage: "info.circle") { showAbout.toggle() }
+                    Button("About CheckFire", systemImage: "info.circle") {
+                        showAbout.toggle()
+                    }
+                    .tint(.accentColor)
                     
                     Button("Delete All Data", systemImage: "trash", role: .destructive) {
                         showDeleteAlert.toggle()

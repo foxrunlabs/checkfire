@@ -2,13 +2,17 @@ import SwiftData
 import SwiftUI
 
 struct WithholdingFormDetailView: View {
-    @Bindable var withholdingForm: WithholdingForm
+    @Bindable private var withholdingForm: WithholdingForm
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
 
+    init(for withholdingForm: WithholdingForm) {
+        self.withholdingForm = withholdingForm
+    }
+    
     var body: some View {
         Form {
             Section {
@@ -64,27 +68,22 @@ struct WithholdingFormDetailView: View {
                     value: $withholdingForm.extraWithholding
                 )
             }
-
+            
             if let paychecks = withholdingForm.paychecks {
-                if paychecks.isEmpty == false {
+                if !paychecks.isEmpty {
                     Section("Paychecks") {
                         ForEach(paychecks) { paycheck in
-                            LabeledContent {
+                            LabeledContent(paycheck.name) {
                                 Text(paycheck.date, format: .dateTime.month().year())
-                            } label: {
-                                Text(paycheck.name)
                             }
                         }
                     }
                 }
             }
         }
-        .scrollDismissesKeyboard(.immediately)
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle($withholdingForm.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: withholdingForm.date) {
-            updatePaychecks()
-        }
         .toolbar {
             ToolbarItem {
                 Button("Delete Withholding Form", systemImage: "trash", role: .destructive) {
@@ -96,7 +95,6 @@ struct WithholdingFormDetailView: View {
     }
     
     private func deleteWithholdingForm() {
-        let paychecks = withholdingForm.paychecks
         modelContext.delete(withholdingForm)
         
         do {
@@ -105,16 +103,12 @@ struct WithholdingFormDetailView: View {
             fatalError(error.localizedDescription)
         }
         
-        if let paychecks {
-            paychecks.forEach { paycheck in
-                paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
+        // re-associate paychecks to remaining withholding forms
+        withholdingForms.forEach { withholdingForm in
+            withholdingForm.paychecks = paychecks.filter { paycheck in
+                paycheck.date >= withholdingForm.date
             }
         }
-    }
-    
-    private func updatePaychecks() {
-        let applicablePaychecks = paychecks.filter { $0.date >= withholdingForm.date }
-        withholdingForm.paychecks = applicablePaychecks
     }
 }
 
@@ -123,7 +117,7 @@ struct WithholdingFormDetailView: View {
     @Previewable @State var withholdingForm = WithholdingForm.example
 
     NavigationStack {
-        WithholdingFormDetailView(withholdingForm: withholdingForm)
+        WithholdingFormDetailView(for: withholdingForm)
     }
     .modelContainer(PreviewController.container)
 }

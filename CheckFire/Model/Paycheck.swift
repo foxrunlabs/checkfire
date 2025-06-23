@@ -9,7 +9,11 @@ final class Paycheck: Identifiable {
     
     var payGrade = PayGrade.e1
     var yearsOfService = YearsOfService.lessThanOrEqual2
-    var basePay: Decimal = 0.00
+    var basePay: Decimal = PayTables.shared.basePay(
+        for: Calendar.current.component(.year, from: .now),
+        as: .e1,
+        with: .lessThanOrEqual2
+    ) ?? 0.00
     
     @Relationship(deleteRule: .cascade, inverse: \LESItem.paycheck) var lesItems: [LESItem]? = []
     var withholdingForm: WithholdingForm? = nil
@@ -20,7 +24,6 @@ final class Paycheck: Identifiable {
         date: Date,
         payGrade: PayGrade,
         yearsOfService: YearsOfService,
-        basePay: Decimal,
         lesItems: [LESItem]? = nil,
         withholdingForm: WithholdingForm? = nil,
         thriftSavingsPlan: ThriftSavingsPlan? = nil
@@ -31,22 +34,20 @@ final class Paycheck: Identifiable {
         
         self.payGrade = payGrade
         self.yearsOfService = yearsOfService
-        self.basePay = basePay
+        let year = Calendar.current.component(.year, from: date)
+        self.basePay = PayTables.shared.basePay(for: year, as: payGrade, with: yearsOfService) ?? 0.00
         
         self.lesItems = lesItems
         self.withholdingForm = withholdingForm
         self.thriftSavingsPlan = thriftSavingsPlan
     }
     
-    /// Creates a new paycheck from another paycheck.
-    /// - Parameter paycheck: Paycheck to copy.
-    convenience init(_ other: Paycheck) {
+    convenience init() {
         self.init(
-            name: other.name,
-            date: other.date,
-            payGrade: other.payGrade,
-            yearsOfService: other.yearsOfService,
-            basePay: other.basePay
+            name: "New Paycheck",
+            date: .now,
+            payGrade: .e1,
+            yearsOfService: .lessThanOrEqual2
         )
     }
     
@@ -183,7 +184,6 @@ final class Paycheck: Identifiable {
         name: "Example",
         date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
         payGrade: .o5,
-        yearsOfService: .over20,
-        basePay: 11592.30
+        yearsOfService: .over20
     )
 }
