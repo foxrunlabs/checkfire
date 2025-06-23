@@ -30,20 +30,6 @@ struct PaycheckTabView: View {
                     dismiss()
                 }
             }
-            
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                
-                // dismiss the keyboard
-                Button("Done") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil,
-                        from: nil,
-                        for: nil
-                    )
-                }
-            }
         }
     }
     

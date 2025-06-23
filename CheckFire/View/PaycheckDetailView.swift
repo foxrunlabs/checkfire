@@ -9,6 +9,8 @@ struct PaycheckDetailView: View {
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
+    @State private var showBasePayResetButton = false
+    
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
         
@@ -22,6 +24,15 @@ struct PaycheckDetailView: View {
     private var availableYearsOfService: [YearsOfService] {
         let year = Calendar.current.component(.year, from: paycheck.date)
         return PayTables.shared.yearsOfServiceAvailable(for: year, as: paycheck.payGrade)
+    }
+    
+    private var computedBasePay: Decimal {
+        let year = Calendar.current.component(.year, from: paycheck.date)
+        return PayTables.shared.basePay(
+            for: year,
+            as: paycheck.payGrade,
+            with: paycheck.yearsOfService
+        ) ?? 0.00
     }
     
     private var entitlements: [LESItem] {
@@ -68,10 +79,24 @@ struct PaycheckDetailView: View {
                 }
                 .pickerStyle(.menu)
 
-                LabeledContent("Base Pay") {
+                LabeledContent {
                     TextField("Base Pay", value: $paycheck.basePay, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
+                } label: {
+                    HStack {
+                        Text("Base Pay")
+                        
+                        if showBasePayResetButton {
+                            Button {
+                                paycheck.basePay = computedBasePay
+                                showBasePayResetButton.toggle()
+                            } label: {
+                                Image(systemName: "arrow.uturn.backward.circle")
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
                 }
             }
             
@@ -149,6 +174,25 @@ struct PaycheckDetailView: View {
         }
         .onChange(of: paycheck.yearsOfService) {
             updateBasePay()
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                
+                Button("Done") {
+                    // dismiss the keyboard
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil,
+                        from: nil,
+                        for: nil
+                    )
+                    
+                    if paycheck.basePay != computedBasePay {
+                        showBasePayResetButton.toggle()
+                    }
+                }
+            }
         }
     }
     
