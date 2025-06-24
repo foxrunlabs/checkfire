@@ -6,8 +6,6 @@ struct PaycheckDetailView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query private var lesItems: [LESItem]
-    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
-    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var showBasePayResetButton = false
     
@@ -17,7 +15,7 @@ struct PaycheckDetailView: View {
         let paycheckID = paycheck.persistentModelID
         self._lesItems = Query(
             filter: #Predicate<LESItem> { $0.paycheck?.persistentModelID == paycheckID },
-            sort: \LESItem.name
+            sort: \.name
         )
     }
     
@@ -166,7 +164,6 @@ struct PaycheckDetailView: View {
         .onChange(of: paycheck.date) {
             updateYearsOfService()
             updateBasePay()
-            updateWithholdingAndTSP()
         }
         .onChange(of: paycheck.payGrade) {
             updateYearsOfService()
@@ -239,11 +236,6 @@ struct PaycheckDetailView: View {
     
     private func deleteAllotment(at indices: IndexSet) {
         indices.forEach { modelContext.delete(allotments[$0]) }
-    }
-    
-    private func updateWithholdingAndTSP() {
-        paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
-        paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
     }
     
     private func updateBasePay() {

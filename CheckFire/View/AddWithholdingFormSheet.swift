@@ -6,7 +6,6 @@ struct AddWithholdingFormSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     
     @State private var name = "New Withholding Form"
@@ -90,20 +89,6 @@ struct AddWithholdingFormSheet: View {
         }
         
         modelContext.insert(newWithholdingForm)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-        
-        // Re-associate paychecks to withholding forms
-        paychecks.forEach { paycheck in
-            paycheck.withholdingForm = withholdingForms.last { withholdingForm in
-                withholdingForm.date <= paycheck.date
-            }
-        }
-        
         selectedPayComponent = .withholdingForm(newWithholdingForm)
     }
 }

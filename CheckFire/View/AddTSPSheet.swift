@@ -6,7 +6,6 @@ struct AddTSPSheet: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var name = "New Thrift Savings Plan"
@@ -90,19 +89,6 @@ struct AddTSPSheet: View {
         }
         
         modelContext.insert(newTSP)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-        
-        paychecks.forEach { paycheck in
-            paycheck.thriftSavingsPlan = thriftSavingsPlans.last { tsp in
-                tsp.date <= paycheck.date
-            }
-        }
-        
         selectedPayComponent = .thriftSavingsPlan(newTSP)
     }
 }

@@ -7,8 +7,6 @@ struct AddPaycheckSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
-    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
-    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var name = "New Paycheck"
     @State private var date = Calendar.current.lastDateOfMonth(from: .now)!
@@ -82,15 +80,16 @@ struct AddPaycheckSheet: View {
         if let template {
             newPaycheck.payGrade = template.payGrade
             newPaycheck.yearsOfService = template.yearsOfService
-            newPaycheck.basePay = template.basePay
+            newPaycheck.basePay = PayTables.shared.basePay(
+                for: Calendar.current.component(.year, from: date),
+                as: template.payGrade,
+                with: template.yearsOfService
+            ) ?? template.basePay
             
             newPaycheck.lesItems = template.lesItems?.map {
                 LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)
             }
         }
-        
-        newPaycheck.withholdingForm = withholdingForms.last { $0.date <= newPaycheck.date }
-        newPaycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= newPaycheck.date }
         
         modelContext.insert(newPaycheck)
         selectedPayComponent = .paycheck(newPaycheck)

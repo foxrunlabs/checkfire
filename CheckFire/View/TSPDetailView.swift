@@ -6,8 +6,6 @@ struct TSPDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
-    @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
 
     init(for tsp: ThriftSavingsPlan) {
         self.tsp = tsp
@@ -80,24 +78,9 @@ struct TSPDetailView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            
-            if let paychecks = tsp.paychecks {
-                if !paychecks.isEmpty {
-                    Section("Paychecks") {
-                        ForEach(paychecks) { paycheck in
-                            LabeledContent(paycheck.name) {
-                                Text(paycheck.date, format: .dateTime.month().year())
-                            }
-                        }
-                    }
-                }
-            }
         }
         .navigationTitle($tsp.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: tsp.date) {
-            updatePaychecks()
-        }
         .onChange(of: tsp.traditionalBasePay) {
             validateTraditional()
         }
@@ -116,30 +99,11 @@ struct TSPDetailView: View {
     
     private func deleteTSP() {
         modelContext.delete(tsp)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-        
-        // re-associate paychecks to remaining TSPs
-        thriftSavingsPlans.forEach { plan in
-            plan.paychecks = paychecks.filter { paycheck in
-                paycheck.date >= plan.date
-            }
-        }
     }
     
     private func resetTSP() {
         tsp.traditionalBasePay = 0.00
         tsp.rothBasePay = 0.00
-    }
-    
-    private func updatePaychecks() {        
-        paychecks.forEach { paycheck in
-            paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
-        }
     }
     
     private func validateTraditional() {

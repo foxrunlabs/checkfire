@@ -16,9 +16,6 @@ final class WithholdingForm: Identifiable {
     var deductions: Decimal = 0.00
     var extraWithholding: Decimal = 0.00
     
-    @Relationship(deleteRule: .noAction, inverse: \Paycheck.withholdingForm)
-    var paychecks: [Paycheck]? = []
-    
     init(
         name: String,
         date: Date,
@@ -29,7 +26,6 @@ final class WithholdingForm: Identifiable {
         otherIncome: Decimal,
         deductions: Decimal,
         extraWithholding: Decimal,
-        paychecks: [Paycheck]? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -43,8 +39,6 @@ final class WithholdingForm: Identifiable {
         self.otherIncome = otherIncome
         self.deductions = deductions
         self.extraWithholding = extraWithholding
-        
-        self.paychecks = paychecks
     }
     
     convenience init() {

@@ -5,7 +5,6 @@ struct WithholdingFormsListView: View {
     @Binding var selectedPayComponent: PayComponent?
     
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     
     @State private var showAddWithholdingSheet = false
@@ -64,22 +63,7 @@ struct WithholdingFormsListView: View {
     }
     
     private func deleteWithholdingForm(at indices: IndexSet) {
-        indices.forEach { index in
-            modelContext.delete(withholdingForms[index])
-            
-            do {
-                try modelContext.save()
-            } catch {
-                fatalError(error.localizedDescription)
-            }
-            
-            // re-associate paychecks to remaining withholding forms
-            paychecks.forEach { paycheck in
-                paycheck.withholdingForm = withholdingForms.last { withholdingForm in
-                    withholdingForm.date <= paycheck.date
-                }
-            }
-        }
+        indices.forEach { modelContext.delete(withholdingForms[$0]) }
     }
 }
 

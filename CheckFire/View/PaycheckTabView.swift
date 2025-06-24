@@ -18,7 +18,7 @@ struct PaycheckTabView: View {
             }
             
             Tab("Net Pay", systemImage: "plus.forwardslash.minus") {
-                NetPayView(paycheck: paycheck)
+                NetPayView(for: paycheck)
             }
         }
         .navigationTitle($paycheck.name)

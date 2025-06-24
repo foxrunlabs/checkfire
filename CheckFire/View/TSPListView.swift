@@ -5,7 +5,6 @@ struct TSPListView: View {
     @Binding var selectedPayComponent: PayComponent?
     
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Paycheck.date) private var paychecks: [Paycheck]
     @Query(sort: \ThriftSavingsPlan.date) private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var showAddTSPSheet = false
@@ -64,22 +63,7 @@ struct TSPListView: View {
     }
     
     private func deleteTSP(at indices: IndexSet) {
-        indices.forEach { index in
-            modelContext.delete(thriftSavingsPlans[index])
-            
-            do {
-                try modelContext.save()
-            } catch {
-                fatalError(error.localizedDescription)
-            }
-            
-            // re-associate paychecks to remaining TSPs
-            thriftSavingsPlans.forEach { tsp in
-                tsp.paychecks = paychecks.filter { paycheck in
-                    paycheck.date >= tsp.date
-                }
-            }
-        }
+        indices.forEach { modelContext.delete(thriftSavingsPlans[$0]) }
     }
 }
 
