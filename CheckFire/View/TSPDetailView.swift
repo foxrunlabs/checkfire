@@ -95,6 +95,9 @@ struct TSPDetailView: View {
         }
         .navigationTitle($tsp.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: tsp.date) {
+            updatePaychecks()
+        }
         .onChange(of: tsp.traditionalBasePay) {
             validateTraditional()
         }
@@ -131,6 +134,12 @@ struct TSPDetailView: View {
     private func resetTSP() {
         tsp.traditionalBasePay = 0.00
         tsp.rothBasePay = 0.00
+    }
+    
+    private func updatePaychecks() {        
+        paychecks.forEach { paycheck in
+            paycheck.thriftSavingsPlan = thriftSavingsPlans.last { $0.date <= paycheck.date }
+        }
     }
     
     private func validateTraditional() {

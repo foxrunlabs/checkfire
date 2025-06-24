@@ -89,9 +89,20 @@ struct AddTSPSheet: View {
             newTSP.rothBonusPay = template.rothBonusPay
         }
         
-        newTSP.paychecks = paychecks.filter { $0.date >= date }
-        
         modelContext.insert(newTSP)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        paychecks.forEach { paycheck in
+            paycheck.thriftSavingsPlan = thriftSavingsPlans.last { tsp in
+                tsp.date <= paycheck.date
+            }
+        }
+        
         selectedPayComponent = .thriftSavingsPlan(newTSP)
     }
 }

@@ -105,6 +105,9 @@ struct WithholdingFormDetailView: View {
                 }
             }
         }
+        .onChange(of: withholdingForm.date) {
+            updatePaychecks()
+        }
     }
     
     private func deleteWithholdingForm() {
@@ -117,10 +120,16 @@ struct WithholdingFormDetailView: View {
         }
         
         // re-associate paychecks to remaining withholding forms
-        withholdingForms.forEach { withholdingForm in
-            withholdingForm.paychecks = paychecks.filter { paycheck in
-                paycheck.date >= withholdingForm.date
+        paychecks.forEach { paycheck in
+            paycheck.withholdingForm = withholdingForms.last { withholdingForm in
+                withholdingForm.date <= paycheck.date
             }
+        }
+    }
+
+    private func updatePaychecks() {
+        paychecks.forEach { paycheck in
+            paycheck.withholdingForm = withholdingForms.last { $0.date <= paycheck.date }
         }
     }
 }

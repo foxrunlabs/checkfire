@@ -89,9 +89,21 @@ struct AddWithholdingFormSheet: View {
             newWithholdingForm.extraWithholding = template.extraWithholding
         }
         
-        newWithholdingForm.paychecks = paychecks.filter { $0.date >= date }
-        
         modelContext.insert(newWithholdingForm)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+        
+        // Re-associate paychecks to withholding forms
+        paychecks.forEach { paycheck in
+            paycheck.withholdingForm = withholdingForms.last { withholdingForm in
+                withholdingForm.date <= paycheck.date
+            }
+        }
+        
         selectedPayComponent = .withholdingForm(newWithholdingForm)
     }
 }

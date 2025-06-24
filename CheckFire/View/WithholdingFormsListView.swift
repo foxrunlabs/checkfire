@@ -74,9 +74,9 @@ struct WithholdingFormsListView: View {
             }
             
             // re-associate paychecks to remaining withholding forms
-            withholdingForms.forEach { withholdingForm in
-                withholdingForm.paychecks = paychecks.filter { paycheck in
-                    paycheck.date >= withholdingForm.date
+            paychecks.forEach { paycheck in
+                paycheck.withholdingForm = withholdingForms.last { withholdingForm in
+                    withholdingForm.date <= paycheck.date
                 }
             }
         }
