@@ -161,6 +161,11 @@ struct PaycheckDetailView: View {
                 }
             }
         }
+        .onAppear {
+            if paycheck.basePay != computedBasePay {
+                showBasePayResetButton = true
+            }
+        }
         .onChange(of: paycheck.date) {
             updateYearsOfService()
             updateBasePay()
@@ -186,7 +191,7 @@ struct PaycheckDetailView: View {
                     )
                     
                     if paycheck.basePay != computedBasePay {
-                        showBasePayResetButton.toggle()
+                        showBasePayResetButton = true
                     }
                 }
             }
