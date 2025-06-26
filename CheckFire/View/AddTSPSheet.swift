@@ -37,7 +37,7 @@ struct AddTSPSheet: View {
                         .tag(nil as ThriftSavingsPlan?)
                     
                     ForEach(thriftSavingsPlans) { tsp in
-                        Text(tsp.name)
+                        Text(tsp.name + " (\(tsp.date.formatted(.dateTime.month().year())))")
                             .tag(tsp)
                     }
                 }

@@ -37,8 +37,10 @@ struct AddWithholdingFormSheet: View {
                         .tag(nil as WithholdingForm?)
                     
                     ForEach(withholdingForms) { withholdingForm in
-                        Text(withholdingForm.name)
-                            .tag(withholdingForm)
+                        Text(
+                            withholdingForm.name + " (\(withholdingForm.date.formatted(.dateTime.month().year())))"
+                        )
+                        .tag(withholdingForm)
                     }
                 }
                 .pickerStyle(.menu)

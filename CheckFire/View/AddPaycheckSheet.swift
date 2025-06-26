@@ -37,8 +37,10 @@ struct AddPaycheckSheet: View {
                         .tag(nil as Paycheck?)
                     
                     ForEach(paychecks) { paycheck in
-                        Text(paycheck.name)
-                            .tag(paycheck)
+                        Text(
+                            paycheck.name + " (\(paycheck.date.formatted(.dateTime.month().year())))"
+                        )
+                        .tag(paycheck)
                     }
                 }
                 .pickerStyle(.menu)
