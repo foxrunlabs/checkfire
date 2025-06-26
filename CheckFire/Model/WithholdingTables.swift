@@ -23,12 +23,12 @@ final class WithholdingTables {
     ///   - year: Calendar year.
     ///   - wage: Taxable wage in dollars.
     /// - Returns: Medicate tax owed in dollars.
-    func calculateMedicare(for year: Int, wage: Decimal) -> Decimal {
-        guard let table = withholdingTable(for: year) else {
-            fatalError("No withholding table found for \(year.description)")
+    func calculateMedicare(for year: Int, wage: Decimal) -> Decimal? {
+        if let table = withholdingTable(for: year) {
+            (wage * table.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        } else {
+            nil
         }
-        
-        return (wage * table.medicareRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     /// Calculate Social Security tax.
@@ -36,12 +36,12 @@ final class WithholdingTables {
     ///   - year: Calendar year.
     ///   - wage: Taxable wage in dollars.
     /// - Returns: Social Security tax owed.
-    func calculateSocialSecurity(for year: Int, wage: Decimal) -> Decimal {
-        guard let table = withholdingTable(for: year) else {
-            fatalError("No withholding table found for \(year.description)")
+    func calculateSocialSecurity(for year: Int, wage: Decimal) -> Decimal? {
+        if let table = withholdingTable(for: year) {
+            (wage * table.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
+        } else {
+            nil
         }
-        
-        return (wage * table.socialSecurityRate).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
     /// Calculate federal income tax withholding for a wage using the percentage method for manual payroll systems.
@@ -54,7 +54,7 @@ final class WithholdingTables {
         for year: Int,
         wage: Decimal,
         using withholdingForm: WithholdingForm
-    ) -> Decimal {
+    ) -> Decimal? {
         let wageFrequency: Decimal = 12
         
         // adjust the wage amount
@@ -64,16 +64,12 @@ final class WithholdingTables {
         adjustedWage = max(0.00, adjustedWage)
         
         // figure the tentative withholding amount
-        guard let table = withholdingTable(for: year) else {
-            fatalError("No withholding table found for " + String(describing: year))
-        }
+        guard let table = withholdingTable(for: year) else { return nil }
         
         let schedule: WithholdingSchedule = withholdingForm.multipleJobs ? .multipleJobs : .standard
         let brackets = table.taxBrackets[schedule]?[withholdingForm.maritalStatus]
         
-        guard let bracket = brackets?.last(where: { adjustedWage >= $0.atLeast }) else {
-            fatalError("No withholding data found for " + String(describing: adjustedWage))
-        }
+        guard let bracket = brackets?.last(where: { adjustedWage >= $0.atLeast }) else { return nil }
         
         var withholding = bracket.tentativeAmount
         withholding += (adjustedWage - bracket.atLeast) * bracket.rate
