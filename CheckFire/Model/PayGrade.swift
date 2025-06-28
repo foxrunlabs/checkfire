@@ -11,7 +11,6 @@ enum PayGrade:
     case o10, o9, o8, o7, o6, o5, o4, o3, o2, o1
     case o3E, o2E, o1E
     case w5, w4, w3, w2, w1
-    case o0
     case e9, e8, e7, e6, e5, e4, e3, e2, e1
     
     var description: String {
@@ -34,7 +33,6 @@ enum PayGrade:
         case .w3: "W-3"
         case .w2: "W-2"
         case .w1: "W-1"
-        case .o0: "MIDN/OC"
         case .e9: "E-9"
         case .e8: "E-8"
         case .e7: "E-7"
