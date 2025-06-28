@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct AddTSPSheet: View {
-    @Binding var selectedPayComponent: PayComponent?
+    @Binding var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -89,7 +89,7 @@ struct AddTSPSheet: View {
         }
         
         modelContext.insert(newTSP)
-        selectedPayComponent = .thriftSavingsPlan(newTSP)
+        selection = .thriftSavingsPlan(newTSP)
     }
 }
 
@@ -102,7 +102,7 @@ struct AddTSPSheet: View {
         showSheet.toggle()
     }
     .sheet(isPresented: $showSheet) {
-        AddTSPSheet(selectedPayComponent: $selectedPayComponent)
+        AddTSPSheet(selection: $selectedPayComponent)
             .presentationDetents([.medium])
     }
     .modelContainer(PreviewController.container)

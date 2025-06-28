@@ -29,11 +29,11 @@ struct ContentView: View {
             if let selectedNavigation {
                 switch selectedNavigation {
                 case .paychecks:
-                    PaychecksListView(selectedPayComponent: $selectedPayComponent)
+                    PaychecksListView(selection: $selectedPayComponent)
                 case .withholdingForms:
-                    WithholdingFormsListView(selectedPayComponent: $selectedPayComponent)
+                    WithholdingFormsListView(selection: $selectedPayComponent)
                 case .thriftSavingsPlans:
-                    TSPListView(selectedPayComponent: $selectedPayComponent)
+                    TSPListView(selection: $selectedPayComponent)
                 }
             } else {
                 ContentUnavailableView(

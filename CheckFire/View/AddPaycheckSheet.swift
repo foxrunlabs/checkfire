@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct AddPaycheckSheet: View {
-    @Binding var selectedPayComponent: PayComponent?
+    @Binding var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -94,7 +94,7 @@ struct AddPaycheckSheet: View {
         }
         
         modelContext.insert(newPaycheck)
-        selectedPayComponent = .paycheck(newPaycheck)
+        selection = .paycheck(newPaycheck)
     }
 }
 
@@ -107,7 +107,7 @@ struct AddPaycheckSheet: View {
         showSheet.toggle()
     }
     .sheet(isPresented: $showSheet) {
-        AddPaycheckSheet(selectedPayComponent: $selectedPayComponent)
+        AddPaycheckSheet(selection: $selectedPayComponent)
             .presentationDetents([.medium])
     }
     .modelContainer(PreviewController.container)

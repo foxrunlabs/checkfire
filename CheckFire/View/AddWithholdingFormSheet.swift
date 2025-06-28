@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct AddWithholdingFormSheet: View {
-    @Binding var selectedPayComponent: PayComponent?
+    @Binding var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -91,7 +91,7 @@ struct AddWithholdingFormSheet: View {
         }
         
         modelContext.insert(newWithholdingForm)
-        selectedPayComponent = .withholdingForm(newWithholdingForm)
+        selection = .withholdingForm(newWithholdingForm)
     }
 }
 
@@ -104,7 +104,7 @@ struct AddWithholdingFormSheet: View {
         showSheet.toggle()
     }
     .sheet(isPresented: $showSheet) {
-        AddWithholdingFormSheet(selectedPayComponent: $selectedPayComponent)
+        AddWithholdingFormSheet(selection: $selectedPayComponent)
             .presentationDetents([.medium])
     }
     .modelContainer(PreviewController.container)
