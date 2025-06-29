@@ -9,6 +9,8 @@ struct SidebarView: View {
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
+    @State private var showPayTables = false
+    
     @State private var showAbout = false
     @State private var showDeleteAlert = false
     
@@ -24,6 +26,13 @@ struct SidebarView: View {
                         navigation: navigationItem,
                         badge: badgeCount(for: navigationItem)
                     )
+                    .tag(navigationItem)
+                }
+            }
+            
+            Section("Tools") {
+                Button("Base Pay Tables", systemImage: "tablecells") {
+                    showPayTables.toggle()
                 }
             }
         }
@@ -45,6 +54,9 @@ struct SidebarView: View {
         }
         .sheet(isPresented: $showAbout) {
             AboutView()
+        }
+        .sheet(isPresented: $showPayTables) {
+            BasePayTablesView()
         }
         .alert("Delete All Data", isPresented: $showDeleteAlert) {
             if ProcessInfo.processInfo.isiOSAppOnMac {
