@@ -8,10 +8,13 @@ struct PaycheckTabView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State private var showPayTablesSheet = false
+    @State private var showBASTablesSheet = false
     
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
     }
+    
+    private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
     
     var body: some View {
         TabView {
@@ -31,7 +34,10 @@ struct PaycheckTabView: View {
                     Button("Base Pay Tables", systemImage: "tablecells") {
                         showPayTablesSheet.toggle()
                     }
-                    .tint(.accentColor)
+                    
+                    Button("BAS Tables", systemImage: "fork.knife") {
+                        showBASTablesSheet.toggle()
+                    }
                     
                     Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
                         deletePaycheck()
@@ -41,10 +47,10 @@ struct PaycheckTabView: View {
             }
         }
         .sheet(isPresented: $showPayTablesSheet) {
-            BasePayTablesView(
-                year: Calendar.current.component(.year, from: paycheck.date),
-                payGrade: paycheck.payGrade
-            )
+            BasePayTablesView(year: paycheckYear, payGrade: paycheck.payGrade)
+        }
+        .sheet(isPresented: $showBASTablesSheet) {
+            BASTablesView(year: paycheckYear)
         }
     }
     

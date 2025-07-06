@@ -21,10 +21,9 @@ struct PaychecksListView: View {
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Paycheck", systemImage: "plus") {
+                        Button("Add Paycheck", systemImage: "document") {
                             showAddPaycheckSheet.toggle()
                         }
-                        .tint(.accentColor)
                         
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortBy) {
@@ -45,7 +44,6 @@ struct PaychecksListView: View {
                             }
                             .pickerStyle(.inline)
                         }
-                        .tint(.accentColor)
                     }
                 }
             }

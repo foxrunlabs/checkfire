@@ -21,10 +21,9 @@ struct TSPListView: View {
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Plan", systemImage: "plus") {
+                        Button("Add Plan", systemImage: "document") {
                             showAddTSPSheet.toggle()
                         }
-                        .tint(.accentColor)
                         
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortBy) {
@@ -45,7 +44,6 @@ struct TSPListView: View {
                             }
                             .pickerStyle(.inline)
                         }
-                        .tint(.accentColor)
                     }
                 }
             }

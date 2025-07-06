@@ -9,9 +9,10 @@ struct SidebarView: View {
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
-    @State private var showPayTables = false
+    @State private var showPayTablesSheet = false
+    @State private var showBASTablesSheet = false
+    @State private var showAboutSheet = false
     
-    @State private var showAbout = false
     @State private var showDeleteAlert = false
     
     var isDeleteDisabled: Bool {
@@ -32,7 +33,11 @@ struct SidebarView: View {
             
             Section("Tools") {
                 Button("Base Pay Tables", systemImage: "tablecells") {
-                    showPayTables.toggle()
+                    showPayTablesSheet.toggle()
+                }
+                
+                Button("BAS Tables", systemImage: "fork.knife") {
+                    showBASTablesSheet.toggle()
                 }
             }
         }
@@ -41,9 +46,8 @@ struct SidebarView: View {
             ToolbarItem {
                 Menu("Options", systemImage: "ellipsis.circle") {
                     Button("About CheckFire", systemImage: "info.circle") {
-                        showAbout.toggle()
+                        showAboutSheet.toggle()
                     }
-                    .tint(.accentColor)
                     
                     Button("Delete All Data", systemImage: "trash", role: .destructive) {
                         showDeleteAlert.toggle()
@@ -52,11 +56,14 @@ struct SidebarView: View {
                 }
             }
         }
-        .sheet(isPresented: $showAbout) {
-            AboutView()
-        }
-        .sheet(isPresented: $showPayTables) {
+        .sheet(isPresented: $showPayTablesSheet) {
             BasePayTablesView()
+        }
+        .sheet(isPresented: $showBASTablesSheet) {
+            BASTablesView()
+        }
+        .sheet(isPresented: $showAboutSheet) {
+            AboutView()
         }
         .alert("Delete All Data", isPresented: $showDeleteAlert) {
             if ProcessInfo.processInfo.isiOSAppOnMac {

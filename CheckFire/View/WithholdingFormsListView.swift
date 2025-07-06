@@ -21,10 +21,9 @@ struct WithholdingFormsListView: View {
             .toolbar {
                 ToolbarItem {
                     Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Form", systemImage: "plus") {
+                        Button("Add Form", systemImage: "document") {
                             showAddWithholdingSheet.toggle()
                         }
-                        .tint(.accentColor)
                         
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortBy) {
@@ -45,7 +44,6 @@ struct WithholdingFormsListView: View {
                             }
                             .pickerStyle(.inline)
                         }
-                        .tint(.accentColor)
                     }
                 }
             }
