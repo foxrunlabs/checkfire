@@ -8,6 +8,7 @@ struct PaycheckDetailView: View {
     @Query private var lesItems: [LESItem]
     
     @State private var showBasicPayResetButton = false
+    @State private var showBASResetButton = false
     
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
@@ -30,6 +31,13 @@ struct PaycheckDetailView: View {
             for: year,
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
+        ) ?? 0.00
+    }
+    
+    private var computedBAS: Decimal {
+        return BASTables.shared.bas(
+            for: Calendar.current.component(.year, from: paycheck.date),
+            as: paycheck.payGrade
         ) ?? 0.00
     }
     
@@ -59,7 +67,7 @@ struct PaycheckDetailView: View {
                     selection: $paycheck.date,
                     in: WithholdingTables.shared.years
                 )
-
+                
                 Picker("Pay Grade", selection: $paycheck.payGrade) {
                     ForEach(PayGrade.allCases) { grade in
                         Text(String(describing: grade))
@@ -70,13 +78,15 @@ struct PaycheckDetailView: View {
                 
                 
                 Picker("Years of Service", selection: $paycheck.yearsOfService) {
-                   ForEach(availableYearsOfService) { serviceYears in
-                       Text(String(describing: serviceYears))
-                           .tag(serviceYears)
-                   }
+                    ForEach(availableYearsOfService) { serviceYears in
+                        Text(String(describing: serviceYears))
+                            .tag(serviceYears)
+                    }
                 }
                 .pickerStyle(.menu)
-
+            }
+            
+            Section {
                 LabeledContent {
                     TextField("Basic Pay", value: $paycheck.basicPay, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
@@ -95,6 +105,34 @@ struct PaycheckDetailView: View {
                             .buttonStyle(.borderless)
                         }
                     }
+                }
+                
+                LabeledContent {
+                    TextField("BAS", value: $paycheck.bas, format: .currency(code: "USD"))
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.decimalPad)
+                } label: {
+                    HStack {
+                        Text("BAS")
+                        
+                        if showBASResetButton {
+                            Button {
+                                paycheck.bas = computedBAS
+                                showBASResetButton.toggle()
+                            } label: {
+                                Image(systemName: "arrow.uturn.backward.circle")
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                    }
+                }
+                
+                LabeledContent {
+                    TextField("BAH", value: $paycheck.bah, format: .currency(code: "USD"))
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.decimalPad)
+                } label: {
+                    Text("BAH")
                 }
             }
             
@@ -162,17 +200,18 @@ struct PaycheckDetailView: View {
             }
         }
         .onAppear {
-            if paycheck.basicPay != computedBasicPay {
-                showBasicPayResetButton = true
-            }
+            if paycheck.basicPay != computedBasicPay { showBasicPayResetButton = true }
+            if paycheck.bas != computedBAS { showBASResetButton = true }
         }
         .onChange(of: paycheck.date) {
             updateYearsOfService()
             updateBasicPay()
+            updateBAS()
         }
         .onChange(of: paycheck.payGrade) {
             updateYearsOfService()
             updateBasicPay()
+            updateBAS()
         }
         .onChange(of: paycheck.yearsOfService) {
             updateBasicPay()
@@ -190,9 +229,8 @@ struct PaycheckDetailView: View {
                         for: nil
                     )
                     
-                    if paycheck.basicPay != computedBasicPay {
-                        showBasicPayResetButton = true
-                    }
+                    if paycheck.basicPay != computedBasicPay { showBasicPayResetButton = true }
+                    if paycheck.bas != computedBAS { showBASResetButton = true }
                 }
             }
         }
@@ -249,6 +287,13 @@ struct PaycheckDetailView: View {
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
         ) ?? paycheck.basicPay
+    }
+    
+    private func updateBAS() {
+        paycheck.bas = BASTables.shared.bas(
+            for: Calendar.current.component(.year, from: paycheck.date),
+            as: paycheck.payGrade
+        ) ?? paycheck.bas
     }
     
     private func updateYearsOfService() {

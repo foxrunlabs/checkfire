@@ -87,6 +87,11 @@ struct AddPaycheckSheet: View {
                 as: template.payGrade,
                 with: template.yearsOfService
             ) ?? template.basicPay
+            newPaycheck.bas = BASTables.shared.bas(
+                for: Calendar.current.component(.year, from: date),
+                as: template.payGrade
+            ) ?? template.bas
+            newPaycheck.bah = template.bah
             
             newPaycheck.lesItems = template.lesItems?.map {
                 LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)

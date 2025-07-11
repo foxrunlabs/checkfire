@@ -5,11 +5,10 @@ import SwiftData
 class PreviewController {
     static let container: ModelContainer = {
         let paycheck = Paycheck.example
+        paycheck.bah = 4485.00
         
         let lesItems: [LESItem] = [
             .init(name: "Fly Pay", amount: 840.00, itemType: .entitlement(.incentivePay), paycheck: paycheck),
-            .init(name: "BAH", amount: 4485.00, itemType: .entitlement(.allowance), paycheck: paycheck),
-            .init(name: "BAS", amount: 320.78, itemType: .entitlement(.allowance), paycheck: paycheck),
             .init(name: "SGLI", amount: 31.00, itemType: .deduction, paycheck: paycheck),
             .init(name: "SGLI Family/Spouse", amount: 10.00, itemType: .deduction, paycheck: paycheck),
             .init(name: "Tricare Dental", amount: 29.98, itemType: .allotment, paycheck: paycheck)

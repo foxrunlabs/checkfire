@@ -14,6 +14,11 @@ final class Paycheck: Identifiable {
         as: .e1,
         with: .lessThanOrEqual2
     ) ?? 0.00
+    var bas = BASTables.shared.bas(
+        for: Calendar.current.component(.year, from: .now),
+        as: .e1
+    ) ?? 0.00
+    var bah: Decimal = 0.00
     
     @Relationship(deleteRule: .cascade, inverse: \LESItem.paycheck) var lesItems: [LESItem]? = []
     
@@ -36,6 +41,8 @@ final class Paycheck: Identifiable {
             as: payGrade,
             with: yearsOfService
         ) ?? 0.00
+        self.bas = BASTables.shared.bas(for: year, as: payGrade) ?? 0.00
+        self.bah = 0.00
         
         self.lesItems = lesItems
     }

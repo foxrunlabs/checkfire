@@ -23,8 +23,10 @@ struct NetPayView: View {
     }
     
     private var grossPay: Decimal {
-        if let lesItems = paycheck.lesItems {
-            paycheck.basicPay + lesItems.reduce(0.00) {
+        let gross = paycheck.basicPay + paycheck.bas + paycheck.bah
+        
+        return if let lesItems = paycheck.lesItems {
+            gross + lesItems.reduce(0.00) {
                 if case .entitlement = $1.itemType {
                     $0 + $1.amount
                 } else {
@@ -32,7 +34,7 @@ struct NetPayView: View {
                 }
             }
         } else {
-            paycheck.basicPay
+            gross
         }
     }
     

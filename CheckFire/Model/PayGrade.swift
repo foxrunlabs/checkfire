@@ -46,4 +46,6 @@ enum PayGrade:
     }
     
     var id: Self { self }
+    
+    var isEnlisted: Bool { description.hasPrefix("E") }
 }

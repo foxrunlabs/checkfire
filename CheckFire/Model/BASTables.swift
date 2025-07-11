@@ -14,5 +14,10 @@ final class BASTables {
         basTables.first { $0.year == year }
     }
     
+    func bas(for year: Int, as payGrade: PayGrade) -> Decimal? {
+        guard let table = basTable(for: year) else { return nil }
+        return payGrade.isEnlisted ? table.enlisted : table.officer
+    }
+    
     static let shared = BASTables()
 }
