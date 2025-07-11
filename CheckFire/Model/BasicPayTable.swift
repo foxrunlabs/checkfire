@@ -1,6 +1,6 @@
 import Foundation
 
-struct PayTable: Decodable {
+struct BasicPayTable: Decodable {
     typealias PaySchedule = [YearsOfService: Decimal?]
     
     let year: Int

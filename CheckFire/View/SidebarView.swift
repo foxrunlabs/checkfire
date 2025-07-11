@@ -9,7 +9,7 @@ struct SidebarView: View {
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
-    @State private var showPayTablesSheet = false
+    @State private var showBasicPayTablesSheet = false
     @State private var showBASTablesSheet = false
     @State private var showAboutSheet = false
     
@@ -32,8 +32,8 @@ struct SidebarView: View {
             }
             
             Section("Tools") {
-                Button("Base Pay Tables", systemImage: "tablecells") {
-                    showPayTablesSheet.toggle()
+                Button("Basic Pay Tables", systemImage: "tablecells") {
+                    showBasicPayTablesSheet.toggle()
                 }
                 
                 Button("BAS Tables", systemImage: "fork.knife") {
@@ -56,8 +56,8 @@ struct SidebarView: View {
                 }
             }
         }
-        .sheet(isPresented: $showPayTablesSheet) {
-            BasePayTablesView()
+        .sheet(isPresented: $showBasicPayTablesSheet) {
+            BasicPayTablesView()
         }
         .sheet(isPresented: $showBASTablesSheet) {
             BASTablesView()

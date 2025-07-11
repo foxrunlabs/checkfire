@@ -78,11 +78,11 @@ struct AddTSPSheet: View {
         newTSP.date = date
         
         if let template {
-            newTSP.traditionalBasePay = template.traditionalBasePay
+            newTSP.traditionalBasicPay = template.traditionalBasicPay
             newTSP.traditionalSpecialPay = template.traditionalSpecialPay
             newTSP.traditionalIncentivePay = template.traditionalIncentivePay
             newTSP.traditionalBonusPay = template.traditionalBonusPay
-            newTSP.rothBasePay = template.rothBasePay
+            newTSP.rothBasicPay = template.rothBasicPay
             newTSP.rothSpecialPay = template.rothSpecialPay
             newTSP.rothIncentivePay = template.rothIncentivePay
             newTSP.rothBonusPay = template.rothBonusPay

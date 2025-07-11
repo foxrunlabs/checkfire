@@ -7,12 +7,12 @@ final class ThriftSavingsPlan: Identifiable {
     var name = ""
     var date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
     
-    var traditionalBasePay: Decimal = 0.00
+    var traditionalBasicPay: Decimal = 0.00
     var traditionalSpecialPay: Decimal = 0.00
     var traditionalIncentivePay: Decimal = 0.00
     var traditionalBonusPay: Decimal = 0.00
     
-    var rothBasePay: Decimal = 0.00
+    var rothBasicPay: Decimal = 0.00
     var rothSpecialPay: Decimal = 0.00
     var rothIncentivePay: Decimal = 0.00
     var rothBonusPay: Decimal = 0.00
@@ -20,11 +20,11 @@ final class ThriftSavingsPlan: Identifiable {
     init(
         name: String,
         date: Date,
-        traditionalBasePay: Decimal,
+        traditionalBasicPay: Decimal,
         traditionalSpecialPay: Decimal,
         traditionalIncentivePay: Decimal,
         traditionalBonusPay: Decimal,
-        rothBasePay: Decimal,
+        rothBasicPay: Decimal,
         rothSpecialPay: Decimal,
         rothIncentivePay: Decimal,
         rothBonusPay: Decimal,
@@ -34,12 +34,12 @@ final class ThriftSavingsPlan: Identifiable {
         self.name = name
         self.date = Calendar.current.lastDateOfMonth(from: date) ?? date
         
-        self.traditionalBasePay = traditionalBasePay
+        self.traditionalBasicPay = traditionalBasicPay
         self.traditionalSpecialPay = traditionalSpecialPay
         self.traditionalIncentivePay = traditionalIncentivePay
         self.traditionalBonusPay = traditionalBonusPay
         
-        self.rothBasePay = rothBasePay
+        self.rothBasicPay = rothBasicPay
         self.rothSpecialPay = rothSpecialPay
         self.rothIncentivePay = rothIncentivePay
         self.rothBonusPay = rothBonusPay
@@ -49,11 +49,11 @@ final class ThriftSavingsPlan: Identifiable {
         self.init(
             name: "New TSP",
             date: .now,
-            traditionalBasePay: 0.00,
+            traditionalBasicPay: 0.00,
             traditionalSpecialPay: 0.00,
             traditionalIncentivePay: 0.00,
             traditionalBonusPay: 0.00,
-            rothBasePay: 0.00,
+            rothBasicPay: 0.00,
             rothSpecialPay: 0.00,
             rothIncentivePay: 0.00,
             rothBonusPay: 0.00
@@ -63,11 +63,11 @@ final class ThriftSavingsPlan: Identifiable {
     static let example = ThriftSavingsPlan(
         name: "Example",
         date: DateComponents(calendar: .current, year: 2025, month: 1, day: 31).date!,
-        traditionalBasePay: 0.11,
+        traditionalBasicPay: 0.11,
         traditionalSpecialPay: 0.00,
         traditionalIncentivePay: 0.00,
         traditionalBonusPay: 0.00,
-        rothBasePay: 0.00,
+        rothBasicPay: 0.00,
         rothSpecialPay: 0.00,
         rothIncentivePay: 0.00,
         rothBonusPay: 0.00

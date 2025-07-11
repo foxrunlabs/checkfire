@@ -32,7 +32,7 @@ struct TSPStepper: View {
     
     Form {
         Section("Traditional") {
-            TSPStepper("Base Pay", value: $tsp.traditionalBasePay, max: 1 - tsp.rothBasePay)
+            TSPStepper("Basic Pay", value: $tsp.traditionalBasicPay, max: 1 - tsp.rothBasicPay)
         }
     }
 }

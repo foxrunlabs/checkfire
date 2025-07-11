@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct BasePayTablesView: View {
+struct BasicPayTablesView: View {
     @State private var year: Int
     @State private var payGrade: PayGrade
     
     @Environment(\.dismiss) private var dismiss
     
     init(year: Int? = nil, payGrade: PayGrade? = nil) {
-        self.year = year ?? PayTables.shared.years.first!
+        self.year = year ?? BasicPayTables.shared.years.first!
         self.payGrade = payGrade ?? .e1
     }
     
@@ -16,7 +16,7 @@ struct BasePayTablesView: View {
             List {
                 Section {
                     Picker("Year", selection: $year) {
-                        ForEach(PayTables.shared.years, id: \.self) { year in
+                        ForEach(BasicPayTables.shared.years, id: \.self) { year in
                             Text(String(describing: year))
                                 .tag(year)
                         }
@@ -39,14 +39,14 @@ struct BasePayTablesView: View {
                         
                         Spacer()
                         
-                        Text("Base Pay")
+                        Text("Basic Pay")
                             .bold()
                     }
                     
-                    ForEach(PayTables.shared.yearsOfServiceAvailable(for: year, as: payGrade), id: \.self) { serviceYear in
+                    ForEach(BasicPayTables.shared.yearsOfServiceAvailable(for: year, as: payGrade), id: \.self) { serviceYear in
                         LabeledContent(String(describing: serviceYear)) {
-                            if let basePay = PayTables.shared.basePay(for: year, as: payGrade, with: serviceYear) {
-                                Text(basePay, format: .currency(code: "USD"))
+                            if let basicPay = BasicPayTables.shared.basicPay(for: year, as: payGrade, with: serviceYear) {
+                                Text(basicPay, format: .currency(code: "USD"))
                                     .textSelection(.enabled)
                             } else {
                                 Text("No Data")
@@ -55,7 +55,7 @@ struct BasePayTablesView: View {
                     }
                 }
             }
-            .navigationTitle("Base Pay Tables")
+            .navigationTitle("Basic Pay Tables")
             .toolbar {
                 ToolbarItem {
                     Button("Done", role: .cancel) {
@@ -70,6 +70,6 @@ struct BasePayTablesView: View {
 // MARK: - Preview
 #Preview {
     NavigationStack {
-        BasePayTablesView()
+        BasicPayTablesView()
     }
 }

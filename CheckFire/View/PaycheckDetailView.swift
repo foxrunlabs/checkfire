@@ -7,7 +7,7 @@ struct PaycheckDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var lesItems: [LESItem]
     
-    @State private var showBasePayResetButton = false
+    @State private var showBasicPayResetButton = false
     
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
@@ -21,12 +21,12 @@ struct PaycheckDetailView: View {
     
     private var availableYearsOfService: [YearsOfService] {
         let year = Calendar.current.component(.year, from: paycheck.date)
-        return PayTables.shared.yearsOfServiceAvailable(for: year, as: paycheck.payGrade)
+        return BasicPayTables.shared.yearsOfServiceAvailable(for: year, as: paycheck.payGrade)
     }
     
-    private var computedBasePay: Decimal {
+    private var computedBasicPay: Decimal {
         let year = Calendar.current.component(.year, from: paycheck.date)
-        return PayTables.shared.basePay(
+        return BasicPayTables.shared.basicPay(
             for: year,
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
@@ -78,17 +78,17 @@ struct PaycheckDetailView: View {
                 .pickerStyle(.menu)
 
                 LabeledContent {
-                    TextField("Base Pay", value: $paycheck.basePay, format: .currency(code: "USD"))
+                    TextField("Basic Pay", value: $paycheck.basicPay, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
                 } label: {
                     HStack {
-                        Text("Base Pay")
+                        Text("Basic Pay")
                         
-                        if showBasePayResetButton {
+                        if showBasicPayResetButton {
                             Button {
-                                paycheck.basePay = computedBasePay
-                                showBasePayResetButton.toggle()
+                                paycheck.basicPay = computedBasicPay
+                                showBasicPayResetButton.toggle()
                             } label: {
                                 Image(systemName: "arrow.uturn.backward.circle")
                             }
@@ -162,20 +162,20 @@ struct PaycheckDetailView: View {
             }
         }
         .onAppear {
-            if paycheck.basePay != computedBasePay {
-                showBasePayResetButton = true
+            if paycheck.basicPay != computedBasicPay {
+                showBasicPayResetButton = true
             }
         }
         .onChange(of: paycheck.date) {
             updateYearsOfService()
-            updateBasePay()
+            updateBasicPay()
         }
         .onChange(of: paycheck.payGrade) {
             updateYearsOfService()
-            updateBasePay()
+            updateBasicPay()
         }
         .onChange(of: paycheck.yearsOfService) {
-            updateBasePay()
+            updateBasicPay()
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -190,8 +190,8 @@ struct PaycheckDetailView: View {
                         for: nil
                     )
                     
-                    if paycheck.basePay != computedBasePay {
-                        showBasePayResetButton = true
+                    if paycheck.basicPay != computedBasicPay {
+                        showBasicPayResetButton = true
                     }
                 }
             }
@@ -243,12 +243,12 @@ struct PaycheckDetailView: View {
         indices.forEach { modelContext.delete(allotments[$0]) }
     }
     
-    private func updateBasePay() {
-        paycheck.basePay = PayTables.shared.basePay(
+    private func updateBasicPay() {
+        paycheck.basicPay = BasicPayTables.shared.basicPay(
             for: Calendar.current.component(.year, from: paycheck.date),
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
-        ) ?? paycheck.basePay
+        ) ?? paycheck.basicPay
     }
     
     private func updateYearsOfService() {

@@ -82,11 +82,11 @@ struct AddPaycheckSheet: View {
         if let template {
             newPaycheck.payGrade = template.payGrade
             newPaycheck.yearsOfService = template.yearsOfService
-            newPaycheck.basePay = PayTables.shared.basePay(
+            newPaycheck.basicPay = BasicPayTables.shared.basicPay(
                 for: Calendar.current.component(.year, from: date),
                 as: template.payGrade,
                 with: template.yearsOfService
-            ) ?? template.basePay
+            ) ?? template.basicPay
             
             newPaycheck.lesItems = template.lesItems?.map {
                 LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)

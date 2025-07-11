@@ -1,7 +1,7 @@
 import Foundation
 
-final class PayTables {
-    private let payTables: [PayTable] = Bundle.main.decode(from: "pay_tables.json")
+final class BasicPayTables {
+    private let payTables: [BasicPayTable] = Bundle.main.decode(from: "basic_pay_tables.json")
     
     var years: [Int] {
         payTables.map { $0.year } 
@@ -10,17 +10,17 @@ final class PayTables {
     /// Private initializer for singleton object.
     private init() {}
     
-    private func payTable(for year: Int) -> PayTable? {
+    private func payTable(for year: Int) -> BasicPayTable? {
         payTables.first { $0.year == year }
     }
     
-    /// Base pay for a given paycheck.
+    /// Basic pay for a given paycheck.
     /// - Parameters:
     ///   - year: Calendar year.
     ///   - grade: Pay grade.
     ///   - yearsOfService: Years of cumulative service.
-    /// - Returns: Base pay `Decimal`, or `nil` if unable to compute.
-    func basePay(
+    /// - Returns: Basic pay `Decimal`, or `nil` if unable to compute.
+    func basicPay(
         for year: Int,
         as grade: PayGrade,
         with yearsOfService: YearsOfService
@@ -41,5 +41,5 @@ final class PayTables {
         return YearsOfService.allCases.filter { schedule.keys.contains($0) }
     }
     
-    static let shared = PayTables()
+    static let shared = BasicPayTables()
 }

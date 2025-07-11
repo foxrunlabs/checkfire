@@ -29,6 +29,6 @@ struct CurrencyField: View {
     @Previewable @State var paycheck = Paycheck.example
     
     List {
-        CurrencyField("Base Pay", value: $paycheck.basePay)
+        CurrencyField("Basic Pay", value: $paycheck.basicPay)
     }
 }

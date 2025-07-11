@@ -24,7 +24,7 @@ struct NetPayView: View {
     
     private var grossPay: Decimal {
         if let lesItems = paycheck.lesItems {
-            paycheck.basePay + lesItems.reduce(0.00) {
+            paycheck.basicPay + lesItems.reduce(0.00) {
                 if case .entitlement = $1.itemType {
                     $0 + $1.amount
                 } else {
@@ -32,14 +32,14 @@ struct NetPayView: View {
                 }
             }
         } else {
-            paycheck.basePay
+            paycheck.basicPay
         }
     }
     
     private var traditionalTSPContribution: Decimal? {
         guard let tsp = thriftSavingsPlans.last else { return nil }
         
-        var contribution = paycheck.basePay * tsp.traditionalBasePay
+        var contribution = paycheck.basicPay * tsp.traditionalBasicPay
         guard let lesItems = paycheck.lesItems else {
             return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
         }
@@ -69,7 +69,7 @@ struct NetPayView: View {
     var rothTSPContribution: Decimal? {
         guard let tsp = thriftSavingsPlans.last else { return nil }
         
-        var contribution = paycheck.basePay * tsp.rothBasePay
+        var contribution = paycheck.basicPay * tsp.rothBasicPay
         guard let lesItems = paycheck.lesItems else {
             return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
         }
@@ -98,7 +98,7 @@ struct NetPayView: View {
     
     var wagePeriod: Decimal? {
         guard let traditionalTSPContribution else { return nil }
-        var taxableWage = paycheck.basePay - traditionalTSPContribution
+        var taxableWage = paycheck.basicPay - traditionalTSPContribution
         guard let lesItems = paycheck.lesItems else { return taxableWage }
         
         taxableWage += lesItems.reduce(0.00) {
@@ -127,14 +127,14 @@ struct NetPayView: View {
     var socialSecurity: Decimal? {
         WithholdingTables.shared.calculateSocialSecurity(
             for: Calendar.current.component(.year, from: paycheck.date),
-            wage: paycheck.basePay
+            wage: paycheck.basicPay
         )
     }
     
     var medicare: Decimal? {
         WithholdingTables.shared.calculateMedicare(
             for: Calendar.current.component(.year, from: paycheck.date),
-            wage: paycheck.basePay
+            wage: paycheck.basicPay
         )
     }
     

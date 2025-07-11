@@ -9,7 +9,7 @@ final class Paycheck: Identifiable {
     
     var payGrade = PayGrade.e1
     var yearsOfService = YearsOfService.lessThanOrEqual2
-    var basePay: Decimal = PayTables.shared.basePay(
+    var basicPay = BasicPayTables.shared.basicPay(
         for: Calendar.current.component(.year, from: .now),
         as: .e1,
         with: .lessThanOrEqual2
@@ -31,7 +31,11 @@ final class Paycheck: Identifiable {
         self.payGrade = payGrade
         self.yearsOfService = yearsOfService
         let year = Calendar.current.component(.year, from: date)
-        self.basePay = PayTables.shared.basePay(for: year, as: payGrade, with: yearsOfService) ?? 0.00
+        self.basicPay = BasicPayTables.shared.basicPay(
+            for: year,
+            as: payGrade,
+            with: yearsOfService
+        ) ?? 0.00
         
         self.lesItems = lesItems
     }

@@ -22,53 +22,53 @@ struct TSPDetailView: View {
             }
             
             Section("Traditional TSP") {
-                TSPStepper("Base Pay", value: $tsp.traditionalBasePay, max: 1 - tsp.rothBasePay)
+                TSPStepper("Basic Pay", value: $tsp.traditionalBasicPay, max: 1 - tsp.rothBasicPay)
                 
                 TSPStepper(
                     "Special Pay",
                     value: $tsp.traditionalSpecialPay,
                     max: 1 - tsp.rothSpecialPay
                 )
-                .disabled(tsp.traditionalBasePay.isZero)
+                .disabled(tsp.traditionalBasicPay.isZero)
                 
                 TSPStepper(
                     "Incentive Pay",
                     value: $tsp.traditionalIncentivePay,
                     max: 1 - tsp.rothIncentivePay
                 )
-                .disabled(tsp.traditionalBasePay.isZero)
+                .disabled(tsp.traditionalBasicPay.isZero)
                 
                 TSPStepper(
                     "Bonus Pay",
                     value: $tsp.traditionalBonusPay,
                     max: 1 - tsp.rothBonusPay
                 )
-                .disabled(tsp.traditionalBasePay.isZero)
+                .disabled(tsp.traditionalBasicPay.isZero)
             }
 
             Section("Roth TSP") {
-                TSPStepper("Base Pay", value: $tsp.rothBasePay, max: 1 - tsp.traditionalBasePay)
+                TSPStepper("Basic Pay", value: $tsp.rothBasicPay, max: 1 - tsp.traditionalBasicPay)
 
                 TSPStepper(
                     "Special Pay",
                     value: $tsp.rothSpecialPay,
                     max: 1 - tsp.traditionalSpecialPay
                 )
-                .disabled(tsp.rothBasePay.isZero)
+                .disabled(tsp.rothBasicPay.isZero)
                 
                 TSPStepper(
                     "Incentive Pay",
                     value: $tsp.rothIncentivePay,
                     max: 1 - tsp.traditionalIncentivePay
                 )
-                .disabled(tsp.rothBasePay.isZero)
+                .disabled(tsp.rothBasicPay.isZero)
 
                 TSPStepper(
                     "Bonus Pay",
                     value: $tsp.rothBonusPay,
                     max: 1 - tsp.traditionalBonusPay
                 )
-                .disabled(tsp.rothBasePay.isZero)
+                .disabled(tsp.rothBasicPay.isZero)
 
             }
             
@@ -81,10 +81,10 @@ struct TSPDetailView: View {
         }
         .navigationTitle($tsp.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: tsp.traditionalBasePay) {
+        .onChange(of: tsp.traditionalBasicPay) {
             validateTraditional()
         }
-        .onChange(of: tsp.rothBasePay) {
+        .onChange(of: tsp.rothBasicPay) {
             validateRoth()
         }
         .toolbar {
@@ -102,12 +102,12 @@ struct TSPDetailView: View {
     }
     
     private func resetTSP() {
-        tsp.traditionalBasePay = 0.00
-        tsp.rothBasePay = 0.00
+        tsp.traditionalBasicPay = 0.00
+        tsp.rothBasicPay = 0.00
     }
     
     private func validateTraditional() {
-        if tsp.traditionalBasePay.isZero {
+        if tsp.traditionalBasicPay.isZero {
             tsp.traditionalSpecialPay = 0.00
             tsp.traditionalIncentivePay = 0.00
             tsp.traditionalBonusPay = 0.00
@@ -115,7 +115,7 @@ struct TSPDetailView: View {
     }
     
     private func validateRoth() {
-        if tsp.rothBasePay.isZero {
+        if tsp.rothBasicPay.isZero {
             tsp.rothSpecialPay = 0.00
             tsp.rothIncentivePay = 0.00
             tsp.rothBonusPay = 0.00
