@@ -2,14 +2,6 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckDetailView: View {
-    @Bindable private var paycheck: Paycheck
-    
-    @Environment(\.modelContext) private var modelContext
-    @Query private var lesItems: [LESItem]
-    
-    @State private var showBasicPayResetButton = false
-    @State private var showBASResetButton = false
-    
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
         
@@ -18,6 +10,19 @@ struct PaycheckDetailView: View {
             filter: #Predicate<LESItem> { $0.paycheck?.persistentModelID == paycheckID },
             sort: \.name
         )
+    }
+    
+    @Bindable private var paycheck: Paycheck
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var paychecks: [Paycheck]
+    @Query private var lesItems: [LESItem]
+    
+    @State private var showBasicPayResetButton = false
+    @State private var showBASResetButton = false
+    
+    private var excludedDates: [Date] {
+        paychecks.filter({ $0.id != paycheck.id }).map { $0.date }
     }
     
     private var availableYearsOfService: [YearsOfService] {
@@ -65,7 +70,8 @@ struct PaycheckDetailView: View {
                 MonthYearPicker(
                     "Pay Date",
                     selection: $paycheck.date,
-                    in: WithholdingTables.shared.years
+                    in: WithholdingTables.shared.years,
+                    excluding: excludedDates
                 )
                 
                 Picker("Pay Grade", selection: $paycheck.payGrade) {

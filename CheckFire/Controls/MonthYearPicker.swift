@@ -1,149 +1,201 @@
 import SwiftUI
 
 struct MonthYearPicker: View {
-    private let title: String
-    @Binding private var selection: Date
-    private let yearRange: ClosedRange<Int>
-    
-    @State private var showPicker = false
-    
-    init(_ title: String, selection: Binding<Date>, in yearRange: ClosedRange<Int>) {
+    init<S>(
+        _ title: S,
+        selection: Binding<Date>,
+        in bounds: ClosedRange<Int>,
+        excluding: [Date]? = nil
+    ) where S : StringProtocol {
         self.title = title
         self._selection = selection
-        self.yearRange = yearRange
+        self.years = bounds
+        self.excludedDates = excluding
     }
+    
+    private let title: any StringProtocol
+    @Binding private var selection: Date
+    private let years: ClosedRange<Int>
+    private let excludedDates: [Date]?
+    
+    @State private var showPickerPopover = false
     
     var body: some View {
-        LabeledContent {
-            Button(selection.formatted(.dateTime.month().year()))
-            {
-                showPicker.toggle()
+        LabeledContent(title) {
+            Button {
+                showPickerPopover.toggle()
+            } label: {
+                HStack(spacing: 5) {
+                    Text(selection.formatted(.dateTime.month().year()))
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.footnote)
+                }
             }
             .buttonStyle(.borderless)
-            .popover(isPresented: $showPicker, arrowEdge: .top) {
-                PickerView(selection: $selection, in: yearRange)
+            .popover(isPresented: $showPickerPopover, arrowEdge: .top) {
+                PickerPopover(selection: $selection, in: years, excluding: excludedDates)
                     .presentationCompactAdaptation(.popover)
             }
-        } label: {
-            Text(title)
         }
     }
     
-    private struct PickerView: View {
-        @Binding private var selection: Date
-        private let yearRange: ClosedRange<Int>
-        
-        init(selection: Binding<Date>, in yearRange: ClosedRange<Int>) {
+    private struct PickerPopover: View {
+        init(selection: Binding<Date>, in bounds: ClosedRange<Int>, excluding: [Date]? = nil) {
             self._selection = selection
-            self.yearRange = yearRange
+            self.years = bounds
+            self.excludedDates = excluding
+            
+            let year = Calendar.current.component(.year, from: selection.wrappedValue)
+            self._pickerYear = State(initialValue: year)
         }
+        
+        @Binding private var selection: Date
+        private let years: ClosedRange<Int>
+        private let excludedDates: [Date]?
+        @State private var pickerYear: Int
         
         var body: some View {
             VStack {
-                YearStepper(selection: $selection, in: yearRange)
-                
-                // Build a 3 x 4 matrix of MonthPickers
-                Grid {
-                    ForEach(0..<4) { row in
-                        GridRow {
-                            MonthPicker(3 * row + 1, selection: $selection)
-                            MonthPicker(3 * row + 2, selection: $selection)
-                            MonthPicker(3 * row + 3, selection: $selection)
-                        }
-                    }
-                }
+                YearStepper(String(describing: pickerYear), value: $pickerYear, in: years)
+                MonthPicker(selection: $selection, year: pickerYear, excluding: excludedDates)
             }
             .padding()
         }
     }
     
     private struct YearStepper: View {
-        @Binding private var selection: Date
-        private let yearRange: ClosedRange<Int>
-        
-        init(selection: Binding<Date>, in yearRange: ClosedRange<Int>) {
-            self._selection = selection
-            self.yearRange = yearRange
+        init<S>(
+            _ title: S,
+            value: Binding<Int>,
+            in bounds: ClosedRange<Int>
+        ) where S : StringProtocol {
+            self.title = title
+            self._year = value
+            self.years = bounds
         }
         
-        private var selectionYear: Int { Calendar.current.component(.year, from: selection) }
+        private let title: any StringProtocol
+        @Binding private var year: Int
+        private let years: ClosedRange<Int>
         
         var body: some View {
             HStack {
                 Button {
-                    decrement()
+                    year = max(year - 1, years.lowerBound)
                 } label: {
                     Image(systemName: "chevron.left")
                         .bold()
                 }
-                .disabled(selectionYear == yearRange.lowerBound)
+                .disabled(year == years.lowerBound)
                 
-                Text(selection.formatted(.dateTime.year()))
+                Text(title)
                     .foregroundStyle(.primary)
                     .bold()
                 
                 Button {
-                    increment()
+                    year = min(year + 1, years.upperBound)
                 } label: {
                     Image(systemName: "chevron.right")
                         .bold()
                 }
-                .disabled(selectionYear == yearRange.upperBound)
-            }
-        }
-        
-        private func decrement() {
-            let year = Calendar.current.component(.year, from: selection)
-            
-            if year > yearRange.lowerBound {
-                selection = Calendar.current.date(byAdding: .year, value: -1, to: selection) ?? selection
-                selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
-            }
-        }
-        
-        private func increment() {
-            let year = Calendar.current.component(.year, from: selection)
-            
-            if year < yearRange.upperBound {
-                selection = Calendar.current.date(byAdding: .year, value: 1, to: selection) ?? selection
-                selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
+                .disabled(year == years.upperBound)
             }
         }
     }
-
+    
     private struct MonthPicker: View {
-        private let month: Int
-        @Binding private var selection: Date
-        
-        private let months = Calendar.current.monthSymbols.map { $0.prefix(3) }
-        
-        init(_ month: Int, selection: Binding<Date>) {
-            self.month = month
+        init(selection: Binding<Date>, year: Int, excluding: [Date]? = nil) {
             self._selection = selection
+            self.year = year
+            self.excludedDates = excluding
+            
+            self.currentDate = selection.wrappedValue
         }
         
-        private var selectionMonth: Int { Calendar.current.component(.month, from: selection) }
+        @Binding private var selection: Date
+        private let year: Int
+        private let excludedDates: [Date]?
+        
+        private let currentDate: Date
         
         var body: some View {
-            Text(months[month - 1])
-                .frame(width: 50, height: 35)
-                .bold(selectionMonth == month)
-                .foregroundStyle(selectionMonth == month ? Color.accentColor : .primary)
-                .background(selectionMonth == month ? Color.accentColor.opacity(0.25) : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-                .onTapGesture {
-                    setMonth()
+            // Build a 3 x 4 matrix of MonthButtons
+            Grid {
+                ForEach(0..<4) { row in
+                    GridRow {
+                        Button(Calendar.current.shortMonthSymbols[3 * row]) {
+                            updateSelection(month: 3 * row + 1)
+                        }
+                        .buttonStyle(
+                            MonthButtonStyle(isSelected: isCurrentDate(month: 3 * row + 1))
+                        )
+                        .disabled(isExcludedDate(month: 3 * row + 1))
+                        
+                        Button(Calendar.current.shortMonthSymbols[3 * row + 1]) {
+                            updateSelection(month: 3 * row + 2)
+                        }
+                        .buttonStyle(
+                            MonthButtonStyle(isSelected: isCurrentDate(month: 3 * row + 2))
+                        )
+                        .disabled(isExcludedDate(month: 3 * row + 2))
+                        
+                        Button(Calendar.current.shortMonthSymbols[3 * row + 2]) {
+                            updateSelection(month: 3 * row + 3)
+                        }
+                        .buttonStyle(
+                            MonthButtonStyle(isSelected: isCurrentDate(month: 3 * row + 3))
+                        )
+                        .disabled(isExcludedDate(month: 3 * row + 3))
+                    }
                 }
+            }
         }
         
-        private func setMonth() {
-            var components = Calendar.current.dateComponents(
-                [.calendar, .year, .month],
-                from: selection
-            )
-            components.month = month
-            selection = components.date ?? selection
-            selection = Calendar.current.lastDateOfMonth(from: selection) ?? selection
+        private func isCurrentDate(month: Int) -> Bool {
+            let components = Calendar.current.dateComponents([.year, .month], from: currentDate)
+            return (month == components.month!) && (year == components.year!)
+        }
+        
+        private func isExcludedDate(month: Int) -> Bool {
+            guard let excludedDates else { return false }
+            
+            var date = DateComponents(calendar: .current, year: year, month: month, day: 1).date!
+            date = Calendar.current.lastDateOfMonth(from: date)!
+            
+            return excludedDates.contains(date)
+        }
+        
+        private func updateSelection(month: Int) {
+            let newDate = DateComponents(
+                calendar: .current,
+                year: year,
+                month: month,
+                day: 1
+            ).date ?? selection
+            selection = Calendar.current.lastDateOfMonth(from: newDate) ?? selection
+        }
+    }
+    
+    private struct MonthButtonStyle: ButtonStyle {
+        let isSelected: Bool
+        
+        @Environment(\.isEnabled) private var isEnabled
+        
+        private var foregroundColor: Color {
+            if isEnabled {
+                isSelected ? .accentColor : .primary
+            } else {
+                .secondary
+            }
+        }
+        
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .frame(width: 50, height: 35)
+                .bold(isSelected)
+                .foregroundStyle(foregroundColor)
+                .background(isSelected ? Color.accentColor.opacity(0.25) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 5))
         }
     }
 }
@@ -157,7 +209,17 @@ struct MonthYearPicker: View {
         day: 28
     ).date!
     
+    @Previewable @State var excludedDates = [
+        DateComponents(calendar: .current, year: 2025, month: 1, day: 31).date!,
+        DateComponents(calendar: .current, year: 2024, month: 12, day: 31).date!
+    ]
+    
     Form {
-        MonthYearPicker("Pay Date", selection: $date, in: WithholdingTables.shared.years)
+        MonthYearPicker(
+            "Pay Date",
+            selection: $date,
+            in: WithholdingTables.shared.years,
+            excluding: excludedDates
+        )
     }
 }

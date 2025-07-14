@@ -12,10 +12,8 @@ struct AddWithholdingFormSheet: View {
     @State private var date = Calendar.current.lastDateOfMonth(from: .now)!
     @State private var template: WithholdingForm?
     
-    @State private var showAlert = false
-    
-    private var withholdingFormExists: Bool {
-        withholdingForms.contains { $0.date == date }
+    private var excludedDates: [Date] {
+        withholdingForms.map { $0.date }
     }
     
     var body: some View {
@@ -29,7 +27,8 @@ struct AddWithholdingFormSheet: View {
                 MonthYearPicker(
                     "Effective Date",
                     selection: $date,
-                    in: WithholdingTables.shared.years
+                    in: WithholdingTables.shared.years,
+                    excluding: excludedDates
                 )
                 
                 Picker("Template", selection: $template) {
@@ -58,19 +57,10 @@ struct AddWithholdingFormSheet: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        if withholdingFormExists {
-                            showAlert.toggle()
-                        } else {
-                            addWithholdingForm()
-                            dismiss()
-                        }
+                        addWithholdingForm()
+                        dismiss()
                     }
                 }
-            }
-            .alert("Error", isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("Effective date already exists.")
             }
         }
     }

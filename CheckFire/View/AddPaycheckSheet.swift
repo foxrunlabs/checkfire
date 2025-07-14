@@ -12,10 +12,8 @@ struct AddPaycheckSheet: View {
     @State private var date = Calendar.current.lastDateOfMonth(from: .now)!
     @State private var template: Paycheck?
     
-    @State private var showAlert = false
-    
-    private var paycheckExists: Bool {
-        paychecks.contains { $0.date == date }
+    private var excludedDates: [Date] {
+        paychecks.map { $0.date }
     }
     
     var body: some View {
@@ -29,7 +27,8 @@ struct AddPaycheckSheet: View {
                 MonthYearPicker(
                     "Pay Date",
                     selection: $date,
-                    in: WithholdingTables.shared.years
+                    in: WithholdingTables.shared.years,
+                    excluding: excludedDates
                 )
                 
                 Picker("Template", selection: $template) {
@@ -57,19 +56,10 @@ struct AddPaycheckSheet: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        if paycheckExists {
-                            showAlert.toggle()
-                        } else {
-                            addPaycheck()
-                            dismiss()
-                        }
+                        addPaycheck()
+                        dismiss()
                     }
                 }
-            }
-            .alert("Error", isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("Pay date already exists.")
             }
         }
     }

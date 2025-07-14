@@ -2,13 +2,18 @@ import SwiftData
 import SwiftUI
 
 struct TSPDetailView: View {
+    init(for tsp: ThriftSavingsPlan) {
+        self.tsp = tsp
+    }
+    
     @Bindable private var tsp: ThriftSavingsPlan
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-
-    init(for tsp: ThriftSavingsPlan) {
-        self.tsp = tsp
+    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
+    
+    private var excludedDates: [Date] {
+        thriftSavingsPlans.filter({ $0.id != tsp.id }).map { $0.date }
     }
     
     var body: some View {
@@ -17,7 +22,8 @@ struct TSPDetailView: View {
                 MonthYearPicker(
                     "Effective Date",
                     selection: $tsp.date,
-                    in: WithholdingTables.shared.years
+                    in: WithholdingTables.shared.years,
+                    excluding: excludedDates
                 )
             }
             

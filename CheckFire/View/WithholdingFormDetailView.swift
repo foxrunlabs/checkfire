@@ -2,13 +2,18 @@ import SwiftData
 import SwiftUI
 
 struct WithholdingFormDetailView: View {
+    init(for withholdingForm: WithholdingForm) {
+        self.withholdingForm = withholdingForm
+    }
+    
     @Bindable private var withholdingForm: WithholdingForm
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-
-    init(for withholdingForm: WithholdingForm) {
-        self.withholdingForm = withholdingForm
+    @Query private var withholdingForms: [WithholdingForm]
+    
+    private var excludedDates: [Date] {
+        withholdingForms.filter({ $0.id != withholdingForm.id }).map { $0.date }
     }
     
     var body: some View {
@@ -17,7 +22,8 @@ struct WithholdingFormDetailView: View {
                 MonthYearPicker(
                     "Effective Date",
                     selection: $withholdingForm.date,
-                    in: WithholdingTables.shared.years
+                    in: WithholdingTables.shared.years,
+                    excluding: excludedDates
                 )
             }
             
