@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct BASTablesView: View {
+struct BASTablesSheet: View {
     @State private var year: Int
     
     @Environment(\.dismiss) private var dismiss
@@ -68,7 +68,5 @@ struct BASTablesView: View {
 
 // MARK: - Preview
 #Preview {
-    NavigationStack {
-        BASTablesView()
-    }
+    BASTablesSheet()
 }

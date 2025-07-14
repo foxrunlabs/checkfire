@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct CurrencyField: View {
-    private let title: String
-    @Binding private var value: Decimal
-
-    init(_ title: String, value: Binding<Decimal>) {
+    init<S>(_ title: S, value: Binding<Decimal>) where S : StringProtocol {
         self.title = title
         self._value = value
     }
+    
+    private let title: any StringProtocol
+    @Binding private var value: Decimal
 
     var body: some View {
         LabeledContent {

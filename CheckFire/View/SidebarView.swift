@@ -57,13 +57,13 @@ struct SidebarView: View {
             }
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesView()
+            BasicPayTablesSheet()
         }
         .sheet(isPresented: $showBASTablesSheet) {
-            BASTablesView()
+            BASTablesSheet()
         }
         .sheet(isPresented: $showAboutSheet) {
-            AboutView()
+            AboutSheet()
         }
         .alert("Delete All Data", isPresented: $showDeleteAlert) {
             if ProcessInfo.processInfo.isiOSAppOnMac {

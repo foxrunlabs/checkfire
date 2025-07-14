@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct AboutView: View {
+struct AboutSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     private let contactURL = URL(string: "mailto:kj6msg@icloud.com")!
@@ -45,12 +45,12 @@ struct AboutView: View {
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var showAbout = true
+    @Previewable @State var showAboutSheet = true
     
     Button("Show About") {
-        showAbout.toggle()
+        showAboutSheet.toggle()
     }
-    .sheet(isPresented: $showAbout) {
-        AboutView()
+    .sheet(isPresented: $showAboutSheet) {
+        AboutSheet()
     }
 }

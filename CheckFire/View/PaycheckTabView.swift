@@ -47,10 +47,10 @@ struct PaycheckTabView: View {
             }
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesView(year: paycheckYear, payGrade: paycheck.payGrade)
+            BasicPayTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
         }
         .sheet(isPresented: $showBASTablesSheet) {
-            BASTablesView(year: paycheckYear)
+            BASTablesSheet(year: paycheckYear)
         }
     }
     

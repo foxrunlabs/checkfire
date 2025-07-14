@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct BasicPayTablesView: View {
+struct BasicPayTablesSheet: View {
     @State private var year: Int
     @State private var payGrade: PayGrade
     
@@ -69,7 +69,5 @@ struct BasicPayTablesView: View {
 
 // MARK: - Preview
 #Preview {
-    NavigationStack {
-        BasicPayTablesView()
-    }
+    BasicPayTablesSheet()
 }

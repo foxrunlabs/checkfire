@@ -1,15 +1,15 @@
 import SwiftUI
 
 struct TSPStepper: View {
-    private let title: String
-    @Binding private var value: Decimal
-    private let max: Decimal
-    
-    init(_ title: String, value: Binding<Decimal>, max: Decimal) {
+    init<S>(_ title: S, value: Binding<Decimal>, max: Decimal) where S : StringProtocol {
         self.title = title
         self._value = value
         self.max = max
     }
+    
+    private let title: any StringProtocol
+    @Binding private var value: Decimal
+    private let max: Decimal
     
     var body: some View {
         Stepper(
