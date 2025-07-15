@@ -114,6 +114,14 @@ struct PaycheckDetailView: View {
                 }
                 
                 LabeledContent {
+                    TextField("BAH", value: $paycheck.bah, format: .currency(code: "USD"))
+                        .multilineTextAlignment(.trailing)
+                        .keyboardType(.decimalPad)
+                } label: {
+                    Text("BAH")
+                }
+                
+                LabeledContent {
                     TextField("BAS", value: $paycheck.bas, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
@@ -131,14 +139,6 @@ struct PaycheckDetailView: View {
                             .buttonStyle(.borderless)
                         }
                     }
-                }
-                
-                LabeledContent {
-                    TextField("BAH", value: $paycheck.bah, format: .currency(code: "USD"))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
-                } label: {
-                    Text("BAH")
                 }
             }
             

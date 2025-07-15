@@ -8,6 +8,7 @@ struct PaycheckTabView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State private var showBasicPayTablesSheet = false
+    @State private var showBAHTablesSheet = false
     @State private var showBASTablesSheet = false
     
     init(for paycheck: Paycheck) {
@@ -35,6 +36,10 @@ struct PaycheckTabView: View {
                         showBasicPayTablesSheet.toggle()
                     }
                     
+                    Button("BAH Tables", systemImage: "house") {
+                        showBAHTablesSheet.toggle()
+                    }
+                    
                     Button("BAS Tables", systemImage: "fork.knife") {
                         showBASTablesSheet.toggle()
                     }
@@ -48,6 +53,9 @@ struct PaycheckTabView: View {
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
             BasicPayTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
+        }
+        .sheet(isPresented: $showBAHTablesSheet) {
+            BAHTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
         }
         .sheet(isPresented: $showBASTablesSheet) {
             BASTablesSheet(year: paycheckYear)

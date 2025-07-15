@@ -10,6 +10,7 @@ struct SidebarView: View {
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
     @State private var showBasicPayTablesSheet = false
+    @State private var showBAHTablesSheet = false
     @State private var showBASTablesSheet = false
     @State private var showAboutSheet = false
     
@@ -36,6 +37,10 @@ struct SidebarView: View {
                     showBasicPayTablesSheet.toggle()
                 }
                 
+                Button("BAH Tables", systemImage: "house") {
+                    showBAHTablesSheet.toggle()
+                }
+                
                 Button("BAS Tables", systemImage: "fork.knife") {
                     showBASTablesSheet.toggle()
                 }
@@ -58,6 +63,9 @@ struct SidebarView: View {
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
             BasicPayTablesSheet()
+        }
+        .sheet(isPresented: $showBAHTablesSheet) {
+            BAHTablesSheet()
         }
         .sheet(isPresented: $showBASTablesSheet) {
             BASTablesSheet()
