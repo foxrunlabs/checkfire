@@ -3,7 +3,7 @@ import SwiftUI
 struct AboutSheet: View {
     @Environment(\.dismiss) private var dismiss
     
-    private let contactURL = URL(string: "mailto:kj6msg@icloud.com")!
+    private let contactURL = URL(string: "mailto:foxrunlabs@icloud.com")!
     private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
     
     private var version: String {

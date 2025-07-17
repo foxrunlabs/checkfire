@@ -69,5 +69,12 @@ struct BasicPayTablesSheet: View {
 
 // MARK: - Preview
 #Preview {
-    BasicPayTablesSheet()
+    @Previewable @State var showSheet = true
+    
+    Button("Show Basic Pay Tables") {
+        showSheet.toggle()
+    }
+    .sheet(isPresented: $showSheet) {
+        BasicPayTablesSheet()
+    }
 }

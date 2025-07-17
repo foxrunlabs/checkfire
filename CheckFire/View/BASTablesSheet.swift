@@ -68,5 +68,12 @@ struct BASTablesSheet: View {
 
 // MARK: - Preview
 #Preview {
-    BASTablesSheet()
+    @Previewable @State var showSheet = true
+    
+    Button("Show BAS Tables") {
+        showSheet.toggle()
+    }
+    .sheet(isPresented: $showSheet) {
+        BASTablesSheet()
+    }
 }

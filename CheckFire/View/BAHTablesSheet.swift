@@ -108,5 +108,12 @@ struct BAHTablesSheet : View {
 
 // MARK: - Preview
 #Preview {
-    BAHTablesSheet()
+    @Previewable @State var showSheet = true
+    
+    Button("Show BAH Tables") {
+        showSheet.toggle()
+    }
+    .sheet(isPresented: $showSheet) {
+        BAHTablesSheet()
+    }
 }
