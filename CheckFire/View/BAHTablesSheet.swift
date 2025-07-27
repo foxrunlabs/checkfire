@@ -8,7 +8,7 @@ struct BAHTablesSheet : View {
     }
     
     @State private var year: Int
-    @AppStorage("zipcode") private var zipcode: String = ""
+    @State private var zipcode: String
     @State private var payGrade: PayGrade
     
     @Environment(\.dismiss) private var dismiss
@@ -24,14 +24,7 @@ struct BAHTablesSheet : View {
     }
     
     private var mha: String {
-        guard let mhaDescription = BAHTables.shared.mha(for: year, in: zipcode) else {
-            return "No Data"
-        }
-        
-        let mhaSegments = mhaDescription.split(separator: ", ")
-        let area = mhaSegments[0].capitalized
-        let state = (mhaSegments.count == 2) ? ", \(mhaSegments[1].uppercased())" : ""
-        return area + state
+        BAHTables.shared.mhaName(for: year, in: zipcode) ?? "No Data"
     }
     
     var body: some View {
@@ -62,8 +55,14 @@ struct BAHTablesSheet : View {
                 }
                 
                 Section {
-                    LabeledContent("MHA") {
+                    HStack {
+                        Text("Military Housing Area")
+                            .fixedSize()
+                        
+                        Spacer()
+                        
                         Text(mha)
+                            .foregroundStyle(.secondary)
                     }
                     
                     LabeledContent("Without Dependents") {

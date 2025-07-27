@@ -1,38 +1,42 @@
 import Foundation
 
 final class BAHTables {
-    private let mhaTables: [MHATable] = Bundle.main.decode(from: "mha_tables.json")
     private let bahTables: [BAHTable] = Bundle.main.decode(from: "bah_tables.json")
     
     var years: [Int] {
         bahTables.map { $0.year }
     }
     
-    /// Private initializaer for singleton object.
+    /// Private initializer for singleton object.
     private init() {}
     
-    private func mhaName(for year: Int, zipcode: String) -> String? {
-        let mhaTable = mhaTables.first { $0.year == year }
-        let mha = mhaTable?.mhas.first { $0.zipcode == zipcode }
-        return mha?.name
-    }
-    
-    func mha(for year: Int, in zipcode: String) -> String? {
-        guard let mhaName = mhaName(for: year, zipcode: zipcode) else { return nil }
+    /// Military Housing Area (MHA) name for a given year and ZIP code.
+    /// - Parameters:
+    ///   - year: Calendar year.
+    ///   - zipcode: ZIP code.
+    /// - Returns: MHA name.
+    func mhaName(for year: Int, in zipcode: String) -> String? {
         let bahTable = bahTables.first { $0.year == year }
-        let bahData = bahTable?.mhas.first { $0.mha == mhaName }
-        return bahData?.description
+        guard let mha = bahTable?.mhas[zipcode] else { return nil }
+        return bahTable?.mhaNames[mha]
     }
     
+    /// Basic Allowance for Housing (BAH) for a given year, ZIP code, pay grade, and dependent status.
+    /// - Parameters:
+    ///   - year: Calendar year.
+    ///   - zipcode: ZIP code.
+    ///   - payGrade: Pay grade.
+    ///   - withDependents: Dependents status.
+    /// - Returns: BAH `Decimal`, or `nil` if unable to compute.
     func bah(
         for year: Int,
         in zipcode: String,
         as payGrade: PayGrade,
         withDependents: Bool
     ) -> Decimal? {
-        guard let mhaName = mhaName(for: year, zipcode: zipcode) else { return nil }
         let bahTable = bahTables.first { $0.year == year }
-        let bahData = bahTable?.mhas.first { $0.mha == mhaName }
+        guard let mha = bahTable?.mhas[zipcode] else { return nil }
+        let bahData = bahTable?.rates[mha]
         return withDependents ? bahData?.withDependents[payGrade] : bahData?.withoutDependents[payGrade]
     }
     
