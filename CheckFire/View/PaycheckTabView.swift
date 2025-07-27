@@ -7,10 +7,6 @@ struct PaycheckTabView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
-    @State private var showBasicPayTablesSheet = false
-    @State private var showBAHTablesSheet = false
-    @State private var showBASTablesSheet = false
-    
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
     }
@@ -31,34 +27,11 @@ struct PaycheckTabView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem {
-                Menu("Options", systemImage: "ellipsis.circle") {
-                    Button("Basic Pay Tables", systemImage: "tablecells") {
-                        showBasicPayTablesSheet.toggle()
-                    }
-                    
-                    Button("BAH Tables", systemImage: "house") {
-                        showBAHTablesSheet.toggle()
-                    }
-                    
-                    Button("BAS Tables", systemImage: "fork.knife") {
-                        showBASTablesSheet.toggle()
-                    }
-                    
-                    Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
-                        deletePaycheck()
-                        dismiss()
-                    }
+                Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
+                    deletePaycheck()
+                    dismiss()
                 }
             }
-        }
-        .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
-        }
-        .sheet(isPresented: $showBAHTablesSheet) {
-            BAHTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
-        }
-        .sheet(isPresented: $showBASTablesSheet) {
-            BASTablesSheet(year: paycheckYear)
         }
     }
     
