@@ -1,19 +1,28 @@
 import SwiftUI
 
 struct BASTablesSheet: View {
-    @State private var year: Int
+    @State var year: Int?
     
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("basYear") private var storedYear = Calendar.current.component(.year, from: .now)
     
-    init(year: Int? = nil) {
-        self.year = year ?? BASTables.shared.years.first!
+    private var officerBAS: String {
+        BASTables.shared.basTable(for: storedYear)?.officer.formatted(.currency(code: "USD")) ?? "No Data"
+    }
+    
+    private var enlistedBAS: String {
+        BASTables.shared.basTable(for: storedYear)?.enlisted.formatted(.currency(code: "USD")) ?? "No Data"
+    }
+    
+    private var basII: String {
+        BASTables.shared.basTable(for: storedYear)?.basII.formatted(.currency(code: "USD")) ?? "No Data"
     }
     
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Picker("Year", selection: $year) {
+                    Picker("Year", selection: $storedYear) {
                         ForEach(BASTables.shared.years, id: \.self) { year in
                             Text(String(describing: year))
                                 .tag(year)
@@ -23,34 +32,19 @@ struct BASTablesSheet: View {
                 }
                 
                 Section {
-                    HStack {
-                        Text("Category")
-                            .bold()
-                        
-                        Spacer()
-                        
-                        Text("BAS Rate")
-                            .bold()
+                    LabeledContent("Officer") {
+                        Text(officerBAS)
+                            .textSelection(.enabled)
                     }
                     
-                    if let basTable = BASTables.shared.basTable(for: year) {
-                        LabeledContent("Officer") {
-                            Text(basTable.officer, format: .currency(code: "USD"))
-                                .textSelection(.enabled)
-                        }
-                        
-                        LabeledContent("Enlisted") {
-                            Text(basTable.enlisted, format: .currency(code: "USD"))
-                                .textSelection(.enabled)
-                        }
-                        
-                        LabeledContent("BAS II") {
-                            Text(basTable.basII, format: .currency(code: "USD"))
-                                .textSelection(.enabled)
-                        }
-                        
-                    } else {
-                        Text("No Data")
+                    LabeledContent("Enlisted") {
+                        Text(enlistedBAS)
+                            .textSelection(.enabled)
+                    }
+                    
+                    LabeledContent("BAS II") {
+                        Text(basII)
+                            .textSelection(.enabled)
                     }
                 }
             }
@@ -60,6 +54,11 @@ struct BASTablesSheet: View {
                     Button("Done", role: .cancel) {
                         dismiss()
                     }
+                }
+            }
+            .onAppear {
+                if let year {
+                    storedYear = year
                 }
             }
         }

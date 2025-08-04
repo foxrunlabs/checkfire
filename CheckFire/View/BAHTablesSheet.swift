@@ -1,37 +1,44 @@
 import SwiftUI
 
 struct BAHTablesSheet : View {
-    init(year: Int? = nil, zipcode: String? = nil, payGrade: PayGrade? = nil) {
-        self.year = year ?? BAHTables.shared.years.first!
-        self.zipcode = zipcode ?? ""
-        self.payGrade = payGrade ?? .e1
-    }
-    
-    @State private var year: Int
-    @State private var zipcode: String
-    @State private var payGrade: PayGrade
+    @State var year: Int?
+    @State var zipcode: String?
+    @State var payGrade: PayGrade?
     
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("bahYear") private var storedYear = Calendar.current.component(.year, from: .now)
+    @AppStorage("bahZIPCode") private var storedZIPCode = "60088"
+    @AppStorage("bahPayGrade") private var storedPayGrade = PayGrade.e1
     
     private var withoutDependents: String {
-        let rate = BAHTables.shared.bah(for: year, in: zipcode, as: payGrade, withDependents: false)
+        let rate = BAHTables.shared.bah(
+            for: storedYear,
+            in: storedZIPCode,
+            as: storedPayGrade,
+            withDependents: false
+        )
         return rate?.formatted(.currency(code: "USD")) ?? "No Data"
     }
     
     private var withDependents: String {
-        let rate = BAHTables.shared.bah(for: year, in: zipcode, as: payGrade, withDependents: true)
+        let rate = BAHTables.shared.bah(
+            for: storedYear,
+            in: storedZIPCode,
+            as: storedPayGrade,
+            withDependents: true
+        )
         return rate?.formatted(.currency(code: "USD")) ?? "No Data"
     }
     
     private var mha: String {
-        BAHTables.shared.mhaName(for: year, in: zipcode) ?? "No Data"
+        BAHTables.shared.mhaName(for: storedYear, in: storedZIPCode) ?? "No Data"
     }
     
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Picker("Year", selection: $year) {
+                    Picker("Year", selection: $storedYear) {
                         ForEach(BAHTables.shared.years, id: \.self) { year in
                             Text(String(describing: year))
                                 .tag(year)
@@ -40,12 +47,12 @@ struct BAHTablesSheet : View {
                     .pickerStyle(.menu)
                     
                     LabeledContent("ZIP Code") {
-                        TextField("ZIP Code", text: $zipcode)
+                        TextField("ZIP Code", text: $storedZIPCode)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.numberPad)
                     }
                     
-                    Picker("Pay Grade", selection: $payGrade) {
+                    Picker("Pay Grade", selection: $storedPayGrade) {
                         ForEach(PayGrade.allCases) { grade in
                             Text(String(describing: grade))
                                 .tag(grade)
@@ -90,6 +97,19 @@ struct BAHTablesSheet : View {
                     Button("Done") {
                         dismissKeyboard()
                     }
+                }
+            }
+            .onAppear {
+                if let year {
+                    storedYear = year
+                }
+                
+                if let zipcode {
+                    storedZIPCode = zipcode
+                }
+                
+                if let payGrade {
+                    storedPayGrade = payGrade
                 }
             }
         }

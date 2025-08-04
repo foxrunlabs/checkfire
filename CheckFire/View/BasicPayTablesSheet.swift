@@ -1,21 +1,18 @@
 import SwiftUI
 
 struct BasicPayTablesSheet: View {
-    @State private var year: Int
-    @State private var payGrade: PayGrade
+    @State var year: Int?
+    @State var payGrade: PayGrade?
     
     @Environment(\.dismiss) private var dismiss
-    
-    init(year: Int? = nil, payGrade: PayGrade? = nil) {
-        self.year = year ?? BasicPayTables.shared.years.first!
-        self.payGrade = payGrade ?? .e1
-    }
+    @AppStorage("paytableYear") private var storedYear = Calendar.current.component(.year, from: .now)
+    @AppStorage("paytablePayGrade") private var storedPayGrade = PayGrade.e1
     
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Picker("Year", selection: $year) {
+                    Picker("Year", selection: $storedYear) {
                         ForEach(BasicPayTables.shared.years, id: \.self) { year in
                             Text(String(describing: year))
                                 .tag(year)
@@ -23,7 +20,7 @@ struct BasicPayTablesSheet: View {
                     }
                     .pickerStyle(.menu)
                     
-                    Picker("Pay Grade", selection: $payGrade) {
+                    Picker("Pay Grade", selection: $storedPayGrade) {
                         ForEach(PayGrade.allCases) { grade in
                             Text(String(describing: grade))
                                 .tag(grade)
@@ -33,23 +30,11 @@ struct BasicPayTablesSheet: View {
                 }
                 
                 Section {
-                    HStack {
-                        Text("Years of Service")
-                            .bold()
-                        
-                        Spacer()
-                        
-                        Text("Basic Pay")
-                            .bold()
-                    }
-                    
-                    ForEach(BasicPayTables.shared.yearsOfServiceAvailable(for: year, as: payGrade), id: \.self) { serviceYear in
-                        LabeledContent(String(describing: serviceYear)) {
-                            if let basicPay = BasicPayTables.shared.basicPay(for: year, as: payGrade, with: serviceYear) {
+                    ForEach(YearsOfService.allCases) { yearOfService in
+                        if let basicPay = BasicPayTables.shared.basicPay(for: storedYear, as: storedPayGrade, with: yearOfService) {
+                            LabeledContent(String(describing: yearOfService)) {
                                 Text(basicPay, format: .currency(code: "USD"))
                                     .textSelection(.enabled)
-                            } else {
-                                Text("No Data")
                             }
                         }
                     }
@@ -61,6 +46,15 @@ struct BasicPayTablesSheet: View {
                     Button("Done", role: .cancel) {
                         dismiss()
                     }
+                }
+            }
+            .onAppear() {
+                if let year {
+                    storedYear = year
+                }
+                
+                if let payGrade {
+                    storedPayGrade = payGrade
                 }
             }
         }
