@@ -6,13 +6,13 @@ struct WithholdingFormsListView: View {
     
     @State private var showAddWithholdingSheet = false
     
-    private enum SortOption {
+    private enum SortOption: String {
         case date
         case name
     }
     
-    @State private var sortBy = SortOption.date
-    @State private var sortOrder = SortOrder.forward
+    @AppStorage("withholdingSortBy") private var sortBy = SortOption.date
+    @AppStorage("withholdingSortOrder") private var sortOrder = SortOrder.forward
     
     var body: some View {
         QueryView(selection: $selection, sort: sort)

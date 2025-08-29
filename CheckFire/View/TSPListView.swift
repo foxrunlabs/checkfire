@@ -6,13 +6,13 @@ struct TSPListView: View {
     
     @State private var showAddTSPSheet = false
     
-    private enum SortOption {
+    private enum SortOption: String {
         case date
         case name
     }
     
-    @State private var sortBy = SortOption.date
-    @State private var sortOrder = SortOrder.forward
+    @AppStorage("tspSortBy") private var sortBy = SortOption.date
+    @AppStorage("tspSortOrder") private var sortOrder = SortOrder.forward
     
     var body: some View {
         QueryView(selection: $selection, sort: sort)

@@ -6,13 +6,13 @@ struct PaychecksListView: View {
     
     @State private var showAddPaycheckSheet = false
     
-    private enum SortOption {
+    private enum SortOption: String {
         case date
         case name
     }
     
-    @State private var sortBy = SortOption.date
-    @State private var sortOrder = SortOrder.forward
+    @AppStorage("paycheckSortBy") private var sortBy = SortOption.date
+    @AppStorage("paycheckSortOrder") private var sortOrder = SortOrder.forward
     
     var body: some View {
         QueryView(selection: $selection, sort: sort)
