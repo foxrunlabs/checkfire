@@ -10,6 +10,13 @@ struct BAHTablesSheet : View {
     @AppStorage("bahZIPCode") private var storedZIPCode = "60088"
     @AppStorage("bahPayGrade") private var storedPayGrade = PayGrade.e1
     
+    private var mha: String {
+        BAHTables.shared.mhaName(
+            for: storedYear,
+            in: storedZIPCode
+        ) ?? "Unknown Military Housing Area"
+    }
+    
     private var withoutDependents: String {
         let rate = BAHTables.shared.bah(
             for: storedYear,
@@ -28,10 +35,6 @@ struct BAHTablesSheet : View {
             withDependents: true
         )
         return rate?.formatted(.currency(code: "USD")) ?? "No Data"
-    }
-    
-    private var mha: String {
-        BAHTables.shared.mhaName(for: storedYear, in: storedZIPCode) ?? "No Data"
     }
     
     var body: some View {
@@ -61,17 +64,7 @@ struct BAHTablesSheet : View {
                     .pickerStyle(.menu)
                 }
                 
-                Section {
-                    HStack {
-                        Text("Military Housing Area")
-                            .fixedSize()
-                        
-                        Spacer()
-                        
-                        Text(mha)
-                            .foregroundStyle(.secondary)
-                    }
-                    
+                Section(mha) {
                     LabeledContent("Without Dependents") {
                         Text(withoutDependents)
                             .textSelection(.enabled)
@@ -134,5 +127,6 @@ struct BAHTablesSheet : View {
     }
     .sheet(isPresented: $showSheet) {
         BAHTablesSheet()
+            .presentationDetents([.medium])
     }
 }

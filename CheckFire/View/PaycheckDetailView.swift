@@ -90,7 +90,7 @@ struct PaycheckDetailView: View {
                         Button {
                             showBasicPayTablesSheet.toggle()
                         } label: {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "magnifyingglass")
                         }
                         .buttonStyle(.borderless)
                         
@@ -107,7 +107,7 @@ struct PaycheckDetailView: View {
                         Button {
                             showBAHTablesSheet.toggle()
                         } label: {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "magnifyingglass")
                         }
                         .buttonStyle(.borderless)
                         
@@ -124,7 +124,7 @@ struct PaycheckDetailView: View {
                         Button {
                             showBASTablesSheet.toggle()
                         } label: {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "magnifyingglass")
                         }
                         .buttonStyle(.borderless)
                         
@@ -225,13 +225,20 @@ struct PaycheckDetailView: View {
             }
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
+            BasicPayTablesSheet(
+                year: paycheckYear,
+                payGrade: paycheck.payGrade,
+                yearsOfService: paycheck.yearsOfService
+            )
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showBAHTablesSheet) {
             BAHTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $showBASTablesSheet) {
             BASTablesSheet(year: paycheckYear)
+                .presentationDetents([.medium])
         }
     }
     

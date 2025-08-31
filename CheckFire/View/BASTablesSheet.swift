@@ -74,5 +74,6 @@ struct BASTablesSheet: View {
     }
     .sheet(isPresented: $showSheet) {
         BASTablesSheet()
+            .presentationDetents([.medium])
     }
 }

@@ -3,10 +3,25 @@ import SwiftUI
 struct BasicPayTablesSheet: View {
     @State var year: Int?
     @State var payGrade: PayGrade?
+    @State var yearsOfService: YearsOfService?
     
     @Environment(\.dismiss) private var dismiss
     @AppStorage("paytableYear") private var storedYear = Calendar.current.component(.year, from: .now)
     @AppStorage("paytablePayGrade") private var storedPayGrade = PayGrade.e1
+    @AppStorage("paytableYearsOfService") private var storedYearsOfService = YearsOfService.lessThanOrEqual2
+    
+    private var availableYearsOfService: [YearsOfService] {
+        BasicPayTables.shared.yearsOfServiceAvailable(for: storedYear, as: storedPayGrade)
+    }
+    
+    private var basicPay: String {
+        let pay = BasicPayTables.shared.basicPay(
+            for: storedYear,
+            as: storedPayGrade,
+            with: storedYearsOfService
+        )
+        return pay?.formatted(.currency(code: "USD")) ?? "No Data"
+    }
     
     var body: some View {
         NavigationStack {
@@ -27,16 +42,20 @@ struct BasicPayTablesSheet: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    
+                    Picker("Years of Service", selection: $storedYearsOfService) {
+                        ForEach(availableYearsOfService) { serviceYears in
+                            Text(String(describing: serviceYears))
+                                .tag(serviceYears)
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
                 
                 Section {
-                    ForEach(YearsOfService.allCases) { yearOfService in
-                        if let basicPay = BasicPayTables.shared.basicPay(for: storedYear, as: storedPayGrade, with: yearOfService) {
-                            LabeledContent(String(describing: yearOfService)) {
-                                Text(basicPay, format: .currency(code: "USD"))
-                                    .textSelection(.enabled)
-                            }
-                        }
+                    LabeledContent("Basic Pay") {
+                        Text(basicPay)
+                            .textSelection(.enabled)
                     }
                 }
             }
@@ -56,6 +75,10 @@ struct BasicPayTablesSheet: View {
                 if let payGrade {
                     storedPayGrade = payGrade
                 }
+                
+                if let yearsOfService {
+                    storedYearsOfService = yearsOfService
+                }
             }
         }
     }
@@ -70,5 +93,6 @@ struct BasicPayTablesSheet: View {
     }
     .sheet(isPresented: $showSheet) {
         BasicPayTablesSheet()
+            .presentationDetents([.medium])
     }
 }
