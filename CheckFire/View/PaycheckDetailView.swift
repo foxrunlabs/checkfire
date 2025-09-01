@@ -18,17 +18,16 @@ struct PaycheckDetailView: View {
     @Query private var paychecks: [Paycheck]
     @Query private var lesItems: [LESItem]
     
-    @State private var showBasicPayTablesSheet = false
-    @State private var showBAHTablesSheet = false
-    @State private var showBASTablesSheet = false
-    
-    private var paycheckYear: Int {
-        Calendar.current.component(.year, from: paycheck.date)
+    private enum FocusedField {
+        case basicPay
+        case bah
+        case bas
     }
     
-    private var excludedDates: [Date] {
-        paychecks.filter({ $0.id != paycheck.id }).map { $0.date }
-    }
+    @FocusState private var focus: FocusedField?
+    
+    private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
+    private var excludedDates: [Date] { paychecks.filter({ $0.id != paycheck.id }).map({ $0.date }) }
     
     private var availableYearsOfService: [YearsOfService] {
         BasicPayTables.shared.yearsOfServiceAvailable(for: paycheckYear, as: paycheck.payGrade)
@@ -44,13 +43,8 @@ struct PaycheckDetailView: View {
         }
     }
     
-    private var deductions: [LESItem] {
-        lesItems.filter { $0.itemType == .deduction }
-    }
-    
-    private var allotments: [LESItem] {
-        lesItems.filter { $0.itemType == .allotment }
-    }
+    private var deductions: [LESItem] { lesItems.filter({ $0.itemType == .deduction }) }
+    private var allotments: [LESItem] { lesItems.filter({ $0.itemType == .allotment }) }
     
     var body: some View {
         Form {
@@ -70,7 +64,6 @@ struct PaycheckDetailView: View {
                 }
                 .pickerStyle(.menu)
                 
-                
                 Picker("Years of Service", selection: $paycheck.yearsOfService) {
                     ForEach(availableYearsOfService) { serviceYears in
                         Text(String(describing: serviceYears))
@@ -81,55 +74,25 @@ struct PaycheckDetailView: View {
             }
             
             Section {
-                LabeledContent {
+                LabeledContent("Basic Pay") {
                     TextField("Basic Pay", value: $paycheck.basicPay, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                } label: {
-                    HStack {
-                        Button {
-                            showBasicPayTablesSheet.toggle()
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                        }
-                        .buttonStyle(.borderless)
-                        
-                        Text("Basic Pay")
-                    }
+                        .focused($focus, equals: .basicPay)
                 }
                 
-                LabeledContent {
+                LabeledContent("BAH") {
                     TextField("BAH", value: $paycheck.bah, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                } label: {
-                    HStack {
-                        Button {
-                            showBAHTablesSheet.toggle()
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                        }
-                        .buttonStyle(.borderless)
-                        
-                        Text("BAH")
-                    }
+                        .focused($focus, equals: .bah)
                 }
                 
-                LabeledContent {
+                LabeledContent("BAS") {
                     TextField("BAS", value: $paycheck.bas, format: .currency(code: "USD"))
                         .multilineTextAlignment(.trailing)
                         .keyboardType(.decimalPad)
-                } label: {
-                    HStack {
-                        Button {
-                            showBASTablesSheet.toggle()
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                        }
-                        .buttonStyle(.borderless)
-                        
-                        Text("BAS")
-                    }
+                        .focused($focus, equals: .bas)
                 }
             }
             
@@ -211,34 +174,8 @@ struct PaycheckDetailView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                
-                Button("Done") {
-                    // dismiss the keyboard
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil,
-                        from: nil,
-                        for: nil
-                    )
-                }
+                KeyboardToolbar(focus: focus, paycheck: paycheck)
             }
-        }
-        .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesSheet(
-                year: paycheckYear,
-                payGrade: paycheck.payGrade,
-                yearsOfService: paycheck.yearsOfService
-            )
-            .presentationDetents([.medium])
-        }
-        .sheet(isPresented: $showBAHTablesSheet) {
-            BAHTablesSheet(year: paycheckYear, payGrade: paycheck.payGrade)
-                .presentationDetents([.medium])
-        }
-        .sheet(isPresented: $showBASTablesSheet) {
-            BASTablesSheet(year: paycheckYear)
-                .presentationDetents([.medium])
         }
     }
     
@@ -307,6 +244,174 @@ struct PaycheckDetailView: View {
         // if it does not, select the first available
         if availableYearsOfService.contains(paycheck.yearsOfService) == false {
             paycheck.yearsOfService = availableYearsOfService.first!
+        }
+    }
+    
+    // MARK: - Keyboard Toolbar
+    private struct KeyboardToolbar: View {
+        let focus: FocusedField?
+        let paycheck: Paycheck
+        
+        @State private var showZIPCodeAlert = false
+        @State private var zipCode = ""
+        
+        private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
+        
+        private var bahRates: [Decimal]? {
+            guard let withoutDependents = BAHTables.shared.bah(
+                for: paycheckYear,
+                in: zipCode,
+                as: paycheck.payGrade,
+                withDependents: false
+            ) else { return nil }
+            
+            guard let withDependents = BAHTables.shared.bah(
+                for: paycheckYear,
+                in: zipCode,
+                as: paycheck.payGrade,
+                withDependents: true
+            ) else { return nil }
+            
+            return [withoutDependents, withDependents]
+        }
+        
+        var body: some View {
+            HStack {
+                switch focus {
+                case .basicPay:
+                    // Allow user to select basic pay from database
+                    if let basicPay = BasicPayTables.shared.basicPay(
+                        for: paycheckYear,
+                        as: paycheck.payGrade,
+                        with: paycheck.yearsOfService
+                    ) {
+                        Button {
+                            paycheck.basicPay = basicPay
+                            dismissKeyboard()
+                        } label: {
+                            VStack {
+                                Text(basicPay, format: .currency(code: "USD"))
+                                Text("\(paycheck.payGrade) \(paycheck.yearsOfService)")
+                                    .font(.caption)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        
+                        Divider()
+                    }
+                case .bah:
+                    // ZIP code search
+                    VStack(spacing: 0) {
+                        Button {
+                            showZIPCodeAlert.toggle()
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                                .font(zipCode.isEmpty ? nil : .caption)
+                        }
+                        
+                        if !zipCode.isEmpty {
+                            Text(zipCode)
+                                .font(.caption)
+                        }
+                    }
+                    
+                    // Allow user to select BAH rate from database
+                    if let bahRates {
+                        Divider()
+                        
+                        Button {
+                            paycheck.bah = bahRates[0]
+                            dismissKeyboard()
+                        } label: {
+                            VStack {
+                                Text(bahRates[0], format: .currency(code: "USD"))
+                                Text("No Dependents")
+                                    .font(.caption)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        
+                        Divider()
+                        
+                        Button {
+                            paycheck.bah = bahRates[1]
+                            dismissKeyboard()
+                        } label: {
+                            VStack {
+                                Text(bahRates[1], format: .currency(code: "USD"))
+                                Text("Dependents")
+                                    .font(.caption)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        
+                        Divider()
+                    } else {
+                        Spacer()
+                    }
+                case .bas:
+                    // Allow user to select BAS from database
+                    if let basTable = BASTables.shared.basTable(for: paycheckYear) {
+                        Button {
+                            paycheck.bas = paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
+                            dismissKeyboard()
+                        } label: {
+                            VStack {
+                                Text(
+                                    paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer,
+                                    format: .currency(code: "USD")
+                                )
+                                Text(paycheck.payGrade.isEnlisted ? "Enlisted" : "Officer")
+                                    .font(.caption)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        
+                        Divider()
+                        
+                        if paycheck.payGrade.isEnlisted {
+                            Button {
+                                paycheck.bas = basTable.basII
+                                dismissKeyboard()
+                            } label: {
+                                VStack {
+                                    Text(basTable.basII, format: .currency(code: "USD"))
+                                    Text("BAS II")
+                                        .font(.caption)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .frame(maxWidth: .infinity)
+                            
+                            Divider()
+                        }
+                    }
+                case nil:
+                    Spacer()
+                }
+                
+                Button("Done") { dismissKeyboard() }
+            }
+            .alert("Enter ZIP Code", isPresented: $showZIPCodeAlert) {
+                TextField("ZIP Code", text: $zipCode)
+                    .keyboardType(.numberPad)
+                
+                Button("OK") {}
+                Button("Cancel", role: .cancel) {}
+            }
+        }
+        
+        private func dismissKeyboard() {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil,
+                from: nil,
+                for: nil
+            )
         }
     }
 }
