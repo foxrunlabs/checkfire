@@ -291,8 +291,12 @@ struct PaycheckDetailView: View {
                         } label: {
                             VStack {
                                 Text(basicPay, format: .currency(code: "USD"))
-                                Text("\(paycheck.payGrade) \(paycheck.yearsOfService)")
-                                    .font(.caption)
+                                
+                                Text(
+                                    String(describing: paycheck.payGrade) + " " +
+                                    String(describing: paycheck.yearsOfService)
+                                )
+                                .font(.caption)
                             }
                         }
                         .buttonStyle(.plain)

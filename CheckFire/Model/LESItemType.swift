@@ -1,6 +1,10 @@
 import Foundation
 
-enum LESItemType: Codable, CustomStringConvertible, Hashable, Identifiable {
+enum LESItemType: CaseIterable, Codable, CustomStringConvertible, Hashable, Identifiable {
+    static var allCases: [LESItemType] {
+        EntitlementType.allCases.map(entitlement) + [.deduction, .allotment]
+    }
+    
     case entitlement(EntitlementType)
     case deduction
     case allotment
