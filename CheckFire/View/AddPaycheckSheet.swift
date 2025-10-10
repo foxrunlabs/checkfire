@@ -84,7 +84,7 @@ struct AddPaycheckSheet: View {
             newPaycheck.bah = template.bah
             
             newPaycheck.lesItems = template.lesItems?.map {
-                LESItem(name: $0.name, amount: $0.amount, itemType: $0.itemType)
+                LESItem(name: $0.name, amount: $0.amount, type: $0.type)
             }
         }
         

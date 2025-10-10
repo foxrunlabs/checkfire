@@ -10,19 +10,19 @@ struct LESItemField: View {
                 .keyboardType(.decimalPad)
         } label: {
             HStack {
-                if case .entitlement(let entitlement) = lesItem.itemType {
+                if lesItem.type.isEntitlement {
                     Menu {
-                        Picker("Entitlement Type", selection: $lesItem.itemType) {
-                            ForEach(EntitlementType.allCases) { entitlementType in
-                                LabeledContent(String(describing: entitlementType)) {
-                                    Image(systemName: icon(for: entitlementType))
+                        Picker("Entitlement Type", selection: $lesItem.type) {
+                            ForEach(LESItemType.entitlementCases) { entitlement in
+                                LabeledContent(String(describing: entitlement)) {
+                                    Image(systemName: icon(for: entitlement))
                                 }
-                                .tag(LESItemType.entitlement(entitlementType))
+                                .tag(entitlement)
                             }
                         }
                         .pickerStyle(.inline)
                     } label: {
-                        Image(systemName: icon(for: entitlement))
+                        Image(systemName: icon(for: lesItem.type))
                     }
                 }
                 
@@ -31,8 +31,8 @@ struct LESItemField: View {
         }
     }
     
-    private func icon(for entitlementType: EntitlementType) -> String {
-        switch entitlementType {
+    private func icon(for entitlement: LESItemType) -> String {
+        switch entitlement {
         case .specialPay:
             "s.square"
         case .incentivePay:
@@ -41,31 +41,17 @@ struct LESItemField: View {
             "b.square"
         case .allowance:
             "a.square"
+        default:
+            ""
         }
     }
 }
 
 // MARK: - Preview
 #Preview {
-    @Previewable @State var entitlement = LESItem(
-        name: "Entitlement",
-        amount: 1.00,
-        itemType: .entitlement(.allowance)
-    )
-    @Previewable @State var deduction = LESItem(
-        name: "Deduction",
-        amount: 2.00,
-        itemType: .deduction
-    )
-    @Previewable @State var allotment = LESItem(
-        name: "Allotment",
-        amount: 3.00,
-        itemType: .allotment
-    )
-    
     List {
-        LESItemField(lesItem: entitlement)
-        LESItemField(lesItem: deduction)
-        LESItemField(lesItem: allotment)
+        LESItemField(lesItem: LESItem.exampleEntitlement)
+        LESItemField(lesItem: LESItem.exampleDeduction)
+        LESItemField(lesItem: LESItem.exampleAllotment)
     }
 }

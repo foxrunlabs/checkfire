@@ -18,6 +18,19 @@ struct PaycheckDetailView: View {
     @Query private var paychecks: [Paycheck]
     @Query private var lesItems: [LESItem]
     
+    private var excludedDates: [Date] {
+        let paychecksMinusCurrent = paychecks.filter { $0.id != paycheck.id }
+        return paychecksMinusCurrent.map { $0.date }
+    }
+    
+    private var availableYearsOfService: [YearsOfService] {
+        BasicPayTables.shared.yearsOfServiceAvailable(for: paycheck.year, as: paycheck.payGrade)
+    }
+    
+    private var entitlements: [LESItem] { lesItems.filter({ $0.type.isEntitlement }) }
+    private var deductions: [LESItem] { lesItems.filter({ $0.type == .deduction }) }
+    private var allotments: [LESItem] { lesItems.filter({ $0.type == .allotment }) }
+    
     private enum FocusedField {
         case basicPay
         case bah
@@ -25,26 +38,6 @@ struct PaycheckDetailView: View {
     }
     
     @FocusState private var focus: FocusedField?
-    
-    private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
-    private var excludedDates: [Date] { paychecks.filter({ $0.id != paycheck.id }).map({ $0.date }) }
-    
-    private var availableYearsOfService: [YearsOfService] {
-        BasicPayTables.shared.yearsOfServiceAvailable(for: paycheckYear, as: paycheck.payGrade)
-    }
-    
-    private var entitlements: [LESItem] {
-        lesItems.filter {
-            if case .entitlement(_) = $0.itemType {
-                true
-            } else {
-                false
-            }
-        }
-    }
-    
-    private var deductions: [LESItem] { lesItems.filter({ $0.itemType == .deduction }) }
-    private var allotments: [LESItem] { lesItems.filter({ $0.itemType == .allotment }) }
     
     var body: some View {
         Form {
@@ -109,7 +102,7 @@ struct PaycheckDetailView: View {
                     Spacer()
 
                     Button {
-                        addEntitlement()
+                        addNewLESItem(type: .specialPay)
                     } label: {
                         Image(systemName: "plus")
                             .font(.body.smallCaps())
@@ -130,7 +123,7 @@ struct PaycheckDetailView: View {
                     Spacer()
 
                     Button {
-                        addDeduction()
+                        addNewLESItem(type: .deduction)
                     } label: {
                         Image(systemName: "plus")
                             .font(.body.smallCaps())
@@ -151,7 +144,7 @@ struct PaycheckDetailView: View {
                     Spacer()
 
                     Button {
-                        addAllotment()
+                        addNewLESItem(type: .allotment)
                     } label: {
                         Image(systemName: "plus")
                             .font(.body.smallCaps())
@@ -179,37 +172,24 @@ struct PaycheckDetailView: View {
         }
     }
     
-    private func addEntitlement() {
-        let newEntitlement = LESItem(
-            name: "New Entitlement",
+    private func addNewLESItem(type: LESItemType) {
+        let name = switch type {
+        case .deduction:
+            "New Deduction"
+        case .allotment:
+            "New Allotment"
+        default:
+            "New Entitlement"
+        }
+        
+        let newLESItem = LESItem(
+            name: name,
             amount: 0.00,
-            itemType: .entitlement(.specialPay),
+            type: type,
             paycheck: paycheck
         )
         
-        modelContext.insert(newEntitlement)
-    }
-    
-    private func addDeduction() {
-        let newDeduction = LESItem(
-            name: "New Deduction",
-            amount: 0.00,
-            itemType: .deduction,
-            paycheck: paycheck
-        )
-        
-        modelContext.insert(newDeduction)
-    }
-    
-    private func addAllotment() {
-        let newAllotment = LESItem(
-            name: "New Allotment",
-            amount: 0.00,
-            itemType: .allotment,
-            paycheck: paycheck
-        )
-        
-        modelContext.insert(newAllotment)
+        modelContext.insert(newLESItem)
     }
     
     private func deleteEntitlement(at indices: IndexSet) {
@@ -226,7 +206,7 @@ struct PaycheckDetailView: View {
     
     private func updateBasicPay() {
         paycheck.basicPay = BasicPayTables.shared.basicPay(
-            for: paycheckYear,
+            for: paycheck.year,
             as: paycheck.payGrade,
             with: paycheck.yearsOfService
         ) ?? paycheck.basicPay
@@ -234,7 +214,7 @@ struct PaycheckDetailView: View {
     
     private func updateBAS() {
         paycheck.bas = BASTables.shared.bas(
-            for: paycheckYear,
+            for: paycheck.year,
             as: paycheck.payGrade
         ) ?? paycheck.bas
     }
@@ -255,18 +235,16 @@ struct PaycheckDetailView: View {
         @State private var showZIPCodeAlert = false
         @State private var zipCode = ""
         
-        private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
-        
         private var bahRates: [Decimal]? {
             guard let withoutDependents = BAHTables.shared.bah(
-                for: paycheckYear,
+                for: paycheck.year,
                 in: zipCode,
                 as: paycheck.payGrade,
                 withDependents: false
             ) else { return nil }
             
             guard let withDependents = BAHTables.shared.bah(
-                for: paycheckYear,
+                for: paycheck.year,
                 in: zipCode,
                 as: paycheck.payGrade,
                 withDependents: true
@@ -281,7 +259,7 @@ struct PaycheckDetailView: View {
                 case .basicPay:
                     // Allow user to select basic pay from database
                     if let basicPay = BasicPayTables.shared.basicPay(
-                        for: paycheckYear,
+                        for: paycheck.year,
                         as: paycheck.payGrade,
                         with: paycheck.yearsOfService
                     ) {
@@ -358,7 +336,7 @@ struct PaycheckDetailView: View {
                     }
                 case .bas:
                     // Allow user to select BAS from database
-                    if let basTable = BASTables.shared.basTable(for: paycheckYear) {
+                    if let basTable = BASTables.shared.basTable(for: paycheck.year) {
                         Button {
                             paycheck.bas = paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
                             dismissKeyboard()

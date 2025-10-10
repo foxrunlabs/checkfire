@@ -56,6 +56,8 @@ final class Paycheck: Identifiable {
         )
     }
     
+    var year: Int { Calendar.current.component(.year, from: date) }
+    
     static let example = Paycheck(
         name: "Example",
         date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,

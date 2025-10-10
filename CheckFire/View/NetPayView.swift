@@ -2,11 +2,6 @@ import SwiftData
 import SwiftUI
 
 struct NetPayView: View {
-    private let paycheck: Paycheck
-    
-    @Query private var withholdingForms: [WithholdingForm]
-    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
-    
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
         
@@ -22,20 +17,16 @@ struct NetPayView: View {
         )
     }
     
+    private let paycheck: Paycheck
+    @Query private var withholdingForms: [WithholdingForm]
+    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
+    
     private var grossPay: Decimal {
-        let gross = paycheck.basicPay + paycheck.bas + paycheck.bah
-        
-        return if let lesItems = paycheck.lesItems {
-            gross + lesItems.reduce(0.00) {
-                if case .entitlement = $1.itemType {
-                    $0 + $1.amount
-                } else {
-                    $0
-                }
-            }
-        } else {
-            gross
-        }
+        var gross = paycheck.basicPay + paycheck.bas + paycheck.bah
+        gross += paycheck.lesItems?.reduce(0.00) { sum, item in
+            item.type.isEntitlement ? sum + item.amount : sum
+        } ?? 0.00
+        return gross
     }
     
     private var traditionalTSPContribution: Decimal? {
@@ -46,9 +37,9 @@ struct NetPayView: View {
             return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
         }
         
-        contribution += lesItems.reduce(0.00) {
-            if case .entitlement(let entitlement) = $1.itemType {
-                let rate = switch entitlement {
+        contribution += lesItems.reduce(0.00) { sum, item in
+            if item.type.isEntitlement {
+                let rate: Decimal = switch item.type {
                 case .specialPay:
                     tsp.traditionalSpecialPay
                 case .incentivePay:
@@ -56,12 +47,12 @@ struct NetPayView: View {
                 case .bonusPay:
                     tsp.traditionalBonusPay
                 default:
-                    Decimal(0.00)
+                    0.00
                 }
                 
-                return $0 + $1.amount * rate
+                return sum + item.amount * rate
             } else {
-                return $0
+                return sum
             }
         }
         
@@ -76,9 +67,9 @@ struct NetPayView: View {
             return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
         }
         
-        contribution += lesItems.reduce(0.00) {
-            if case .entitlement(let entitlement) = $1.itemType {
-                let rate = switch entitlement {
+        contribution += lesItems.reduce(0.00) { sum, item in
+            if item.type.isEntitlement {
+                let rate: Decimal = switch item.type {
                 case .specialPay:
                     tsp.rothSpecialPay
                 case .incentivePay:
@@ -86,12 +77,12 @@ struct NetPayView: View {
                 case .bonusPay:
                     tsp.rothBonusPay
                 default:
-                    Decimal(0.00)
+                    0.00
                 }
                 
-                return $0 + $1.amount * rate
+                return sum + item.amount * rate
             } else {
-                return $0
+                return sum
             }
         }
         
@@ -103,12 +94,8 @@ struct NetPayView: View {
         var taxableWage = paycheck.basicPay - traditionalTSPContribution
         guard let lesItems = paycheck.lesItems else { return taxableWage }
         
-        taxableWage += lesItems.reduce(0.00) {
-            if case .entitlement(let entitlement) = $1.itemType {
-                (entitlement != .allowance) ? $0 + $1.amount : $0
-            } else {
-                $0
-            }
+        taxableWage += lesItems.reduce(0.00) { sum, item in
+            (item.type.isEntitlement && item.type != .allowance) ? sum + item.amount : sum
         }
         
         return taxableWage
@@ -116,11 +103,10 @@ struct NetPayView: View {
     
     var federalTaxes: Decimal? {
         guard let withholdingForm = withholdingForms.last else { return nil }
-        let year = Calendar.current.component(.year, from: paycheck.date)
         guard let wagePeriod else { return nil }
         
         return WithholdingTables.shared.calculateWithholding(
-            for: year,
+            for: paycheck.year,
             wage: wagePeriod,
             using: withholdingForm
         )
@@ -128,14 +114,14 @@ struct NetPayView: View {
     
     var socialSecurity: Decimal? {
         WithholdingTables.shared.calculateSocialSecurity(
-            for: Calendar.current.component(.year, from: paycheck.date),
+            for: paycheck.year,
             wage: paycheck.basicPay
         )
     }
     
     var medicare: Decimal? {
         WithholdingTables.shared.calculateMedicare(
-            for: Calendar.current.component(.year, from: paycheck.date),
+            for: paycheck.year,
             wage: paycheck.basicPay
         )
     }
@@ -143,30 +129,23 @@ struct NetPayView: View {
     var netPay: Decimal? {
         guard let traditionalTSPContribution else { return nil }
         guard let rothTSPContribution else { return nil }
-        
-        var net = grossPay
-        net -= traditionalTSPContribution
-        net -= rothTSPContribution
-        
-        if let lesItems = paycheck.lesItems {
-            net -= lesItems.reduce(0.00) {
-                if case .entitlement = $1.itemType {
-                    $0
-                } else {
-                    $0 + $1.amount
-                }
-            }
-        }
-        
         guard let federalTaxes = federalTaxes else { return nil }
         guard let medicare = medicare else { return nil }
         guard let socialSecurity = socialSecurity else { return nil }
         
-        net -= federalTaxes
-        net -= medicare
-        net -= socialSecurity
+        var netPay = grossPay
+        netPay -= traditionalTSPContribution
+        netPay -= rothTSPContribution
         
-        return net
+        netPay -= paycheck.lesItems?.reduce(0.00) { sum, item in
+            item.type.isEntitlement ? sum : sum + item.amount
+        } ?? 0.00
+        
+        netPay -= federalTaxes
+        netPay -= medicare
+        netPay -= socialSecurity
+        
+        return netPay
     }
     
     private var withholdingFormDate: String {
@@ -228,13 +207,13 @@ struct NetPayView: View {
     }
     
     private struct LabeledCurrency: View {
-        private let label: String
-        private let value: Decimal?
-        
         init(_ label: String, value: Decimal?) {
             self.label = label
             self.value = value
         }
+        
+        private let label: String
+        private let value: Decimal?
         
         var body: some View {
             LabeledContent {
