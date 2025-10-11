@@ -34,9 +34,18 @@ struct AboutSheet: View {
                 }
             }
             .navigationTitle("About")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem {
-                    Button("Done") { dismiss() }
+                ToolbarItem(placement: .primaryAction) {
+                    if #available(iOS 26, *) {
+                        Button("Done", systemImage: "checkmark") {
+                            dismiss()
+                        }
+                    } else {
+                        Button("Done") {
+                            dismiss()
+                        }
+                    }
                 }
             }
         }

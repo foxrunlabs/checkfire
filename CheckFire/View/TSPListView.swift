@@ -19,31 +19,42 @@ struct TSPListView: View {
             .listStyle(.inset)
             .navigationTitle("Thrift Savings Plans")
             .toolbar {
-                ToolbarItem {
-                    Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Plan", systemImage: "document") {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("Sort By", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort By", selection: $sortBy) {
+                            Text("Date")
+                                .tag(SortOption.date)
+                            
+                            Text("Name")
+                                .tag(SortOption.name)
+                        }
+                        .pickerStyle(.inline)
+                        
+                        Picker("Sort Order", selection: $sortOrder.animation()) {
+                            Text(ascendingLabel)
+                                .tag(SortOrder.forward)
+                            
+                            Text(descendingLabel)
+                                .tag(SortOrder.reverse)
+                        }
+                        .pickerStyle(.inline)
+                    }
+                    
+                    if #unavailable(iOS 26) {
+                        Button("Add Plan", systemImage: "plus") {
                             showAddTSPSheet.toggle()
                         }
+                    }
+                }
+                
+                if #available(iOS 26, *) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        Spacer()
                         
-                        Menu("Sort By", systemImage: "arrow.up.arrow.down") {
-                            Picker("Sort By", selection: $sortBy) {
-                                Text("Date")
-                                    .tag(SortOption.date)
-                                
-                                Text("Name")
-                                    .tag(SortOption.name)
-                            }
-                            .pickerStyle(.inline)
-                            
-                            Picker("Sort Order", selection: $sortOrder.animation()) {
-                                Text(ascendingLabel)
-                                    .tag(SortOrder.forward)
-                                
-                                Text(descendingLabel)
-                                    .tag(SortOrder.reverse)
-                            }
-                            .pickerStyle(.inline)
+                        Button("Add Plan", systemImage: "plus") {
+                            showAddTSPSheet.toggle()
                         }
+                        .buttonStyle(.glassProminent)
                     }
                 }
             }

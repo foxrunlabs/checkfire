@@ -16,8 +16,24 @@ struct SidebarView: View {
     
     @State private var showDeleteAlert = false
     
-    var isDeleteDisabled: Bool {
+    private var isDeleteDisabled: Bool {
         paychecks.isEmpty && withholdingForms.isEmpty && thriftSavingsPlans.isEmpty
+    }
+    
+    private var menuIcon: String {
+        if #available(iOS 26, *) {
+            "ellipsis"
+        } else {
+            "ellipsis.circle"
+        }
+    }
+    
+    private var aboutIcon: String {
+        if #available(iOS 26, *) {
+            "info"
+        } else {
+            "info.circle"
+        }
     }
     
     var body: some View {
@@ -49,8 +65,8 @@ struct SidebarView: View {
         .navigationTitle("CheckFire")
         .toolbar {
             ToolbarItem {
-                Menu("Options", systemImage: "ellipsis.circle") {
-                    Button("About CheckFire", systemImage: "info.circle") {
+                Menu("Options", systemImage: menuIcon) {
+                    Button("About CheckFire", systemImage: aboutIcon) {
                         showAboutSheet.toggle()
                     }
                     
@@ -63,12 +79,15 @@ struct SidebarView: View {
         }
         .sheet(isPresented: $showBasicPayTablesSheet) {
             BasicPayTablesSheet()
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showBAHTablesSheet) {
             BAHTablesSheet()
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showBASTablesSheet) {
             BASTablesSheet()
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showAboutSheet) {
             AboutSheet()

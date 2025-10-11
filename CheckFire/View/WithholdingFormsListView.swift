@@ -19,31 +19,42 @@ struct WithholdingFormsListView: View {
             .listStyle(.inset)
             .navigationTitle("Withholding Forms")
             .toolbar {
-                ToolbarItem {
-                    Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Form", systemImage: "document") {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("Sort By", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort By", selection: $sortBy) {
+                            Text("Date")
+                                .tag(SortOption.date)
+                            
+                            Text("Name")
+                                .tag(SortOption.name)
+                        }
+                        .pickerStyle(.inline)
+                        
+                        Picker("Sort Order", selection: $sortOrder.animation()) {
+                            Text(ascendingLabel)
+                                .tag(SortOrder.forward)
+                            
+                            Text(descendingLabel)
+                                .tag(SortOrder.reverse)
+                        }
+                        .pickerStyle(.inline)
+                    }
+                    
+                    if #unavailable(iOS 26) {
+                        Button("Add Form", systemImage: "plus") {
                             showAddWithholdingSheet.toggle()
                         }
+                    }
+                }
+                
+                if #available(iOS 26, *) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        Spacer()
                         
-                        Menu("Sort By", systemImage: "arrow.up.arrow.down") {
-                            Picker("Sort By", selection: $sortBy) {
-                                Text("Date")
-                                    .tag(SortOption.date)
-                                
-                                Text("Name")
-                                    .tag(SortOption.name)
-                            }
-                            .pickerStyle(.inline)
-                            
-                            Picker("Sort Order", selection: $sortOrder.animation()) {
-                                Text(ascendingLabel)
-                                    .tag(SortOrder.forward)
-                                
-                                Text(descendingLabel)
-                                    .tag(SortOrder.reverse)
-                            }
-                            .pickerStyle(.inline)
+                        Button("Add Form", systemImage: "plus") {
+                            showAddWithholdingSheet.toggle()
                         }
+                        .buttonStyle(.glassProminent)
                     }
                 }
             }

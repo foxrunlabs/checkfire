@@ -19,31 +19,42 @@ struct PaychecksListView: View {
             .listStyle(.inset)
             .navigationTitle("Paychecks")
             .toolbar {
-                ToolbarItem {
-                    Menu("Options", systemImage: "ellipsis.circle") {
-                        Button("Add Paycheck", systemImage: "document") {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("Sort By", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort By", selection: $sortBy) {
+                            Text("Date")
+                                .tag(SortOption.date)
+                            
+                            Text("Name")
+                                .tag(SortOption.name)
+                        }
+                        .pickerStyle(.inline)
+                        
+                        Picker("Sort Order", selection: $sortOrder.animation()) {
+                            Text(ascendingLabel)
+                                .tag(SortOrder.forward)
+                            
+                            Text(descendingLabel)
+                                .tag(SortOrder.reverse)
+                        }
+                        .pickerStyle(.inline)
+                    }
+                    
+                    if #unavailable(iOS 26) {
+                        Button("Add Paycheck", systemImage: "plus") {
                             showAddPaycheckSheet.toggle()
                         }
+                    }
+                }
+                
+                if #available(iOS 26, *) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        Spacer()
                         
-                        Menu("Sort By", systemImage: "arrow.up.arrow.down") {
-                            Picker("Sort By", selection: $sortBy) {
-                                Text("Date")
-                                    .tag(SortOption.date)
-                                
-                                Text("Name")
-                                    .tag(SortOption.name)
-                            }
-                            .pickerStyle(.inline)
-                            
-                            Picker("Sort Order", selection: $sortOrder.animation()) {
-                                Text(ascendingLabel)
-                                    .tag(SortOrder.forward)
-                                
-                                Text(descendingLabel)
-                                    .tag(SortOrder.reverse)
-                            }
-                            .pickerStyle(.inline)
+                        Button("Add Paycheck", systemImage: "plus") {
+                            showAddPaycheckSheet.toggle()
                         }
+                        .buttonStyle(.glassProminent)
                     }
                 }
             }

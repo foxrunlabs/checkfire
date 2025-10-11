@@ -20,7 +20,7 @@ struct BASTablesSheet: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 Section {
                     Picker("Year", selection: $storedYear) {
                         ForEach(BASTables.shared.years, id: \.self) { year in
@@ -49,10 +49,17 @@ struct BASTablesSheet: View {
                 }
             }
             .navigationTitle("BAS Tables")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem {
-                    Button("Done", role: .cancel) {
-                        dismiss()
+                    if #available(iOS 26, *) {
+                        Button("Done", systemImage: "checkmark") {
+                            dismiss()
+                        }
+                    } else {
+                        Button("Done") {
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -74,6 +81,5 @@ struct BASTablesSheet: View {
     }
     .sheet(isPresented: $showSheet) {
         BASTablesSheet()
-            .presentationDetents([.medium])
     }
 }

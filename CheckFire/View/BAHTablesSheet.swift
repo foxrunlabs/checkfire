@@ -7,8 +7,8 @@ struct BAHTablesSheet : View {
     
     @Environment(\.dismiss) private var dismiss
     @AppStorage("bahYear") private var storedYear = Calendar.current.component(.year, from: .now)
-    @AppStorage("bahZIPCode") private var storedZIPCode = "60088"
     @AppStorage("bahPayGrade") private var storedPayGrade = PayGrade.e1
+    @AppStorage("bahZIPCode") private var storedZIPCode = "60088"
     
     private var mha: String {
         BAHTables.shared.mhaName(
@@ -39,7 +39,7 @@ struct BAHTablesSheet : View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 Section {
                     Picker("Year", selection: $storedYear) {
                         ForEach(BAHTables.shared.years, id: \.self) { year in
@@ -49,12 +49,6 @@ struct BAHTablesSheet : View {
                     }
                     .pickerStyle(.menu)
                     
-                    LabeledContent("ZIP Code") {
-                        TextField("ZIP Code", text: $storedZIPCode)
-                            .multilineTextAlignment(.trailing)
-                            .keyboardType(.numberPad)
-                    }
-                    
                     Picker("Pay Grade", selection: $storedPayGrade) {
                         ForEach(PayGrade.allCases) { grade in
                             Text(String(describing: grade))
@@ -62,6 +56,12 @@ struct BAHTablesSheet : View {
                         }
                     }
                     .pickerStyle(.menu)
+                    
+                    LabeledContent("ZIP Code") {
+                        TextField("ZIP Code", text: $storedZIPCode)
+                            .multilineTextAlignment(.trailing)
+                            .keyboardType(.numberPad)
+                    }
                 }
                 
                 Section(mha) {
@@ -77,10 +77,17 @@ struct BAHTablesSheet : View {
                 }
             }
             .navigationTitle("BAH Tables")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem {
-                    Button("Done", role: .cancel) {
-                        dismiss()
+                    if #available(iOS 26, *) {
+                        Button("Done", systemImage: "checkmark") {
+                            dismiss()
+                        }
+                    } else {
+                        Button("Done") {
+                            dismiss()
+                        }
                     }
                 }
                 
@@ -127,6 +134,5 @@ struct BAHTablesSheet : View {
     }
     .sheet(isPresented: $showSheet) {
         BAHTablesSheet()
-            .presentationDetents([.medium])
     }
 }

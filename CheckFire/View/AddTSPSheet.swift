@@ -47,15 +47,28 @@ struct AddTSPSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
+                    if #available(iOS 26, *) {
+                        Button("Cancel", systemImage: "xmark") {
+                            dismiss()
+                        }
+                    } else {
+                        Button("Cancel") {
+                            dismiss()
+                        }
                     }
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        addTSP()
-                        dismiss()
+                    if #available(iOS 26, *) {
+                        Button("Add", systemImage: "checkmark") {
+                            addTSP()
+                            dismiss()
+                        }
+                    } else {
+                        Button("Add") {
+                            addTSP()
+                            dismiss()
+                        }
                     }
                 }
             }

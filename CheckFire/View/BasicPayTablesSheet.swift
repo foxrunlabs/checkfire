@@ -25,7 +25,7 @@ struct BasicPayTablesSheet: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 Section {
                     Picker("Year", selection: $storedYear) {
                         ForEach(BasicPayTables.shared.years, id: \.self) { year in
@@ -60,10 +60,17 @@ struct BasicPayTablesSheet: View {
                 }
             }
             .navigationTitle("Basic Pay Tables")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem {
-                    Button("Done", role: .cancel) {
-                        dismiss()
+                    if #available(iOS 26, *) {
+                        Button("Done", systemImage: "checkmark") {
+                            dismiss()
+                        }
+                    } else {
+                        Button("Done") {
+                            dismiss()
+                        }
                     }
                 }
             }
@@ -93,6 +100,5 @@ struct BasicPayTablesSheet: View {
     }
     .sheet(isPresented: $showSheet) {
         BasicPayTablesSheet()
-            .presentationDetents([.medium])
     }
 }
