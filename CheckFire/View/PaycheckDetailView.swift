@@ -42,12 +42,13 @@ struct PaycheckDetailView: View {
     var body: some View {
         Form {
             Section {
-                MonthYearPicker(
-                    "Pay Date",
-                    selection: $paycheck.date,
-                    in: WithholdingTables.shared.years,
-                    excluding: excludedDates
-                )
+                LabeledContent("Pay Date") {
+                    MonthYearPicker(
+                        selection: $paycheck.date,
+                        in: WithholdingTables.shared.years,
+                        excluding: excludedDates
+                    )
+                }
                 
                 Picker("Pay Grade", selection: $paycheck.payGrade) {
                     ForEach(PayGrade.allCases) { grade in

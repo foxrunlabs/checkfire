@@ -4,7 +4,8 @@ import SwiftUI
 struct WithholdingFormsListView: View {
     @Binding var selection: PayComponent?
     
-    @State private var showAddWithholdingSheet = false
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \WithholdingForm.date) private var withholdingForms: [WithholdingForm]
     
     private enum SortOption: String {
         case date
@@ -14,9 +15,23 @@ struct WithholdingFormsListView: View {
     @AppStorage("withholdingSortBy") private var sortBy = SortOption.date
     @AppStorage("withholdingSortOrder") private var sortOrder = SortOrder.forward
     
+    private var sort: [SortDescriptor<WithholdingForm>] {
+        switch sortBy {
+        case .date:
+            [SortDescriptor(\WithholdingForm.date, order: sortOrder)]
+        case .name:
+            [
+                SortDescriptor(\WithholdingForm.name, order: sortOrder),
+                SortDescriptor(\WithholdingForm.date, order: sortOrder)
+            ]
+        }
+    }
+    
+    private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
+    private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
+    
     var body: some View {
         QueryView(selection: $selection, sort: sort)
-            .listStyle(.inset)
             .navigationTitle("Withholding Forms")
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -42,7 +57,7 @@ struct WithholdingFormsListView: View {
                     
                     if #unavailable(iOS 26) {
                         Button("Add Form", systemImage: "plus") {
-                            showAddWithholdingSheet.toggle()
+                            addWithholdingForm()
                         }
                     }
                 }
@@ -52,43 +67,41 @@ struct WithholdingFormsListView: View {
                         Spacer()
                         
                         Button("Add Form", systemImage: "plus") {
-                            showAddWithholdingSheet.toggle()
+                            addWithholdingForm()
                         }
                         .buttonStyle(.glassProminent)
                     }
                 }
             }
-            .sheet(isPresented: $showAddWithholdingSheet) {
-                AddWithholdingFormSheet(selection: $selection)
-                    .presentationDetents([.medium])
-            }
     }
     
-    private var sort: [SortDescriptor<WithholdingForm>] {
-        switch sortBy {
-        case .date:
-            [SortDescriptor(\WithholdingForm.date, order: sortOrder)]
-        case .name:
-            [
-                SortDescriptor(\WithholdingForm.name, order: sortOrder),
-                SortDescriptor(\WithholdingForm.date, order: sortOrder)
-            ]
+    private func addWithholdingForm() {
+        let formDates = withholdingForms.map { $0.date }
+        let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+        let newWithholdingForm = WithholdingForm()
+        
+        // if a form exists for the current month, create a form a month past the latest date
+        // contained in the current query
+        if formDates.contains(currentMonth) {
+            let lastDate = formDates.max()!
+            let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+            newWithholdingForm.date = Calendar.current.lastDateOfMonth(from: nextDate)!
         }
+        
+        modelContext.insert(newWithholdingForm)
+        selection = .withholdingForm(newWithholdingForm)
     }
-    
-    private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
-    private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
     
     private struct QueryView: View {
-        @Binding var selection: PayComponent?
-        
-        @Environment(\.modelContext) private var modelContext
-        @Query private var withholdingForms: [WithholdingForm]
-        
         init(selection: Binding<PayComponent?>, sort: [SortDescriptor<WithholdingForm>]) {
             self._selection = selection
             self._withholdingForms = Query(sort: sort)
         }
+        
+        @Binding private var selection: PayComponent?
+        
+        @Environment(\.modelContext) private var modelContext
+        @Query private var withholdingForms: [WithholdingForm]
         
         var body: some View {
             if withholdingForms.isEmpty {
@@ -102,19 +115,29 @@ struct WithholdingFormsListView: View {
                     ForEach(withholdingForms) { withholdingForm in
                         WithholdingFormsListRow(for: withholdingForm)
                             .tag(PayComponent.withholdingForm(withholdingForm))
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    deleteWithholdingForm(withholdingForm)
+                                }
+                                
+                                Button("Copy", systemImage: "document.on.document") {
+                                    copyWithholdingForm(withholdingForm)
+                                }
+                                .tint(.accentColor)
+                            }
                     }
-                    .onDelete(perform: deleteWithholdingForm)
                 }
+                .listStyle(.inset)
             }
 
         }
         
         private struct WithholdingFormsListRow: View {
-            let withholdingForm: WithholdingForm
-            
             init(for withholdingForm: WithholdingForm) {
                 self.withholdingForm = withholdingForm
             }
+            
+            private let withholdingForm: WithholdingForm
             
             var body: some View {
                 NavigationLink(value: withholdingForm) {
@@ -129,8 +152,35 @@ struct WithholdingFormsListView: View {
             }
         }
         
-        private func deleteWithholdingForm(at indices: IndexSet) {
-            indices.forEach { modelContext.delete(withholdingForms[$0]) }
+        private func copyWithholdingForm(_ other: WithholdingForm) {
+            let formDates = withholdingForms.map { $0.date }
+            let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+            let newWithholdingForm = WithholdingForm()
+            newWithholdingForm.name = other.name + " (copy)"
+            
+            // if a form exists for the current month, create a form a month past the latest date
+            // contained in the current query
+            if formDates.contains(currentMonth) {
+                let lastDate = formDates.max()!
+                let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+                newWithholdingForm.date = Calendar.current.lastDateOfMonth(from: nextDate)!
+            }
+            
+            newWithholdingForm.maritalStatus = other.maritalStatus
+            newWithholdingForm.multipleJobs = other.multipleJobs
+            newWithholdingForm.childDependents = other.childDependents
+            newWithholdingForm.otherDependents = other.otherDependents
+            newWithholdingForm.otherIncome = other.otherIncome
+            newWithholdingForm.deductions = other.deductions
+            newWithholdingForm.extraWithholding = other.extraWithholding
+            
+            modelContext.insert(newWithholdingForm)
+            selection = .withholdingForm(newWithholdingForm)
+        }
+        
+        private func deleteWithholdingForm(_ withholdingForm: WithholdingForm) {
+            modelContext.delete(withholdingForm)
+            selection = nil
         }
     }
 }

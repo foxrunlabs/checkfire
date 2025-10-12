@@ -43,7 +43,7 @@ final class WithholdingForm: Identifiable {
     
     convenience init() {
         self.init(
-            name: "New Withholding",
+            name: "New Withholding Form",
             date: .now,
             maritalStatus: .single,
             multipleJobs: false,

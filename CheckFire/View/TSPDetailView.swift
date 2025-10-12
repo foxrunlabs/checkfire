@@ -19,12 +19,13 @@ struct TSPDetailView: View {
     var body: some View {
         Form {
             Section {
-                MonthYearPicker(
-                    "Effective Date",
-                    selection: $tsp.date,
-                    in: WithholdingTables.shared.years,
-                    excluding: excludedDates
-                )
+                LabeledContent("Effective Date") {
+                    MonthYearPicker(
+                        selection: $tsp.date,
+                        in: WithholdingTables.shared.years,
+                        excluding: excludedDates
+                    )
+                }
             }
             
             Section("Traditional TSP") {
@@ -77,13 +78,6 @@ struct TSPDetailView: View {
                 .disabled(tsp.rothBasicPay.isZero)
 
             }
-            
-            Section {
-                Button("Reset") {
-                    resetTSP()
-                }
-                .frame(maxWidth: .infinity)
-            }
         }
         .navigationTitle($tsp.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -94,8 +88,13 @@ struct TSPDetailView: View {
             validateRoth()
         }
         .toolbar {
-            ToolbarItem {
-                Button("Delete Thrift Savings Plan", systemImage: "trash", role: .destructive) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button("Copy", systemImage: "document.on.document") {
+                    copyTSP()
+                    dismiss()
+                }
+                
+                Button("Delete", systemImage: "trash", role: .destructive) {
                     deleteTSP()
                     dismiss()
                 }
@@ -103,13 +102,34 @@ struct TSPDetailView: View {
         }
     }
     
-    private func deleteTSP() {
-        modelContext.delete(tsp)
+    private func copyTSP() {
+        let tspDates = thriftSavingsPlans.map { $0.date }
+        let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+        let newTSP = ThriftSavingsPlan()
+        newTSP.name = tsp.name + " (copy)"
+        
+        // if a plan exists for the current month, create a plan a month past the latest date
+        // contained in the current query
+        if tspDates.contains(currentMonth) {
+            let lastDate = tspDates.max()!
+            let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+            newTSP.date = Calendar.current.lastDateOfMonth(from: nextDate)!
+        }
+        
+        newTSP.traditionalBasicPay = tsp.traditionalBasicPay
+        newTSP.traditionalSpecialPay = tsp.traditionalSpecialPay
+        newTSP.traditionalIncentivePay = tsp.traditionalIncentivePay
+        newTSP.traditionalBonusPay = tsp.traditionalBonusPay
+        newTSP.rothBasicPay = tsp.rothBasicPay
+        newTSP.rothSpecialPay = tsp.rothSpecialPay
+        newTSP.rothIncentivePay = tsp.rothIncentivePay
+        newTSP.rothBonusPay = tsp.rothBonusPay
+        
+        modelContext.insert(newTSP)
     }
     
-    private func resetTSP() {
-        tsp.traditionalBasicPay = 0.00
-        tsp.rothBasicPay = 0.00
+    private func deleteTSP() {
+        modelContext.delete(tsp)
     }
     
     private func validateTraditional() {

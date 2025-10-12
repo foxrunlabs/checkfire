@@ -2,16 +2,15 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckTabView: View {
-    @Bindable private var paycheck: Paycheck
-    
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
     }
     
-    private var paycheckYear: Int { Calendar.current.component(.year, from: paycheck.date) }
+    @Bindable private var paycheck: Paycheck
+    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query private var paychecks: [Paycheck]
     
     var body: some View {
         TabView {
@@ -26,13 +25,52 @@ struct PaycheckTabView: View {
         .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem {
-                Button("Delete Paycheck", systemImage: "trash", role: .destructive) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button("Copy", systemImage: "document.on.document") {
+                    copyPaycheck()
+                    dismiss()
+                }
+                
+                Button("Delete", systemImage: "trash", role: .destructive) {
                     deletePaycheck()
                     dismiss()
                 }
             }
         }
+    }
+    
+    private func copyPaycheck() {
+        let paycheckDates = paychecks.map { $0.date }
+        let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+        let newPaycheck = Paycheck()
+        newPaycheck.name = paycheck.name + " (copy)"
+        
+        // if a paycheck exists for the current month, create a form a month past the latest date
+        // contained in the current query
+        if paycheckDates.contains(currentMonth) {
+            let lastDate = paycheckDates.max()!
+            let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+            newPaycheck.date = Calendar.current.lastDateOfMonth(from: nextDate)!
+        }
+        
+        newPaycheck.payGrade = paycheck.payGrade
+        newPaycheck.yearsOfService = paycheck.yearsOfService
+        newPaycheck.basicPay = BasicPayTables.shared.basicPay(
+            for: newPaycheck.year,
+            as: newPaycheck.payGrade,
+            with: newPaycheck.yearsOfService
+        ) ?? paycheck.basicPay
+        newPaycheck.bas = BASTables.shared.bas(
+            for: newPaycheck.year,
+            as: newPaycheck.payGrade
+        ) ?? paycheck.bas
+        newPaycheck.bah = paycheck.bah
+        
+        newPaycheck.lesItems = paycheck.lesItems?.map {
+            LESItem(name: $0.name, amount: $0.amount, type: $0.type)
+        }
+        
+        modelContext.insert(newPaycheck)
     }
     
     private func deletePaycheck() {

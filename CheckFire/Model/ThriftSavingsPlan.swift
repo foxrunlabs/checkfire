@@ -47,7 +47,7 @@ final class ThriftSavingsPlan: Identifiable {
     
     convenience init() {
         self.init(
-            name: "New TSP",
+            name: "New Thrift Savings Plan",
             date: .now,
             traditionalBasicPay: 0.00,
             traditionalSpecialPay: 0.00,

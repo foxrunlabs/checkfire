@@ -19,12 +19,13 @@ struct WithholdingFormDetailView: View {
     var body: some View {
         Form {
             Section {
-                MonthYearPicker(
-                    "Effective Date",
-                    selection: $withholdingForm.date,
-                    in: WithholdingTables.shared.years,
-                    excluding: excludedDates
-                )
+                LabeledContent("Effective Date") {
+                    MonthYearPicker(
+                        selection: $withholdingForm.date,
+                        in: WithholdingTables.shared.years,
+                        excluding: excludedDates
+                    )
+                }
             }
             
             Section {
@@ -76,8 +77,13 @@ struct WithholdingFormDetailView: View {
         .navigationTitle($withholdingForm.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem {
-                Button("Delete Withholding Form", systemImage: "trash", role: .destructive) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button("Copy", systemImage: "document.on.document") {
+                    copyWithholdingForm()
+                    dismiss()
+                }
+                
+                Button("Delete", systemImage: "trash", role: .destructive) {
                     deleteWithholdingForm()
                     dismiss()
                 }
@@ -91,6 +97,31 @@ struct WithholdingFormDetailView: View {
                 }
             }
         }
+    }
+    
+    private func copyWithholdingForm() {
+        let formDates = withholdingForms.map { $0.date }
+        let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+        let newWithholdingForm = WithholdingForm()
+        newWithholdingForm.name = withholdingForm.name + " (copy)"
+        
+        // if a form exists for the current month, create a form a month past the latest date
+        // contained in the current query
+        if formDates.contains(currentMonth) {
+            let lastDate = formDates.max()!
+            let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+            newWithholdingForm.date = Calendar.current.lastDateOfMonth(from: nextDate)!
+        }
+        
+        newWithholdingForm.maritalStatus = withholdingForm.maritalStatus
+        newWithholdingForm.multipleJobs = withholdingForm.multipleJobs
+        newWithholdingForm.childDependents = withholdingForm.childDependents
+        newWithholdingForm.otherDependents = withholdingForm.otherDependents
+        newWithholdingForm.otherIncome = withholdingForm.otherIncome
+        newWithholdingForm.deductions = withholdingForm.deductions
+        newWithholdingForm.extraWithholding = withholdingForm.extraWithholding
+        
+        modelContext.insert(newWithholdingForm)
     }
     
     private func deleteWithholdingForm() {

@@ -1,19 +1,12 @@
 import SwiftUI
 
 struct MonthYearPicker: View {
-    init<S>(
-        _ title: S,
-        selection: Binding<Date>,
-        in bounds: ClosedRange<Int>,
-        excluding: [Date]? = nil
-    ) where S : StringProtocol {
-        self.title = title
+    init(selection: Binding<Date>, in bounds: ClosedRange<Int>,excluding: [Date]? = nil) {
         self._selection = selection
         self.years = bounds
         self.excludedDates = excluding
     }
     
-    private let title: any StringProtocol
     @Binding private var selection: Date
     private let years: ClosedRange<Int>
     private let excludedDates: [Date]?
@@ -21,21 +14,19 @@ struct MonthYearPicker: View {
     @State private var showPickerPopover = false
     
     var body: some View {
-        LabeledContent(title) {
-            Button {
-                showPickerPopover.toggle()
-            } label: {
-                HStack(spacing: 5) {
-                    Text(selection.formatted(.dateTime.month().year()))
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.footnote)
-                }
+        Button {
+            showPickerPopover.toggle()
+        } label: {
+            HStack(spacing: 5) {
+                Text(selection.formatted(.dateTime.month().year()))
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.footnote)
             }
-            .buttonStyle(.borderless)
-            .popover(isPresented: $showPickerPopover, arrowEdge: .top) {
-                PickerPopover(selection: $selection, in: years, excluding: excludedDates)
-                    .presentationCompactAdaptation(.popover)
-            }
+        }
+        .buttonStyle(.borderless)
+        .popover(isPresented: $showPickerPopover, arrowEdge: .top) {
+            PickerPopover(selection: $selection, in: years, excluding: excludedDates)
+                .presentationCompactAdaptation(.popover)
         }
     }
     
@@ -215,11 +206,12 @@ struct MonthYearPicker: View {
     ]
     
     Form {
-        MonthYearPicker(
-            "Pay Date",
-            selection: $date,
-            in: WithholdingTables.shared.years,
-            excluding: excludedDates
-        )
+        LabeledContent("Date") {
+            MonthYearPicker(
+                selection: $date,
+                in: WithholdingTables.shared.years,
+                excluding: excludedDates
+            )
+        }
     }
 }

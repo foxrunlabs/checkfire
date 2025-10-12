@@ -18,6 +18,7 @@ struct NetPayView: View {
     }
     
     private let paycheck: Paycheck
+    
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
@@ -148,14 +149,6 @@ struct NetPayView: View {
         return netPay
     }
     
-    private var withholdingFormDate: String {
-        withholdingForms.last?.date.formatted(.dateTime.month().year()) ?? "No Form"
-    }
-    
-    private var tspDate: String {
-        thriftSavingsPlans.last?.date.formatted(.dateTime.month().year()) ?? "No Plan"
-    }
-    
     var body: some View {
         List {
             Group {
@@ -186,7 +179,7 @@ struct NetPayView: View {
                         } else {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle")
-                                Text("Missing Data")
+                                Text("Missing Form")
                             }
                         }
                     }
@@ -197,7 +190,7 @@ struct NetPayView: View {
                         } else {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle")
-                                Text("Missing Data")
+                                Text("Missing Plan")
                             }
                         }
                     }
