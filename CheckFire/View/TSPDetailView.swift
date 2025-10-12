@@ -2,11 +2,13 @@ import SwiftData
 import SwiftUI
 
 struct TSPDetailView: View {
-    init(for tsp: ThriftSavingsPlan) {
+    init(for tsp: ThriftSavingsPlan, selection: Binding<PayComponent?>) {
         self.tsp = tsp
+        self._selection = selection
     }
     
     @Bindable private var tsp: ThriftSavingsPlan
+    @Binding private var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -91,7 +93,6 @@ struct TSPDetailView: View {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Copy", systemImage: "document.on.document") {
                     copyTSP()
-                    dismiss()
                 }
                 
                 Button("Delete", systemImage: "trash", role: .destructive) {
@@ -126,10 +127,12 @@ struct TSPDetailView: View {
         newTSP.rothBonusPay = tsp.rothBonusPay
         
         modelContext.insert(newTSP)
+        selection = .thriftSavingsPlan(newTSP)
     }
     
     private func deleteTSP() {
         modelContext.delete(tsp)
+        selection = nil
     }
     
     private func validateTraditional() {
@@ -154,7 +157,7 @@ struct TSPDetailView: View {
     @Previewable @State var tsp = ThriftSavingsPlan.example
     
     NavigationStack {
-        TSPDetailView(for: tsp)
+        TSPDetailView(for: tsp, selection: .constant(nil))
     }
     .modelContainer(PreviewController.container)
 }

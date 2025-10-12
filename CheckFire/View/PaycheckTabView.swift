@@ -2,11 +2,13 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckTabView: View {
-    init(for paycheck: Paycheck) {
+    init(for paycheck: Paycheck, selection: Binding<PayComponent?>) {
         self.paycheck = paycheck
+        self._selection = selection
     }
     
     @Bindable private var paycheck: Paycheck
+    @Binding private var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -28,7 +30,6 @@ struct PaycheckTabView: View {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Copy", systemImage: "document.on.document") {
                     copyPaycheck()
-                    dismiss()
                 }
                 
                 Button("Delete", systemImage: "trash", role: .destructive) {
@@ -71,10 +72,12 @@ struct PaycheckTabView: View {
         }
         
         modelContext.insert(newPaycheck)
+        selection = .paycheck(newPaycheck)
     }
     
     private func deletePaycheck() {
         modelContext.delete(paycheck)
+        selection = nil
     }
 }
 
@@ -82,7 +85,7 @@ struct PaycheckTabView: View {
     @Previewable @State var paycheck = Paycheck.example
     
     NavigationStack {
-        PaycheckTabView(for: paycheck)
+        PaycheckTabView(for: paycheck, selection: .constant(nil))
     }
     .modelContainer(PreviewController.container)
 }

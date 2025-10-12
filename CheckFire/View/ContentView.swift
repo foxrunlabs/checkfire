@@ -14,7 +14,7 @@ struct ContentView: View {
                 selectedPayComponent: $selectedPayComponent
             )
         } detail: {
-            DetailViewController(selectedPayComponent: selectedPayComponent)
+            DetailViewController(selectedPayComponent: $selectedPayComponent)
         }
         .onChange(of: selectedNavigation) {
             selectedPayComponent = nil
@@ -46,17 +46,20 @@ struct ContentView: View {
     }
     
     private struct DetailViewController: View {
-        let selectedPayComponent: PayComponent?
+        @Binding var selectedPayComponent: PayComponent?
         
         var body: some View {
             if let selectedPayComponent {
                 switch selectedPayComponent {
                 case .paycheck(let selectedPaycheck):
-                    PaycheckTabView(for: selectedPaycheck)
+                    PaycheckTabView(for: selectedPaycheck, selection: $selectedPayComponent)
                 case .withholdingForm(let selectedWithholdingForm):
-                    WithholdingFormDetailView(for: selectedWithholdingForm)
+                    WithholdingFormDetailView(
+                        for: selectedWithholdingForm,
+                        selection: $selectedPayComponent
+                    )
                 case .thriftSavingsPlan(let selectedTSP):
-                    TSPDetailView(for: selectedTSP)
+                    TSPDetailView(for: selectedTSP, selection: $selectedPayComponent)
                 }
             } else {
                 ContentUnavailableView(

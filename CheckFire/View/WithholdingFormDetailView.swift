@@ -2,11 +2,13 @@ import SwiftData
 import SwiftUI
 
 struct WithholdingFormDetailView: View {
-    init(for withholdingForm: WithholdingForm) {
+    init(for withholdingForm: WithholdingForm, selection: Binding<PayComponent?>) {
         self.withholdingForm = withholdingForm
+        self._selection = selection
     }
     
     @Bindable private var withholdingForm: WithholdingForm
+    @Binding private var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -80,7 +82,6 @@ struct WithholdingFormDetailView: View {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Copy", systemImage: "document.on.document") {
                     copyWithholdingForm()
-                    dismiss()
                 }
                 
                 Button("Delete", systemImage: "trash", role: .destructive) {
@@ -122,10 +123,12 @@ struct WithholdingFormDetailView: View {
         newWithholdingForm.extraWithholding = withholdingForm.extraWithholding
         
         modelContext.insert(newWithholdingForm)
+        selection = .withholdingForm(newWithholdingForm)
     }
     
     private func deleteWithholdingForm() {
         modelContext.delete(withholdingForm)
+        selection = nil
     }
     
     private func dismissKeyboard() {
@@ -143,7 +146,7 @@ struct WithholdingFormDetailView: View {
     @Previewable @State var withholdingForm = WithholdingForm.example
 
     NavigationStack {
-        WithholdingFormDetailView(for: withholdingForm)
+        WithholdingFormDetailView(for: withholdingForm, selection: .constant(nil))
     }
     .modelContainer(PreviewController.container)
 }
