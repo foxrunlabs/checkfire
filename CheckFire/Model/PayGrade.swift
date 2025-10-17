@@ -13,6 +13,14 @@ enum PayGrade:
     case w5, w4, w3, w2, w1
     case e9, e8, e7, e6, e5, e4, e3, e2, e1
     
+    static let officers: [Self] = [.o10, .o9, .o8, .o7, .o6, .o5, .o4, .o3, .o2, .o1]
+    static let priorEnlisted: [Self] = [.o3E, .o2E, .o1E]
+    static let warrants: [Self] = [.w5, .w4, .w3, .w2, .w1]
+    static let enlisted: [Self] = [.e9, .e8, .e7, .e6, .e5, .e4, .e3, .e2, .e1]
+    
+    var isEnlisted: Bool { Self.enlisted.contains(self) }
+    
+    // MARK: - Custom String Convertible
     var description: String {
         switch self {
         case .o10: "O-10"
@@ -45,7 +53,6 @@ enum PayGrade:
         }
     }
     
+    // MARK: - Identifiable
     var id: Self { self }
-    
-    var isEnlisted: Bool { description.hasPrefix("E") }
 }

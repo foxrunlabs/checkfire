@@ -34,6 +34,12 @@ struct ContentView: View {
                     WithholdingFormsListView(selection: $selectedPayComponent)
                 case .thriftSavingsPlans:
                     TSPListView(selection: $selectedPayComponent)
+                case .basicPayTables:
+                    BasicPayTablesListView(selection: $selectedPayComponent)
+                case .bahTables:
+                    BAHTablesListView(selection: $selectedPayComponent)
+                case .basTables:
+                    BASTablesListView(selection: $selectedPayComponent)
                 }
             } else {
                 ContentUnavailableView(
@@ -60,6 +66,12 @@ struct ContentView: View {
                     )
                 case .thriftSavingsPlan(let selectedTSP):
                     TSPDetailView(for: selectedTSP, selection: $selectedPayComponent)
+                case .basicPay(let year):
+                    BasicPayTablesDetailView(year: year)
+                case .bah(let year):
+                    BAHTablesDetailView(year: year)
+                case .bas(let year):
+                    BASTablesDetailView(year: year)
                 }
             } else {
                 ContentUnavailableView(

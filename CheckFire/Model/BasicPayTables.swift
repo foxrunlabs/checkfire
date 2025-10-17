@@ -10,7 +10,7 @@ final class BasicPayTables {
     /// Private initializer for singleton object.
     private init() {}
     
-    private func payTable(for year: Int) -> BasicPayTable? {
+    func payTable(for year: Int) -> BasicPayTable? {
         payTables.first { $0.year == year }
     }
     

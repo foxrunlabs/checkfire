@@ -9,11 +9,7 @@ struct SidebarView: View {
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
-    @State private var showBasicPayTablesSheet = false
-    @State private var showBAHTablesSheet = false
-    @State private var showBASTablesSheet = false
     @State private var showAboutSheet = false
-    
     @State private var showDeleteAlert = false
     
     private var isDeleteDisabled: Bool {
@@ -39,8 +35,8 @@ struct SidebarView: View {
     var body: some View {
         List(selection: $selectedNavigation) {
             Section("Pay Data") {
-                ForEach(SidebarNavigation.allCases) { navigationItem in
-                    PayDataListRow(
+                ForEach(SidebarNavigation.payDataCases) { navigationItem in
+                    ListRow(
                         navigation: navigationItem,
                         badge: badgeCount(for: navigationItem)
                     )
@@ -49,16 +45,10 @@ struct SidebarView: View {
             }
             
             Section("Tools") {
-                Button("Basic Pay Tables", systemImage: "tablecells") {
-                    showBasicPayTablesSheet.toggle()
-                }
-                
-                Button("BAH Tables", systemImage: "house") {
-                    showBAHTablesSheet.toggle()
-                }
-                
-                Button("BAS Tables", systemImage: "fork.knife") {
-                    showBASTablesSheet.toggle()
+                ForEach(SidebarNavigation.tableCases) { navigationItem in
+                    ListRow(navigation: navigationItem, badge: badgeCount(for: navigationItem))
+                        .tag(navigationItem)
+                    
                 }
             }
         }
@@ -76,18 +66,6 @@ struct SidebarView: View {
                     .disabled(isDeleteDisabled)
                 }
             }
-        }
-        .sheet(isPresented: $showBasicPayTablesSheet) {
-            BasicPayTablesSheet()
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showBAHTablesSheet) {
-            BAHTablesSheet()
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(isPresented: $showBASTablesSheet) {
-            BASTablesSheet()
-                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showAboutSheet) {
             AboutSheet()
@@ -108,7 +86,7 @@ struct SidebarView: View {
         }
     }
     
-    private struct PayDataListRow: View {
+    private struct ListRow: View {
         let navigation: SidebarNavigation
         let badge: Int
         
@@ -117,6 +95,9 @@ struct SidebarView: View {
             case .paychecks: "dollarsign"
             case .withholdingForms: "pencil.and.list.clipboard"
             case .thriftSavingsPlans: "dollarsign.bank.building"
+            case .basicPayTables: "tablecells"
+            case .bahTables: "house"
+            case .basTables: "fork.knife"
             }
         }
         
@@ -137,6 +118,7 @@ struct SidebarView: View {
         case .paychecks: paychecks.count
         case .withholdingForms: withholdingForms.count
         case .thriftSavingsPlans: thriftSavingsPlans.count
+        default: 0
         }
     }
     
