@@ -4,33 +4,11 @@ import SwiftUI
 struct SidebarView: View {
     @Binding var selectedNavigation: SidebarNavigation?
     
-    @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
     
-    @State private var showAboutSheet = false
-    @State private var showDeleteAlert = false
-    
-    private var isDeleteDisabled: Bool {
-        paychecks.isEmpty && withholdingForms.isEmpty && thriftSavingsPlans.isEmpty
-    }
-    
-    private var menuIcon: String {
-        if #available(iOS 26, *) {
-            "ellipsis"
-        } else {
-            "ellipsis.circle"
-        }
-    }
-    
-    private var aboutIcon: String {
-        if #available(iOS 26, *) {
-            "info"
-        } else {
-            "info.circle"
-        }
-    }
+    @State private var showSettingsSheet = false
     
     var body: some View {
         List(selection: $selectedNavigation) {
@@ -44,7 +22,7 @@ struct SidebarView: View {
                 }
             }
             
-            Section("Tools") {
+            Section("Tables") {
                 ForEach(SidebarNavigation.tableCases) { navigationItem in
                     ListRow(navigation: navigationItem, badge: badgeCount(for: navigationItem))
                         .tag(navigationItem)
@@ -54,35 +32,14 @@ struct SidebarView: View {
         }
         .navigationTitle("CheckFire")
         .toolbar {
-            ToolbarItem {
-                Menu("Options", systemImage: menuIcon) {
-                    Button("About CheckFire", systemImage: aboutIcon) {
-                        showAboutSheet.toggle()
-                    }
-                    
-                    Button("Delete All Data", systemImage: "trash", role: .destructive) {
-                        showDeleteAlert.toggle()
-                    }
-                    .disabled(isDeleteDisabled)
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Settings", systemImage: "gear") {
+                    showSettingsSheet.toggle()
                 }
             }
         }
-        .sheet(isPresented: $showAboutSheet) {
-            AboutSheet()
-        }
-        .alert("Delete All Data", isPresented: $showDeleteAlert) {
-            if ProcessInfo.processInfo.isiOSAppOnMac {
-                Button("Delete") { deleteAllData() }
-                    .keyboardShortcut(.defaultAction)
-
-                Button("Cancel") { }
-                    .keyboardShortcut(.cancelAction)
-            } else {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) { deleteAllData() }
-            }
-        } message: {
-            Text("Are you sure?")
+        .sheet(isPresented: $showSettingsSheet) {
+            SettingsSheet()
         }
     }
     
@@ -90,24 +47,13 @@ struct SidebarView: View {
         let navigation: SidebarNavigation
         let badge: Int
         
-        private var icon: String {
-            switch navigation {
-            case .paychecks: "dollarsign"
-            case .withholdingForms: "pencil.and.list.clipboard"
-            case .thriftSavingsPlans: "dollarsign.bank.building"
-            case .basicPayTables: "tablecells"
-            case .bahTables: "house"
-            case .basTables: "fork.knife"
-            }
-        }
-        
         var body: some View {
             NavigationLink(value: navigation) {
                 Label {
                     Text(String(describing: navigation))
                         .badge(badge)
                 } icon: {
-                    Image(systemName: icon)
+                    Image(systemName: navigation.icon)
                 }
             }
         }
@@ -120,12 +66,6 @@ struct SidebarView: View {
         case .thriftSavingsPlans: thriftSavingsPlans.count
         default: 0
         }
-    }
-    
-    private func deleteAllData() {
-        paychecks.forEach { modelContext.delete($0) }
-        withholdingForms.forEach { modelContext.delete($0) }
-        thriftSavingsPlans.forEach { modelContext.delete($0) }
     }
 }
 

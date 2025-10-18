@@ -9,6 +9,17 @@ enum SidebarNavigation: CaseIterable, CustomStringConvertible, Identifiable {
     static var payDataCases: [Self] = [.paychecks, .withholdingForms, .thriftSavingsPlans]
     static var tableCases: [Self] = [.basicPayTables, .bahTables, .basTables]
     
+    var icon: String {
+        switch self {
+        case .paychecks: "dollarsign"
+        case .withholdingForms: "pencil.and.list.clipboard"
+        case .thriftSavingsPlans: "dollarsign.bank.building"
+        case .basicPayTables: "tablecells"
+        case .bahTables: "house"
+        case .basTables: "fork.knife"
+        }
+    }
+    
     // MARK: - Custom String Convertible
     var description: String {
         switch self {
