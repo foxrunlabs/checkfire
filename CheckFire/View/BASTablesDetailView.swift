@@ -1,12 +1,13 @@
 import SwiftUI
 
 struct BASTablesDetailView: View {
+    let year: Int
+    
     init(year: Int) {
         self.year = year
         self.basTable = BASTables.shared.basTable(for: year)
     }
     
-    private let year: Int
     private let basTable: BASTable?
     
     var body: some View {

@@ -2,15 +2,16 @@ import SwiftData
 import SwiftUI
 
 struct WithholdingFormDetailView: View {
+    @Bindable var withholdingForm: WithholdingForm
+    @Binding var selection: PayComponent?
+    
     init(for withholdingForm: WithholdingForm, selection: Binding<PayComponent?>) {
         self.withholdingForm = withholdingForm
         self._selection = selection
     }
     
-    @Bindable private var withholdingForm: WithholdingForm
-    @Binding private var selection: PayComponent?
-    
     @Environment(\.dismiss) private var dismiss
+    
     @Environment(\.modelContext) private var modelContext
     @Query private var withholdingForms: [WithholdingForm]
     
@@ -90,11 +91,10 @@ struct WithholdingFormDetailView: View {
                 }
             }
             
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                
-                Button("Done") {
-                    dismissKeyboard()
+            ToolbarItem(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button("Done") { dismissKeyboard() }
                 }
             }
         }
@@ -138,6 +138,30 @@ struct WithholdingFormDetailView: View {
             from: nil,
             for: nil
         )
+    }
+}
+
+fileprivate struct CurrencyField: View {
+    let title: any StringProtocol
+    @Binding var value: Decimal
+    
+    init<S>(_ title: S, value: Binding<Decimal>) where S : StringProtocol {
+        self.title = title
+        self._value = value
+    }
+
+    var body: some View {
+        LabeledContent {
+            TextField(
+                title,
+                value: $value,
+                format: .currency(code: "USD")
+            )
+            .multilineTextAlignment(.trailing)
+            .keyboardType(.decimalPad)
+        } label: {
+            Text(title)
+        }
     }
 }
 

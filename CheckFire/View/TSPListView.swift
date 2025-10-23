@@ -91,96 +91,96 @@ struct TSPListView: View {
         modelContext.insert(newTSP)
         selection = .thriftSavingsPlan(newTSP)
     }
+}
+
+fileprivate struct QueryView: View {
+    @Binding var selection: PayComponent?
     
-    private struct QueryView: View {
-        init(selection: Binding<PayComponent?>, sort: [SortDescriptor<ThriftSavingsPlan>]) {
-            self._selection = selection
-            self._thriftSavingsPlans = Query(sort: sort)
-        }
-        
-        @Binding private var selection: PayComponent?
-        
-        @Environment(\.modelContext) private var modelContext
-        @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
-        
-        var body: some View {
-            if thriftSavingsPlans.isEmpty {
-                ContentUnavailableView(
-                    "No Plans Found",
-                    systemImage: "dollarsign.bank.building",
-                    description: Text("Please add a new plan.")
-                )
-            } else {
-                List(selection: $selection) {
-                    ForEach(thriftSavingsPlans) { tsp in
-                        TSPListRow(for: tsp)
-                            .tag(PayComponent.thriftSavingsPlan(tsp))
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    deleteTSP(tsp)
-                                }
-                                
-                                Button("Copy", systemImage: "document.on.document") {
-                                    copyTSP(tsp)
-                                }
-                                .tint(.accentColor)
+    init(selection: Binding<PayComponent?>, sort: [SortDescriptor<ThriftSavingsPlan>]) {
+        self._selection = selection
+        self._thriftSavingsPlans = Query(sort: sort)
+    }
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
+    
+    var body: some View {
+        if thriftSavingsPlans.isEmpty {
+            ContentUnavailableView(
+                "No Plans Found",
+                systemImage: "dollarsign.bank.building",
+                description: Text("Please add a new plan.")
+            )
+        } else {
+            List(selection: $selection) {
+                ForEach(thriftSavingsPlans) { tsp in
+                    ListRow(for: tsp)
+                        .tag(PayComponent.thriftSavingsPlan(tsp))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                deleteTSP(tsp)
                             }
-                    }
-                }
-                .listStyle(.inset)
-            }
-        }
-        
-        private struct TSPListRow: View {
-            init(for tsp: ThriftSavingsPlan) {
-                self.tsp = tsp
-            }
-            
-            private let tsp: ThriftSavingsPlan
-            
-            var body: some View {
-                NavigationLink(value: tsp) {
-                    VStack(alignment: .leading) {
-                        Text(tsp.name)
-                            .font(.headline)
-                        
-                        Text(tsp.date, format: .dateTime.month(.wide).year())
-                            .font(.subheadline)
-                    }
+                            
+                            Button("Copy", systemImage: "document.on.document") {
+                                copyTSP(tsp)
+                            }
+                            .tint(.accentColor)
+                        }
                 }
             }
+            .listStyle(.inset)
+        }
+    }
+    
+    private func copyTSP(_ other: ThriftSavingsPlan) {
+        let tspDates = thriftSavingsPlans.map { $0.date }
+        let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
+        let newTSP = ThriftSavingsPlan()
+        newTSP.name = other.name + " (copy)"
+        
+        // if a plan exists for the current month, create a plan a month past the latest date
+        // contained in the current query
+        if tspDates.contains(currentMonth) {
+            let lastDate = tspDates.max()!
+            let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
+            newTSP.date = Calendar.current.lastDateOfMonth(from: nextDate)!
         }
         
-        private func copyTSP(_ other: ThriftSavingsPlan) {
-            let tspDates = thriftSavingsPlans.map { $0.date }
-            let currentMonth = Calendar.current.lastDateOfMonth(from: .now)!
-            let newTSP = ThriftSavingsPlan()
-            newTSP.name = other.name + " (copy)"
-            
-            // if a plan exists for the current month, create a plan a month past the latest date
-            // contained in the current query
-            if tspDates.contains(currentMonth) {
-                let lastDate = tspDates.max()!
-                let nextDate = Calendar.current.date(byAdding: .month, value: 1, to: lastDate)!
-                newTSP.date = Calendar.current.lastDateOfMonth(from: nextDate)!
+        newTSP.traditionalBasicPay = other.traditionalBasicPay
+        newTSP.traditionalSpecialPay = other.traditionalSpecialPay
+        newTSP.traditionalIncentivePay = other.traditionalIncentivePay
+        newTSP.traditionalBonusPay = other.traditionalBonusPay
+        newTSP.rothBasicPay = other.rothBasicPay
+        newTSP.rothSpecialPay = other.rothSpecialPay
+        newTSP.rothIncentivePay = other.rothIncentivePay
+        newTSP.rothBonusPay = other.rothBonusPay
+        
+        modelContext.insert(newTSP)
+        selection = .thriftSavingsPlan(newTSP)
+    }
+    
+    private func deleteTSP(_ tsp: ThriftSavingsPlan) {
+        modelContext.delete(tsp)
+        selection = nil
+    }
+}
+
+fileprivate struct ListRow: View {
+    let tsp: ThriftSavingsPlan
+    
+    init(for tsp: ThriftSavingsPlan) {
+        self.tsp = tsp
+    }
+    
+    var body: some View {
+        NavigationLink(value: tsp) {
+            VStack(alignment: .leading) {
+                Text(tsp.name)
+                    .font(.headline)
+                
+                Text(tsp.date, format: .dateTime.month(.wide).year())
+                    .font(.subheadline)
             }
-            
-            newTSP.traditionalBasicPay = other.traditionalBasicPay
-            newTSP.traditionalSpecialPay = other.traditionalSpecialPay
-            newTSP.traditionalIncentivePay = other.traditionalIncentivePay
-            newTSP.traditionalBonusPay = other.traditionalBonusPay
-            newTSP.rothBasicPay = other.rothBasicPay
-            newTSP.rothSpecialPay = other.rothSpecialPay
-            newTSP.rothIncentivePay = other.rothIncentivePay
-            newTSP.rothBonusPay = other.rothBonusPay
-            
-            modelContext.insert(newTSP)
-            selection = .thriftSavingsPlan(newTSP)
-        }
-        
-        private func deleteTSP(_ tsp: ThriftSavingsPlan) {
-            modelContext.delete(tsp)
-            selection = nil
         }
     }
 }

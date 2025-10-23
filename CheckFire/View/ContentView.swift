@@ -20,66 +20,66 @@ struct ContentView: View {
             selectedPayComponent = nil
         }
     }
+}
     
-    private struct ContentViewController: View {
-        let selectedNavigation: SidebarNavigation?
-        @Binding var selectedPayComponent: PayComponent?
-        
-        var body: some View {
-            if let selectedNavigation {
-                switch selectedNavigation {
-                case .paychecks:
-                    PaychecksListView(selection: $selectedPayComponent)
-                case .withholdingForms:
-                    WithholdingFormsListView(selection: $selectedPayComponent)
-                case .thriftSavingsPlans:
-                    TSPListView(selection: $selectedPayComponent)
-                case .basicPayTables:
-                    BasicPayTablesListView(selection: $selectedPayComponent)
-                case .bahTables:
-                    BAHTablesListView(selection: $selectedPayComponent)
-                case .basTables:
-                    BASTablesListView(selection: $selectedPayComponent)
-                }
-            } else {
-                ContentUnavailableView(
-                    "Nothing Selected",
-                    systemImage: "sidebar.left",
-                    description: Text("Please select a sidebar item.")
-                )
+fileprivate struct ContentViewController: View {
+    let selectedNavigation: SidebarNavigation?
+    @Binding var selectedPayComponent: PayComponent?
+    
+    var body: some View {
+        if let selectedNavigation {
+            switch selectedNavigation {
+            case .paychecks:
+                PaychecksListView(selection: $selectedPayComponent)
+            case .withholdingForms:
+                WithholdingFormsListView(selection: $selectedPayComponent)
+            case .thriftSavingsPlans:
+                TSPListView(selection: $selectedPayComponent)
+            case .basicPayTables:
+                BasicPayTablesListView(selection: $selectedPayComponent)
+            case .bahTables:
+                BAHTablesListView(selection: $selectedPayComponent)
+            case .basTables:
+                BASTablesListView(selection: $selectedPayComponent)
             }
+        } else {
+            ContentUnavailableView(
+                "Nothing Selected",
+                systemImage: "sidebar.left",
+                description: Text("Please select a sidebar item.")
+            )
         }
     }
+}
     
-    private struct DetailViewController: View {
-        @Binding var selectedPayComponent: PayComponent?
-        
-        var body: some View {
-            if let selectedPayComponent {
-                switch selectedPayComponent {
-                case .paycheck(let selectedPaycheck):
-                    PaycheckTabView(for: selectedPaycheck, selection: $selectedPayComponent)
-                case .withholdingForm(let selectedWithholdingForm):
-                    WithholdingFormDetailView(
-                        for: selectedWithholdingForm,
-                        selection: $selectedPayComponent
-                    )
-                case .thriftSavingsPlan(let selectedTSP):
-                    TSPDetailView(for: selectedTSP, selection: $selectedPayComponent)
-                case .basicPay(let year):
-                    BasicPayTablesDetailView(year: year)
-                case .bah(let year):
-                    BAHTablesDetailView(year: year)
-                case .bas(let year):
-                    BASTablesDetailView(year: year)
-                }
-            } else {
-                ContentUnavailableView(
-                    "Nothing Selected",
-                    systemImage: "document",
-                    description: Text("Please make a selection.")
+fileprivate struct DetailViewController: View {
+    @Binding var selectedPayComponent: PayComponent?
+    
+    var body: some View {
+        if let selectedPayComponent {
+            switch selectedPayComponent {
+            case .paycheck(let selectedPaycheck):
+                PaycheckTabView(for: selectedPaycheck, selection: $selectedPayComponent)
+            case .withholdingForm(let selectedWithholdingForm):
+                WithholdingFormDetailView(
+                    for: selectedWithholdingForm,
+                    selection: $selectedPayComponent
                 )
+            case .thriftSavingsPlan(let selectedTSP):
+                TSPDetailView(for: selectedTSP, selection: $selectedPayComponent)
+            case .basicPay(let year):
+                BasicPayTablesDetailView(year: year)
+            case .bah(let year):
+                BAHTablesDetailView(year: year)
+            case .bas(let year):
+                BASTablesDetailView(year: year)
             }
+        } else {
+            ContentUnavailableView(
+                "Nothing Selected",
+                systemImage: "document",
+                description: Text("Please make a selection.")
+            )
         }
     }
 }

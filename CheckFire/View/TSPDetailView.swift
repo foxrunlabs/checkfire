@@ -2,13 +2,13 @@ import SwiftData
 import SwiftUI
 
 struct TSPDetailView: View {
+    @Bindable var tsp: ThriftSavingsPlan
+    @Binding var selection: PayComponent?
+    
     init(for tsp: ThriftSavingsPlan, selection: Binding<PayComponent?>) {
         self.tsp = tsp
         self._selection = selection
     }
-    
-    @Bindable private var tsp: ThriftSavingsPlan
-    @Binding private var selection: PayComponent?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -148,6 +148,32 @@ struct TSPDetailView: View {
             tsp.rothSpecialPay = 0.00
             tsp.rothIncentivePay = 0.00
             tsp.rothBonusPay = 0.00
+        }
+    }
+}
+
+fileprivate struct TSPStepper: View {
+    let title: any StringProtocol
+    @Binding var value: Decimal
+    let max: Decimal
+    
+    init<S>(_ title: S, value: Binding<Decimal>, max: Decimal) where S : StringProtocol {
+        self.title = title
+        self._value = value
+        self.max = max
+    }
+    
+    var body: some View {
+        Stepper(
+            value: $value,
+            in: 0.00...max,
+            step: 0.01
+        ) {
+            HStack {
+                Text(title)
+                Spacer()
+                Text(value, format: .percent)
+            }
         }
     }
 }

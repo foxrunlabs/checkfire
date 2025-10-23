@@ -26,18 +26,19 @@ struct BasicPayTablesListView: View {
             }
         }
     }
+}
+
+fileprivate struct ListRow: View {
+    let year: Int
     
-    private struct ListRow: View {
-        let year: Int
-        
-        var body: some View {
-            NavigationLink(value: year) {
-                Text(String(describing: year))
-                    .font(.headline)
-            }
+    var body: some View {
+        NavigationLink(value: year) {
+            Text(String(describing: year))
+                .font(.headline)
         }
     }
 }
+
 
 // MARK: - Preview
 #Preview {

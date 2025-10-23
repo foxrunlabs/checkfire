@@ -5,7 +5,6 @@ import SwiftData
 class PreviewController {
     static let container: ModelContainer = {
         let paycheck = Paycheck.example
-        paycheck.bah = 4485.00
         
         let lesItems: [LESItem] = [
             .init(name: "Fly Pay", amount: 840.00, type: .incentivePay, paycheck: paycheck),

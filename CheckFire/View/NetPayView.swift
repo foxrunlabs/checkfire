@@ -2,10 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct NetPayView: View {
-    private let paycheck: Paycheck
-    private let grossPay: Decimal
-    private let socialSecurity: Decimal
-    private let medicare: Decimal
+    let paycheck: Paycheck
     
     init(for paycheck: Paycheck) {
         self.paycheck = paycheck
@@ -39,6 +36,10 @@ struct NetPayView: View {
             sort: \.date
         )
     }
+    
+    private let grossPay: Decimal
+    private let socialSecurity: Decimal
+    private let medicare: Decimal
     
     @Query private var withholdingForms: [WithholdingForm]
     @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
@@ -123,7 +124,7 @@ struct NetPayView: View {
             }
         } else {
             ContentUnavailableView(
-                "Can't Compute Net Pay",
+                "Unable to Compute Net Pay",
                 systemImage: "exclamationmark.triangle",
                 description: Text(missingDataDescription)
             )

@@ -14,11 +14,11 @@ struct SettingsSheet: View {
     private let contactURL = URL(string: "mailto:foxrunlabs@icloud.com")!
     private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
     
-    private var version: String {
+    private let version: String = {
         let number = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
         return number + " (\(build))"
-    }
+    }()
     
     private var isDeleteDisabled: Bool {
         paychecks.isEmpty && withholdingForms.isEmpty && thriftSavingsPlans.isEmpty
@@ -79,16 +79,16 @@ struct SettingsSheet: View {
         withholdingForms.forEach { modelContext.delete($0) }
         thriftSavingsPlans.forEach { modelContext.delete($0) }
     }
-    
-    private struct DoneButtonStyle: ViewModifier {
-        func body(content: Content) -> some View {
-            if #available(iOS 26, *) {
-                content
-                    .labelStyle(.automatic)
-            } else {
-                content
-                    .labelStyle(.titleOnly)
-            }
+}
+
+fileprivate struct DoneButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .labelStyle(.automatic)
+        } else {
+            content
+                .labelStyle(.titleOnly)
         }
     }
 }

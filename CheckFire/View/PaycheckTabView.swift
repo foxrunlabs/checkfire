@@ -2,15 +2,16 @@ import SwiftData
 import SwiftUI
 
 struct PaycheckTabView: View {
+    @Bindable var paycheck: Paycheck
+    @Binding var selection: PayComponent?
+    
     init(for paycheck: Paycheck, selection: Binding<PayComponent?>) {
         self.paycheck = paycheck
         self._selection = selection
     }
     
-    @Bindable private var paycheck: Paycheck
-    @Binding private var selection: PayComponent?
-    
     @Environment(\.dismiss) private var dismiss
+    
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
     
@@ -65,6 +66,7 @@ struct PaycheckTabView: View {
             for: newPaycheck.year,
             as: newPaycheck.payGrade
         ) ?? paycheck.bas
+        newPaycheck.vhaZIP = paycheck.vhaZIP
         newPaycheck.bah = paycheck.bah
         
         newPaycheck.lesItems = paycheck.lesItems?.map {
@@ -81,6 +83,7 @@ struct PaycheckTabView: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     @Previewable @State var paycheck = Paycheck.example
     

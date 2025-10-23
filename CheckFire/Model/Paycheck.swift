@@ -18,6 +18,7 @@ final class Paycheck: Identifiable {
         for: Calendar.current.component(.year, from: .now),
         as: .e1
     ) ?? 0.00
+    var vhaZIP = ""
     var bah: Decimal = 0.00
     
     @Relationship(deleteRule: .cascade, inverse: \LESItem.paycheck) var lesItems: [LESItem]? = []
@@ -42,6 +43,7 @@ final class Paycheck: Identifiable {
             with: yearsOfService
         ) ?? 0.00
         self.bas = BASTables.shared.bas(for: year, as: payGrade) ?? 0.00
+        self.vhaZIP = ""
         self.bah = 0.00
         
         self.lesItems = lesItems
@@ -58,10 +60,15 @@ final class Paycheck: Identifiable {
     
     var year: Int { Calendar.current.component(.year, from: date) }
     
-    static let example = Paycheck(
-        name: "Example",
-        date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
-        payGrade: .o5,
-        yearsOfService: .over20
-    )
+    static let example: Paycheck = {
+        let paycheck = Paycheck(
+            name: "Example",
+            date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
+            payGrade: .o5,
+            yearsOfService: .over20
+        )
+        paycheck.vhaZIP = "02842"
+        paycheck.bah = 4485.00
+        return paycheck        
+    }()
 }

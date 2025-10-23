@@ -43,28 +43,28 @@ struct SidebarView: View {
         }
     }
     
-    private struct ListRow: View {
-        let navigation: SidebarNavigation
-        let badge: Int
-        
-        var body: some View {
-            NavigationLink(value: navigation) {
-                Label {
-                    Text(String(describing: navigation))
-                        .badge(badge)
-                } icon: {
-                    Image(systemName: navigation.icon)
-                }
-            }
-        }
-    }
-    
     private func badgeCount(for navigation: SidebarNavigation) -> Int {
         switch navigation {
         case .paychecks: paychecks.count
         case .withholdingForms: withholdingForms.count
         case .thriftSavingsPlans: thriftSavingsPlans.count
         default: 0
+        }
+    }
+}
+
+fileprivate struct ListRow: View {
+    let navigation: SidebarNavigation
+    let badge: Int
+    
+    var body: some View {
+        NavigationLink(value: navigation) {
+            Label {
+                Text(String(describing: navigation))
+                    .badge(badge)
+            } icon: {
+                Image(systemName: navigation.icon)
+            }
         }
     }
 }

@@ -26,15 +26,15 @@ struct BAHTablesListView: View {
             }
         }
     }
+}
     
-    private struct ListRow: View {
-        let year: Int
-        
-        var body: some View {
-            NavigationLink(value: year) {
-                Text(String(describing: year))
-                    .font(.headline)
-            }
+fileprivate struct ListRow: View {
+    let year: Int
+    
+    var body: some View {
+        NavigationLink(value: year) {
+            Text(String(describing: year))
+                .font(.headline)
         }
     }
 }
