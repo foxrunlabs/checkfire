@@ -2,45 +2,27 @@ import SwiftData
 import SwiftUI
 
 struct SettingsSheet: View {
+    private let contactURL = URL(string: "mailto:foxrunlabs@icloud.com")!
+    private let sourceDocs: [SourceDoc] = Bundle.main.decode(from: "source_documentation.json")
     @Environment(\.dismiss) private var dismiss
-    
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
-    @Query private var withholdingForms: [WithholdingForm]
-    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
-    
     @State private var showDeleteAlert = false
     
-    private let contactURL = URL(string: "mailto:foxrunlabs@icloud.com")!
-    private let sourceDocs: [SourceDocumentation] = Bundle.main.decode(from: "source_documentation.json")
-    
-    private let version: String = {
-        let number = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        return number + " (\(build))"
-    }()
-    
-    private var isDeleteDisabled: Bool {
-        paychecks.isEmpty && withholdingForms.isEmpty && thriftSavingsPlans.isEmpty
-    }
-    
+    // MARK: - Body
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     Text("Copyright © 2025 Ryan Clarke")
-                    
-                    Text("Version " + version)
-                    
-                    Link(destination: contactURL) {
-                        Label("Contact", systemImage: "envelope")
-                    }
+                    Text("Version " + Bundle.main.versionString)
+                    Link(destination: contactURL) { Label("Contact", systemImage: "envelope") }
                 }
                 
                 Section("Official Documentation") {
-                    ForEach(sourceDocs) { doc in
-                        Link(destination: doc.url) {
-                            Label(doc.name, systemImage: "network")
+                    ForEach(sourceDocs) { sourceDoc in
+                        Link(destination: sourceDoc.url) {
+                            Label(sourceDoc.name, systemImage: "network")
                         }
                     }
                 }
@@ -49,12 +31,9 @@ struct SettingsSheet: View {
                     Button("Delete All Data", systemImage: "trash", role: .destructive) {
                         showDeleteAlert.toggle()
                     }
-                    .disabled(isDeleteDisabled)
-                    .confirmationDialog("Delete All Day?", isPresented: $showDeleteAlert) {
-                        Button("Delete", role: .destructive) {
-                            deleteAllData()
-                        }
-                        
+                    .disabled(paychecks.isEmpty)
+                    .confirmationDialog("Delete All Data?", isPresented: $showDeleteAlert) {
+                        Button("Delete", role: .destructive) { deleteAllData() }
                         Button("Cancel", role: .cancel) {}
                     } message: {
                         Text("Are you sure?")
@@ -65,33 +44,36 @@ struct SettingsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Done", systemImage: "checkmark") {
-                        dismiss()
-                    }
-                    .modifier(DoneButtonStyle())
+                    Button("Done", systemImage: "checkmark") { dismiss() }
+                        .modifier(DoneButtonStyle())
                 }
             }
         }
     }
     
+    // MARK: - Methods
     private func deleteAllData() {
         paychecks.forEach { modelContext.delete($0) }
-        withholdingForms.forEach { modelContext.delete($0) }
-        thriftSavingsPlans.forEach { modelContext.delete($0) }
     }
 }
 
-fileprivate struct DoneButtonStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content
-                .labelStyle(.automatic)
-        } else {
-            content
-                .labelStyle(.titleOnly)
+
+// MARK: - Button Style
+extension SettingsSheet {
+    private struct DoneButtonStyle: ViewModifier {
+        func body(content: Content) -> some View {
+            if #available(iOS 26, *) {
+                content
+                    .labelStyle(.automatic)
+                    .buttonStyle(.glassProminent)
+            } else {
+                content
+                    .labelStyle(.titleOnly)
+            }
         }
     }
 }
+
 
 // MARK: - Preview
 #Preview {

@@ -3,89 +3,79 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedNavigation: SidebarNavigation?
-    @State private var selectedPayComponent: PayComponent?
+    @State private var selectedDetail: DetailSelection?
     
+    // MARK: - Body
     var body: some View {
         NavigationSplitView {
             SidebarView(selectedNavigation: $selectedNavigation)
         } content: {
             ContentViewController(
                 selectedNavigation: selectedNavigation,
-                selectedPayComponent: $selectedPayComponent
+                selectedDetail: $selectedDetail
             )
         } detail: {
-            DetailViewController(selectedPayComponent: $selectedPayComponent)
+            DetailViewController(selectedDetail: $selectedDetail)
         }
         .onChange(of: selectedNavigation) {
-            selectedPayComponent = nil
-        }
-    }
-}
-    
-fileprivate struct ContentViewController: View {
-    let selectedNavigation: SidebarNavigation?
-    @Binding var selectedPayComponent: PayComponent?
-    
-    var body: some View {
-        if let selectedNavigation {
-            switch selectedNavigation {
-            case .paychecks:
-                PaychecksListView(selection: $selectedPayComponent)
-            case .withholdingForms:
-                WithholdingFormsListView(selection: $selectedPayComponent)
-            case .thriftSavingsPlans:
-                TSPListView(selection: $selectedPayComponent)
-            case .basicPayTables:
-                BasicPayTablesListView(selection: $selectedPayComponent)
-            case .bahTables:
-                BAHTablesListView(selection: $selectedPayComponent)
-            case .basTables:
-                BASTablesListView(selection: $selectedPayComponent)
-            }
-        } else {
-            ContentUnavailableView(
-                "Nothing Selected",
-                systemImage: "sidebar.left",
-                description: Text("Please select a sidebar item.")
-            )
-        }
-    }
-}
-    
-fileprivate struct DetailViewController: View {
-    @Binding var selectedPayComponent: PayComponent?
-    
-    var body: some View {
-        if let selectedPayComponent {
-            switch selectedPayComponent {
-            case .paycheck(let selectedPaycheck):
-                PaycheckTabView(for: selectedPaycheck, selection: $selectedPayComponent)
-            case .withholdingForm(let selectedWithholdingForm):
-                WithholdingFormDetailView(
-                    for: selectedWithholdingForm,
-                    selection: $selectedPayComponent
-                )
-            case .thriftSavingsPlan(let selectedTSP):
-                TSPDetailView(for: selectedTSP, selection: $selectedPayComponent)
-            case .basicPay(let year):
-                BasicPayTablesDetailView(year: year)
-            case .bah(let year):
-                BAHTablesDetailView(year: year)
-            case .bas(let year):
-                BASTablesDetailView(year: year)
-            }
-        } else {
-            ContentUnavailableView(
-                "Nothing Selected",
-                systemImage: "document",
-                description: Text("Please make a selection.")
-            )
+            selectedDetail = nil
         }
     }
 }
 
+
+// MARK: - Content View Controller
+extension ContentView {
+    private struct ContentViewController: View {
+        let selectedNavigation: SidebarNavigation?
+        @Binding var selectedDetail: DetailSelection?
+        
+        // MARK: - Body
+        var body: some View {
+            if let selectedNavigation {
+                switch selectedNavigation {
+                case .paychecks:
+                    PaychecksListView(selection: $selectedDetail)
+                }
+            } else {
+                ContentUnavailableView(
+                    "Nothing Selected",
+                    systemImage: "sidebar.left",
+                    description: Text("Please select a sidebar item.")
+                )
+            }
+        }
+    }
+}
+
+
+// MARK: - Detail View Controller
+extension ContentView {
+    private struct DetailViewController: View {
+        @Binding var selectedDetail: DetailSelection?
+        
+        // MARK: - Body
+        var body: some View {
+            if let selectedDetail {
+                switch selectedDetail {
+                case .paycheck(let selectedPaycheck):
+                    PaycheckTabView(paycheck: selectedPaycheck, selection: $selectedDetail)
+                }
+            } else {
+                ContentUnavailableView(
+                    "Nothing Selected",
+                    systemImage: "document",
+                    description: Text("Please make a selection.")
+                )
+            }
+        }
+    }
+}
+
+
 // MARK: - Preview
 #Preview {
     ContentView()
+        .environment(WithholdingTableRepository(from: "withholding_tables.json"))
         .modelContainer(PreviewController.container)
 }

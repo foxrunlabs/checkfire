@@ -5,28 +5,18 @@ struct SidebarView: View {
     @Binding var selectedNavigation: SidebarNavigation?
     
     @Query private var paychecks: [Paycheck]
-    @Query private var withholdingForms: [WithholdingForm]
-    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
-    
     @State private var showSettingsSheet = false
     
+    // MARK: - Body
     var body: some View {
         List(selection: $selectedNavigation) {
-            Section("Pay Data") {
-                ForEach(SidebarNavigation.payDataCases) { navigationItem in
+            Section {
+                ForEach(SidebarNavigation.allCases) { navigationItem in
                     ListRow(
                         navigation: navigationItem,
                         badge: badgeCount(for: navigationItem)
                     )
                     .tag(navigationItem)
-                }
-            }
-            
-            Section("Tables") {
-                ForEach(SidebarNavigation.tableCases) { navigationItem in
-                    ListRow(navigation: navigationItem, badge: badgeCount(for: navigationItem))
-                        .tag(navigationItem)
-                    
                 }
             }
         }
@@ -43,31 +33,36 @@ struct SidebarView: View {
         }
     }
     
+    // MARK: - Methods
     private func badgeCount(for navigation: SidebarNavigation) -> Int {
         switch navigation {
         case .paychecks: paychecks.count
-        case .withholdingForms: withholdingForms.count
-        case .thriftSavingsPlans: thriftSavingsPlans.count
-        default: 0
         }
     }
 }
 
-fileprivate struct ListRow: View {
-    let navigation: SidebarNavigation
-    let badge: Int
-    
-    var body: some View {
-        NavigationLink(value: navigation) {
-            Label {
-                Text(String(describing: navigation))
-                    .badge(badge)
-            } icon: {
-                Image(systemName: navigation.icon)
+
+// MARK: - List Row
+extension SidebarView {
+    private struct ListRow: View {
+        let navigation: SidebarNavigation
+        let badge: Int
+        
+        // MARK: - Body
+        var body: some View {
+            NavigationLink(value: navigation) {
+                Label {
+                    Text(String(describing: navigation))
+                        .badge(badge)
+                } icon: {
+                    Image(systemName: navigation.icon)
+                        .foregroundStyle(navigation.color)
+                }
             }
         }
     }
 }
+
 
 // MARK: - Preview
 #Preview {

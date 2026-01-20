@@ -1,16 +1,16 @@
 import Foundation
 
+// MARK: - Decode
 extension Bundle {
     /// Find and decode a JSON file from a bundle.
     /// - Parameter from: filename of JSON from which to decode.
     /// - Returns: decoded JSON.
     func decode<T: Decodable>(from filename: String) -> [T] {
-        guard let url = self.url(forResource: filename, withExtension: nil) else {
-            fatalError("Failed to locate \(filename) in bundle.")
-        }
-        
-        guard let data = try? Data(contentsOf: url) else {
-            fatalError("Failed to load \(filename) from bundle.")
+        guard
+            let url = url(forResource: filename, withExtension: nil),
+            let data = try? Data(contentsOf: url)
+        else {
+            fatalError("Failed to load \(filename) in bundle.")
         }
         
         do {
@@ -26,5 +26,24 @@ extension Bundle {
         } catch {
             fatalError("Failed to decode \(filename) from bundle: \(error.localizedDescription)")
         }
+    }
+}
+
+
+// MARK: - Version Strings
+extension Bundle {
+    /// The bundle’s marketing version (CFBundleShortVersionString).
+    var marketingVersion: String {
+        infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+    }
+
+    /// The bundle’s build number (CFBundleVersion).
+    var buildNumber: String {
+        infoDictionary?["CFBundleVersion"] as? String ?? "?"
+    }
+
+    /// The bundle’s marketing version and build number, e.g., "1.2.3 (45)".
+    var versionString: String {
+        "\(marketingVersion) (\(buildNumber))"
     }
 }

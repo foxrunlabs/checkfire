@@ -12,7 +12,7 @@ enum MaritalStatus:
     case married
     case headOfHousehold
     
-    // MARK: - Custom String Convertible
+    // MARK: - CustomStringConvertible
     var description: String {
         switch self {
         case .single:
@@ -23,7 +23,10 @@ enum MaritalStatus:
             "Head of Household"
         }
     }
-    
+
     // MARK: - Identifiable
     var id: Self { self }
 }
+
+
+

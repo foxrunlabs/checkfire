@@ -7,37 +7,40 @@ extension Decimal {
         case up
         case toNearestOrAwayFromZero
         case toNearestOrEven
+        
+        var mode: Decimal.RoundingMode {
+            switch self {
+            case .down:
+                .down
+            case .up:
+                .up
+            case .toNearestOrAwayFromZero:
+                .plain
+            case .toNearestOrEven:
+                .bankers
+            }
+        }
     }
     
-    /// Returns this value rounded to an integral value using the specified rounding rule.
-    /// - Parameter rule: The rounding rule to use.
-    /// - Returns: The integral value found by rounding using rule.
-    func rounded(_ rule: DecimalRoundingRule, digits: Int) -> Self {
+    /// Returns a value rounded using the specified rounding rule to the given number of fractional digits.
+    /// - Parameters:
+    ///   - rule: The rounding rule to apply.
+    ///   - digits: The number of digits to keep after the decimal point.
+    /// - Returns: A new value rounded according to `rule` and `digits`.
+    func rounded(_ rule: DecimalRoundingRule, digits: Int) -> Decimal {
         var number = self
         var result: Decimal = 0
-        
-        let roundingMode = switch rule {
-        case .down:
-            NSDecimalNumber.RoundingMode.down
-        case .up:
-            NSDecimalNumber.RoundingMode.up
-        case .toNearestOrAwayFromZero:
-            NSDecimalNumber.RoundingMode.plain
-        case .toNearestOrEven:
-            NSDecimalNumber.RoundingMode.bankers
-        }
-        
-        NSDecimalRound(&result, &number, digits, roundingMode)
+        NSDecimalRound(&result, &number, digits, rule.mode)
         
         return result
     }
     
-    func rounded() -> Self {
+    func rounded() -> Decimal {
         rounded(.toNearestOrAwayFromZero, digits: 0)
     }
     
-    /// Rounds the value to an integral value using the specified rounding rule.
-    /// - Parameter rule: The rounding rule to use.
+    /// Rounds using the specified rounding rule to the given number of fractional digits.
+    /// - Parameter rule: The rounding rule to apply.
     mutating func round(_ rule: DecimalRoundingRule, digits: Int) {
         self = rounded(rule, digits: digits)
     }

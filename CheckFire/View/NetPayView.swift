@@ -1,235 +1,97 @@
-import SwiftData
+import Foundation
 import SwiftUI
 
 struct NetPayView: View {
     let paycheck: Paycheck
     
-    init(for paycheck: Paycheck) {
-        self.paycheck = paycheck
-        
-        self.grossPay = {
-            var gross = paycheck.basicPay + paycheck.bas + paycheck.bah
-            gross += paycheck.lesItems?.reduce(0.00) { sum, item in
-                item.type.isEntitlement ? sum + item.amount : sum
-            } ?? 0.00
-            return gross
-        }()
-        
-        self.socialSecurity = WithholdingTables.shared.calculateSocialSecurity(
-            for: paycheck.year,
-            wage: paycheck.basicPay
-        ) ?? 0.00
-        
-        self.medicare = WithholdingTables.shared.calculateMedicare(
-            for: paycheck.year,
-            wage: paycheck.basicPay
-        ) ?? 0.00
-        
-        let paycheckDate = paycheck.date
-        self._withholdingForms = Query(
-            filter: #Predicate<WithholdingForm> { $0.date <= paycheckDate },
-            sort: \.date
-        )
-        
-        self._thriftSavingsPlans = Query(
-            filter: #Predicate<ThriftSavingsPlan> { $0.date <= paycheckDate },
-            sort: \.date
-        )
+    @Environment(WithholdingTableRepository.self) private var withholdingTables
+    @State private var withholdingTable: WithholdingTable?
+    
+    // MARK: - Computed Properties
+    private var federalTaxes: Decimal {
+        withholdingTable?.calculateWithholding(for: paycheck) ?? 0.00
     }
     
-    private let grossPay: Decimal
-    private let socialSecurity: Decimal
-    private let medicare: Decimal
-    
-    @Query private var withholdingForms: [WithholdingForm]
-    @Query private var thriftSavingsPlans: [ThriftSavingsPlan]
-    
-    private var missingDataDescription: String {
-        if withholdingForms.isEmpty && thriftSavingsPlans.isEmpty {
-            "Missing Withholding Form and Thrift Savings Plan"
-        } else {
-            if withholdingForms.isEmpty {
-                "Missing Withholding Form"
-            } else if thriftSavingsPlans.isEmpty {
-                "Missing Thrift Savings Plan"
-            } else {
-                ""
-            }
-        }
+    private var medicare: Decimal {
+        withholdingTable?.calculateMedicare(for: paycheck) ?? 0.00
     }
     
+    private var socialSecurity: Decimal {
+        withholdingTable?.calculateSocialSecurity(for: paycheck) ?? 0.00
+    }
+    
+    private var netPay: Decimal {
+        var net = paycheck.grossPay
+        net -= paycheck.traditionalTSPContribution
+        net -= paycheck.rothTSPContribution
+        net -= federalTaxes
+        net -= medicare
+        net -= socialSecurity        
+        net -= paycheck.lesItems.filter { !$0.isEntitlement }.reduce(0.00) { $0 + $1.amount }
+        return net
+    }
+    
+    // MARK: - Body
     var body: some View {
-        if let withholdingForm = withholdingForms.last, let tsp = thriftSavingsPlans.last {
-            List {
-                Group {
-                    Section {
-                        LabeledContent("Gross Pay") {
-                            Text(grossPay, format: .currency(code: "USD"))
-                        }
-                        
-                        LabeledContent("Wage Period") {
-                            Text(wagePeriod(tsp: tsp), format: .currency(code: "USD"))
-                        }
-                    }
-                    
-                    Section {
-                        LabeledContent("Traditional TSP") {
-                            Text(
-                                traditionalTSPContribution(using: tsp),
-                                format: .currency(code: "USD")
-                            )
-                        }
-                        
-                        LabeledContent("Roth TSP") {
-                            Text(rothTSPContribution(using: tsp), format: .currency(code: "USD"))
-                        }
-                    }
-                    
-                    Section {
-                        LabeledContent("Federal Taxes") {
-                            Text(
-                                federalTaxes(using: withholdingForm, tsp: tsp),
-                                format: .currency(code: "USD")
-                            )
-                        }
-                        
-                        LabeledContent("Social Security") {
-                            Text(socialSecurity, format: .currency(code: "USD"))
-                        }
-                        
-                        LabeledContent("Medicare") {
-                            Text(medicare, format: .currency(code: "USD"))
-                        }
-                    }
-                    
-                    Section {
-                        LabeledContent("Net Pay") {
-                            Text(
-                                netPay(withholdingForm: withholdingForm, tsp: tsp),
-                                format: .currency(code: "USD")
-                            )
-                        }
-                    }
-                    
-                    Section {
-                        LabeledContent("Withholding Form") {
-                            Text(withholdingForm.date, format: .dateTime.month().year())
-                        }
-                        
-                        LabeledContent("Thrift Savings Plan") {
-                            Text(tsp.date, format: .dateTime.month().year())
-                        }
-                    }
-                }
-            }
-        } else {
-            ContentUnavailableView(
-                "Unable to Compute Net Pay",
-                systemImage: "exclamationmark.triangle",
-                description: Text(missingDataDescription)
-            )
-        }
-    }
-    
-    // MARK: - Computation Functions
-    private func traditionalTSPContribution(using tsp: ThriftSavingsPlan) -> Decimal {
-        var contribution = paycheck.basicPay * tsp.traditionalBasicPay
-        guard let lesItems = paycheck.lesItems else {
-            return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-        }
-        
-        contribution += lesItems.reduce(0.00) { sum, item in
-            if item.type.isEntitlement {
-                let rate: Decimal = switch item.type {
-                case .specialPay:
-                    tsp.traditionalSpecialPay
-                case .incentivePay:
-                    tsp.traditionalIncentivePay
-                case .bonusPay:
-                    tsp.traditionalBonusPay
-                default:
-                    0.00
+        List {
+            Group {
+                Section {
+                    LabeledCurrency("Gross Pay", value: paycheck.grossPay)
+                    LabeledCurrency("Wage Period", value: paycheck.wagePeriod)
                 }
                 
-                return sum + item.amount * rate
-            } else {
-                return sum
-            }
-        }
-        
-        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-    }
-    
-    private func rothTSPContribution(using tsp: ThriftSavingsPlan) -> Decimal {
-        var contribution = paycheck.basicPay * tsp.rothBasicPay
-        guard let lesItems = paycheck.lesItems else {
-            return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-        }
-        
-        contribution += lesItems.reduce(0.00) { sum, item in
-            if item.type.isEntitlement {
-                let rate: Decimal = switch item.type {
-                case .specialPay:
-                    tsp.rothSpecialPay
-                case .incentivePay:
-                    tsp.rothIncentivePay
-                case .bonusPay:
-                    tsp.rothBonusPay
-                default:
-                    0.00
+                Section {
+                    LabeledCurrency("Traditional TSP", value: paycheck.traditionalTSPContribution)
+                    LabeledCurrency("Roth TSP", value: paycheck.rothTSPContribution)
                 }
                 
-                return sum + item.amount * rate
-            } else {
-                return sum
+                Section {
+                    LabeledCurrency("Federal Taxes", value: federalTaxes)
+                    LabeledCurrency("Social Security", value: socialSecurity)
+                    LabeledCurrency("Medicare", value: medicare)
+                }
+                
+                Section {
+                    LabeledCurrency("Net Pay", value: netPay)
+                }
             }
         }
-        
-        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-    }
-    
-    private func wagePeriod(tsp: ThriftSavingsPlan) -> Decimal {
-        var taxableWage = paycheck.basicPay - traditionalTSPContribution(using: tsp)
-        guard let lesItems = paycheck.lesItems else { return taxableWage }
-        
-        taxableWage += lesItems.reduce(0.00) { sum, item in
-            (item.type.isEntitlement && item.type != .allowance) ? sum + item.amount : sum
+        .onAppear {
+            withholdingTable = withholdingTables.table(for: paycheck.year)
         }
-        
-        return taxableWage
-    }
-    
-    private func federalTaxes(using withholdingForm: WithholdingForm, tsp: ThriftSavingsPlan)-> Decimal {
-        return WithholdingTables.shared.calculateWithholding(
-            for: paycheck.year,
-            wage: wagePeriod(tsp: tsp),
-            using: withholdingForm
-        ) ?? 0.00
-    }
-    
-    private func netPay(withholdingForm: WithholdingForm, tsp: ThriftSavingsPlan) -> Decimal {
-        var netPay = grossPay
-        netPay -= traditionalTSPContribution(using: tsp)
-        netPay -= rothTSPContribution(using: tsp)
-        
-        netPay -= paycheck.lesItems?.reduce(0.00) { sum, item in
-            item.type.isEntitlement ? sum : sum + item.amount
-        } ?? 0.00
-        
-        netPay -= federalTaxes(using: withholdingForm, tsp: tsp)
-        netPay -= medicare
-        netPay -= socialSecurity
-        
-        return netPay
     }
 }
+
+
+// MARK: - Labeled Currency
+extension NetPayView {
+    private struct LabeledCurrency<S: StringProtocol>: View {
+        let title: S
+        let value: Decimal
+        
+        // MARK: - Initializer
+        init(_ title: S, value: Decimal) {
+            self.title = title
+            self.value = value
+        }
+        
+        //MARK: - Body
+        var body: some View {
+            LabeledContent(title) {
+                Text(value, format: .currency(code: "USD"))
+            }
+        }
+    }
+}
+
 
 // MARK: - Preview
 #Preview {
     @Previewable @State var paycheck = Paycheck.example
     
     NavigationStack {
-        NetPayView(for: paycheck)
+        NetPayView(paycheck: paycheck)
     }
+    .environment(WithholdingTableRepository(from: "withholding_tables.json"))
     .modelContainer(PreviewController.container)
 }

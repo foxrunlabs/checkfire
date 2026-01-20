@@ -1,177 +1,227 @@
 import SwiftData
 import SwiftUI
-
-fileprivate enum FocusedField {
-    case basicPay
-    case bah
-    case bas
-    case lesItem
-}
+import UIKit
 
 struct PaycheckDetailView: View {
+    private enum FocusedField: Hashable {
+        case basicPay
+        case lesAmount(UUID)
+        
+    }
+    
+    // MARK: - Properties
     @Bindable var paycheck: Paycheck
     
-    init(for paycheck: Paycheck) {
-        self.paycheck = paycheck
-        
-        // find LES items associated with this paycheck
-        let paycheckID = paycheck.persistentModelID
-        self._lesItems = Query(
-            filter: #Predicate<LESItem> { $0.paycheck?.persistentModelID == paycheckID },
-            sort: \.name
-        )
-    }
-    
+    @Environment(WithholdingTableRepository.self) private var withholdingTables
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
-    @Query private var lesItems: [LESItem]
-    
     @FocusState private var focus: FocusedField?
     
-    private var excludedDates: [Date] {
-        let paychecksMinusCurrent = paychecks.filter { $0.id != paycheck.id }
-        return paychecksMinusCurrent.map { $0.date }
+    // MARK: - Computed Properties
+    private var entitlementIndices: [Int] {
+        paycheck.lesItems.indices.filter { paycheck.lesItems[$0].isEntitlement }
     }
     
-    private var availableYearsOfService: [YearsOfService] {
-        BasicPayTables.shared.yearsOfServiceAvailable(for: paycheck.year, as: paycheck.payGrade)
+    private var deductionIndices: [Int] {
+        paycheck.lesItems.indices.filter { paycheck.lesItems[$0].category == .deduction }
     }
     
-    private var entitlements: [LESItem] { lesItems.filter({ $0.type.isEntitlement }) }
-    private var deductions: [LESItem] { lesItems.filter({ $0.type == .deduction }) }
-    private var allotments: [LESItem] { lesItems.filter({ $0.type == .allotment }) }
+    private var allotmentIndices: [Int] {
+        paycheck.lesItems.indices.filter { paycheck.lesItems[$0].category == .allotment }
+    }
     
+    // MARK: - Body
     var body: some View {
         Form {
             Section {
                 LabeledContent("Pay Date") {
-                    MonthYearPicker(
-                        selection: $paycheck.date,
-                        in: WithholdingTables.shared.years,
-                        excluding: excludedDates
-                    )
+                    MonthYearPicker(selection: $paycheck.date, in: withholdingTables.years)
                 }
                 
                 Picker("Pay Grade", selection: $paycheck.payGrade) {
-                    ForEach(PayGrade.allCases) { grade in
-                        Text(String(describing: grade))
-                            .tag(grade)
+                    ForEach(Paycheck.PayGrade.allCases) { payGrade in
+                        Text(String(describing: payGrade))
+                            .tag(payGrade)
                     }
                 }
                 .pickerStyle(.menu)
                 
                 Picker("Years of Service", selection: $paycheck.yearsOfService) {
-                    ForEach(availableYearsOfService) { serviceYears in
-                        Text(String(describing: serviceYears))
-                            .tag(serviceYears)
+                    ForEach(Paycheck.YearsOfService.allCases) { yearsOfService in
+                        Text(String(describing: yearsOfService))
+                            .tag(yearsOfService)
                     }
                 }
                 .pickerStyle(.menu)
                 
-                
-                LabeledContent("VHA ZIP Code") {
-                    TextField("VHA ZIP Code", text: $paycheck.vhaZIP)
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
-                        .focused($focus, equals: .lesItem)
-                }
-            }
-            
-            Section {
-                LabeledContent("Basic Pay") {
-                    TextField("Basic Pay", value: $paycheck.basicPay, format: .currency(code: "USD"))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
-                        .focused($focus, equals: .basicPay)
-                }
-                
-                LabeledContent("BAH") {
-                    TextField("BAH", value: $paycheck.bah, format: .currency(code: "USD"))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
-                        .focused($focus, equals: .bah)
-                }
-                
-                LabeledContent("BAS") {
-                    TextField("BAS", value: $paycheck.bas, format: .currency(code: "USD"))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.decimalPad)
-                        .focused($focus, equals: .bas)
-                }
+                LabeledCurrencyField("Basic Pay", value: $paycheck.basicPay)
+                    .focused($focus, equals: .basicPay)
             }
             
             // Entitlements
             Section {
-                ForEach(entitlements) { entitlement in
-                    LESItemField(lesItem: entitlement, focus: _focus)
+                ForEach(entitlementIndices, id: \.self) { index in
+                    LESItemField(lesItem: $paycheck.lesItems[index], focus: _focus)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button("Delete", systemImage: "trash", role: .destructive) {
-                                deleteLESItem(entitlement)
+                                deleteLESItem(at: index)
                             }
                         }
                 }
             } header: {
                 LESItemsSectionHeader("Entitlements") {
-                    addNewLESItem(type: .specialPay)
+                    addLESItem(category: .specialPay)
                 }
             }
             
             // Deductions
             Section {
-                ForEach(deductions) { deduction in
-                    LESItemField(lesItem: deduction, focus: _focus)
+                ForEach(deductionIndices, id: \.self) { index in
+                    LESItemField(lesItem: $paycheck.lesItems[index], focus: _focus)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button("Delete", systemImage: "trash", role: .destructive) {
-                                deleteLESItem(deduction)
+                                deleteLESItem(at: index)
                             }
                         }
                 }
             } header: {
                 LESItemsSectionHeader("Deductions") {
-                    addNewLESItem(type: .deduction)
+                    addLESItem(category: .deduction)
                 }
             }
             
             // Allotments
             Section {
-                ForEach(allotments) { allotment in
-                    LESItemField(lesItem: allotment, focus: _focus)
+                ForEach(allotmentIndices, id: \.self) { index in
+                    LESItemField(lesItem: $paycheck.lesItems[index], focus: _focus)
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button("Delete", systemImage: "trash", role: .destructive) {
-                                deleteLESItem(allotment)
+                                deleteLESItem(at: index)
                             }
                         }
                 }
             } header: {
                 LESItemsSectionHeader("Allotments") {
-                    addNewLESItem(type: .allotment)
+                    addLESItem(category: .allotment)
                 }
             }
+            
+            // Withholding Form
+            Section("Withholding Form") {
+                Picker("Marital Status", selection: $paycheck.withholdingForm.maritalStatus) {
+                    ForEach(MaritalStatus.allCases) { status in
+                        Text(String(describing: status))
+                            .tag(status)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Toggle(
+                    "Multiple Jobs or Spouse Works",
+                    isOn: $paycheck.withholdingForm.multipleJobs
+                )
+                
+                Stepper(
+                    "^[\(paycheck.withholdingForm.childDependents) Additional Dependents](inflect: true) Under 17",
+                    value: $paycheck.withholdingForm.childDependents,
+                    in: 0...10
+                )
+
+                Stepper(
+                    "^[\(paycheck.withholdingForm.otherDependents) Other Dependents](inflect: true)",
+                    value: $paycheck.withholdingForm.otherDependents,
+                    in: 0...10
+                )
+                
+                LabeledCurrencyField(
+                    "Other Income Amount - Not From Jobs",
+                    value: $paycheck.withholdingForm.otherIncome
+                )
+
+                LabeledCurrencyField(
+                    "Other Deductions",
+                    value: $paycheck.withholdingForm.deductions
+                )
+
+                LabeledCurrencyField(
+                    "Extra Withholding Amount Monthly",
+                    value: $paycheck.withholdingForm.extraWithholding
+                )
+            }
+            
+            // Thrift Savings Plan
+            Section("Traditional TSP") {
+                TSPStepper(
+                    "Basic Pay",
+                    value: $paycheck.thriftSavingsPlan.traditional.basicPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.roth.basicPayRate
+                )
+
+                TSPStepper(
+                    "Special Pay",
+                    value: $paycheck.thriftSavingsPlan.traditional.specialPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.roth.specialPayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+
+                TSPStepper(
+                    "Incentive Pay",
+                    value: $paycheck.thriftSavingsPlan.traditional.incentivePayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.roth.incentivePayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+
+                TSPStepper(
+                    "Bonus Pay",
+                    value: $paycheck.thriftSavingsPlan.traditional.bonusPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.roth.bonusPayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+            }
+
+            Section("Roth TSP") {
+                TSPStepper(
+                    "Basic Pay",
+                    value: $paycheck.thriftSavingsPlan.roth.basicPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.traditional.basicPayRate
+                )
+
+                TSPStepper(
+                    "Special Pay",
+                    value: $paycheck.thriftSavingsPlan.roth.specialPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.traditional.specialPayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+
+                TSPStepper(
+                    "Incentive Pay",
+                    value: $paycheck.thriftSavingsPlan.roth.incentivePayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.traditional.incentivePayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+
+                TSPStepper(
+                    "Bonus Pay",
+                    value: $paycheck.thriftSavingsPlan.roth.bonusPayRate,
+                    max: 1 - paycheck.thriftSavingsPlan.traditional.bonusPayRate
+                )
+                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+            }
         }
-        .onChange(of: paycheck.date) {
-            updateYearsOfService()
-            updateBasicPay()
-            updateBAS()
+        .onChange(of: paycheck.thriftSavingsPlan.traditional.basicPayRate) {
+            validateTraditional()
         }
-        .onChange(of: paycheck.payGrade) {
-            updateYearsOfService()
-            updateBasicPay()
-            updateBAS()
-        }
-        .onChange(of: paycheck.yearsOfService) {
-            updateBasicPay()
+        .onChange(of: paycheck.thriftSavingsPlan.roth.basicPayRate) {
+            validateRoth()
         }
         .toolbar {
             ToolbarItem(placement: .keyboard) {
                 switch focus {
-                case .basicPay:
-                    BasicPayKeypadToolbar(paycheck: paycheck)
-                case .bah:
-                    BAHKeypadToolbar(paycheck: paycheck)
-                case .bas:
-                    BASKeypadToolbar(paycheck: paycheck)
-                case .lesItem:
-                    LESItemKeypadToolbar()
+                case .basicPay, .lesAmount:
+                    HStack {
+                        Spacer()
+                        Button("Done") { dismissKeyboard() }
+                    }
                 default:
                     EmptyView()
                 }
@@ -179,8 +229,9 @@ struct PaycheckDetailView: View {
         }
     }
     
-    private func addNewLESItem(type: LESItemType) {
-        let name = switch type {
+    // MARK: - Methods
+    private func addLESItem(category: Paycheck.LESItem.Category) {
+        let name = switch category {
         case .deduction:
             "New Deduction"
         case .allotment:
@@ -189,410 +240,149 @@ struct PaycheckDetailView: View {
             "New Entitlement"
         }
         
-        let newLESItem = LESItem(
-            name: name,
-            amount: 0.00,
-            type: type,
-            paycheck: paycheck
-        )
+        let newLESItem = Paycheck.LESItem(name, amount: 0.00, category: category)
+        paycheck.lesItems.append(newLESItem)
+    }
+    
+    private func deleteLESItem(at index: Int) {
+        paycheck.lesItems.remove(at: index)
+    }
+    
+    private func validateTraditional() {
+        if paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero {
+            paycheck.thriftSavingsPlan.traditional.specialPayRate = 0.00
+            paycheck.thriftSavingsPlan.traditional.incentivePayRate = 0.00
+            paycheck.thriftSavingsPlan.traditional.bonusPayRate = 0.00
+        }
+    }
+
+    private func validateRoth() {
+        if paycheck.thriftSavingsPlan.roth.basicPayRate.isZero {
+            paycheck.thriftSavingsPlan.roth.specialPayRate = 0.00
+            paycheck.thriftSavingsPlan.roth.incentivePayRate = 0.00
+            paycheck.thriftSavingsPlan.roth.bonusPayRate = 0.00
+        }
+    }
+}
+
+
+// MARK: - LES Item Section Header
+extension PaycheckDetailView {
+    private struct LESItemsSectionHeader: View {
+        let title: LocalizedStringKey
+        let action: @MainActor () -> Void
         
-        modelContext.insert(newLESItem)
-    }
-    
-    private func deleteLESItem(_ item: LESItem) {
-        modelContext.delete(item)
-    }
-    
-    private func updateBasicPay() {
-        paycheck.basicPay = BasicPayTables.shared.basicPay(
-            for: paycheck.year,
-            as: paycheck.payGrade,
-            with: paycheck.yearsOfService
-        ) ?? paycheck.basicPay
-    }
-    
-    private func updateBAS() {
-        paycheck.bas = BASTables.shared.bas(
-            for: paycheck.year,
-            as: paycheck.payGrade
-        ) ?? paycheck.bas
-    }
-    
-    private func updateYearsOfService() {
-        // check if the current years of service exists for the paygrade, and
-        // if it does not, select the first available
-        if availableYearsOfService.contains(paycheck.yearsOfService) == false {
-            paycheck.yearsOfService = availableYearsOfService.first!
+        @Environment(\.modelContext) private var modelContext
+        
+        // MARK: - Initializers
+        init(_ title: LocalizedStringKey, action: @escaping @MainActor () -> Void) {
+            self.title = title
+            self.action = action
         }
-    }
-}
-
-fileprivate struct LESItemsSectionHeader: View {
-    let title: any StringProtocol
-    let action: @MainActor () -> Void
-    
-    init<S>(_ title: S, action: @escaping @MainActor () -> Void) where S: StringProtocol {
-        self.title = title
-        self.action = action
-    }
-    
-    @Environment(\.modelContext) private var modelContext
-    
-    var body: some View {
-        HStack {
-            Text(title)
-
-            Spacer()
-
-            Button {
-                action()
-            } label: {
-                Image(systemName: "plus")
-                    .font(.body.smallCaps())
-            }
-        }
-    }
-}
-
-fileprivate struct LESItemField: View {
-    @Bindable var lesItem: LESItem
-    @FocusState var focus: FocusedField?
-    
-    var body: some View {
-        LabeledContent {
-            TextField(lesItem.name, value: $lesItem.amount, format: .currency(code: "USD"))
-                .multilineTextAlignment(.trailing)
-                .keyboardType(.decimalPad)
-                .focused($focus, equals: .lesItem)
-        } label: {
+        
+        // MARK: - Body
+        var body: some View {
             HStack {
-                if lesItem.type.isEntitlement {
-                    Menu {
-                        Picker("Entitlement Type", selection: $lesItem.type) {
-                            ForEach(LESItemType.entitlementCases) { entitlement in
-                                LabeledContent(String(describing: entitlement)) {
-                                    Image(systemName: icon(for: entitlement))
-                                }
-                                .tag(entitlement)
-                            }
-                        }
-                        .pickerStyle(.inline)
-                    } label: {
-                        Image(systemName: icon(for: lesItem.type))
-                    }
-                }
-                
-                TextField("Item Name", text: $lesItem.name)
-            }
-        }
-    }
-    
-    private func icon(for entitlement: LESItemType) -> String {
-        switch entitlement {
-        case .specialPay:
-            "s.square"
-        case .incentivePay:
-            "i.square"
-        case .bonusPay:
-            "b.square"
-        case .allowance:
-            "a.square"
-        default:
-            ""
-        }
-    }
-}
-
-fileprivate struct BasicPayKeypadToolbar: View {
-    let paycheck: Paycheck
-    
-    var body: some View {
-        HStack {
-            // Allow user to select basic pay from database
-            if let basicPay = BasicPayTables.shared.basicPay(
-                for: paycheck.year,
-                as: paycheck.payGrade,
-                with: paycheck.yearsOfService
-            ) {
-                ToolbarButton(
-                    String(describing: paycheck.payGrade) +
-                        " " + String(describing: paycheck.yearsOfService),
-                    value: basicPay
-                ) {
-                    paycheck.basicPay = basicPay
-                    dismissKeyboard()
-                }
-                
-                Divider()
-            } else {
-                Spacer()
-            }
-            
-            Button("Done") { dismissKeyboard() }
-        }
-    }
-}
-
-fileprivate struct BAHKeypadToolbar: View {
-    let paycheck: Paycheck
-    
-    private var bahNoDependents: Decimal? {
-        BAHTables.shared.bah(
-            for: paycheck.year,
-            in: paycheck.vhaZIP,
-            as: paycheck.payGrade,
-            withDependents: false
-        )
-    }
-    
-    private var bahDependents: Decimal? {
-        BAHTables.shared.bah(
-            for: paycheck.year,
-            in: paycheck.vhaZIP,
-            as: paycheck.payGrade,
-            withDependents: true
-        )
-    }
-    
-    var body: some View {
-        HStack {
-            // Allow user to select BAH rate from database
-            if let bahNoDependents, let bahDependents {
-                ToolbarButton("No Dependents", value: bahNoDependents) {
-                    paycheck.bah = bahNoDependents
-                    dismissKeyboard()
-                }
-                
-                Divider()
-                
-                ToolbarButton("Dependents", value: bahDependents) {
-                    paycheck.bah = bahDependents
-                    dismissKeyboard()
-                }
-                
-                Divider()
-            } else {
-                Spacer()
-            }
-            
-            Button("Done") { dismissKeyboard() }
-        }
-    }
-}
-
-fileprivate struct BASKeypadToolbar: View {
-    let paycheck: Paycheck
-    
-    var body: some View {
-        HStack {
-            // Allow user to select BAS from database
-            if let basTable = BASTables.shared.basTable(for: paycheck.year) {
-                ToolbarButton(
-                    paycheck.payGrade.isEnlisted ? "Enlisted" : "Officer",
-                    value: paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
-                ) {
-                    paycheck.bas = paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
-                    dismissKeyboard()
-                }
-                
-                Divider()
-                
-                if paycheck.payGrade.isEnlisted {
-                    ToolbarButton("BAS II", value: basTable.basII) {
-                        paycheck.bas = basTable.basII
-                        dismissKeyboard()
-                    }
-                    
-                    Divider()
-                }
-            } else {
-                Spacer()
-            }
-            
-            Button("Done") { dismissKeyboard() }
-        }
-    }
-}
-
-fileprivate struct LESItemKeypadToolbar: View {
-    var body: some View {
-        HStack {
-            Spacer()
-            Button("Done") { dismissKeyboard() }
-        }
-    }
-}
-
-fileprivate struct DecimalPadToolbar: View {
-    @FocusState var focus: FocusedField?
-    let paycheck: Paycheck
-    
-    @State private var zipCode = ""
-    @State private var showZIPCodeAlert = false
-    
-    private var bahNoDependents: Decimal? {
-        BAHTables.shared.bah(
-            for: paycheck.year,
-            in: zipCode,
-            as: paycheck.payGrade,
-            withDependents: false
-        )
-    }
-    
-    private var bahDependents: Decimal? {
-        BAHTables.shared.bah(
-            for: paycheck.year,
-            in: zipCode,
-            as: paycheck.payGrade,
-            withDependents: true
-        )
-    }
-        
-    var body: some View {
-        Group {
-            switch focus {
-            case .basicPay:
-                HStack {
-                    // Allow user to select basic pay from database
-                    if let basicPay = BasicPayTables.shared.basicPay(
-                        for: paycheck.year,
-                        as: paycheck.payGrade,
-                        with: paycheck.yearsOfService
-                    ) {
-                        ToolbarButton(
-                            String(describing: paycheck.payGrade) +
-                            " " + String(describing: paycheck.yearsOfService),
-                            value: basicPay
-                        ) {
-                            paycheck.basicPay = basicPay
-                            dismissKeyboard()
-                        }
-                        
-                        Divider()
-                    }
-                    
-                    Button("Done") { dismissKeyboard() }
-                }
-            case .bah:
-                HStack {
-                    // ZIP code search
-                    VStack(spacing: 0) {
-                        Button {
-                            showZIPCodeAlert.toggle()
-                        } label: {
-                            Image(systemName: "magnifyingglass")
-                                .font(zipCode.isEmpty ? nil : .caption)
-                        }
-                        
-                        if !zipCode.isEmpty {
-                            Text(zipCode)
-                                .font(.caption)
-                        }
-                    }
-                    
-                    // Allow user to select BAH rate from database
-                    if let bahNoDependents, let bahDependents {
-                        Divider()
-                        
-                        ToolbarButton("No Dependents", value: bahNoDependents) {
-                            paycheck.bah = bahNoDependents
-                            dismissKeyboard()
-                        }
-                        
-                        Divider()
-                        
-                        ToolbarButton("Dependents", value: bahDependents) {
-                            paycheck.bah = bahDependents
-                            dismissKeyboard()
-                        }
-                        
-                        Divider()
-                    } else {
-                        Spacer()
-                    }
-                    
-                    Button("Done") { dismissKeyboard() }
-                }
-            case .bas:
-                HStack {
-                    // Allow user to select BAS from database
-                    if let basTable = BASTables.shared.basTable(for: paycheck.year) {
-                        ToolbarButton(
-                            paycheck.payGrade.isEnlisted ? "Enlisted" : "Officer",
-                            value: paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
-                        ) {
-                            paycheck.bas = paycheck.payGrade.isEnlisted ? basTable.enlisted : basTable.officer
-                            dismissKeyboard()
-                        }
-                        
-                        Divider()
-                        
-                        if paycheck.payGrade.isEnlisted {
-                            ToolbarButton("BAS II", value: basTable.basII) {
-                                paycheck.bas = basTable.basII
-                                dismissKeyboard()
-                            }
-                            
-                            Divider()
-                        }
-                    }
-                    
-                    Button("Done") { dismissKeyboard() }
-                }
-            case .lesItem:
-                HStack {
-                    Spacer()
-                    Button("Done") { dismissKeyboard() }
-                }
-            case .none:
-                HStack {
-                    Spacer()
-                    Button("Done") { dismissKeyboard() }
-                }
-            }
-        }
-        .alert("Enter ZIP Code", isPresented: $showZIPCodeAlert) {
-            TextField("ZIP Code", text: $zipCode)
-                .keyboardType(.numberPad)
-                .focused($focus, equals: .lesItem)
-            
-            Button("OK") {}
-            Button("Cancel", role: .cancel) {}
-        }
-    }
-}
-
-fileprivate struct ToolbarButton: View {
-    let title: any StringProtocol
-    let value: Decimal
-    let action: @MainActor () -> Void
-    
-    init<S>(
-        _ title: S,
-        value: Decimal,
-        action: @escaping @MainActor () -> Void
-    ) where S: StringProtocol {
-        self.title = title
-        self.value = value
-        self.action = action
-    }
-    
-    var body: some View {
-        Button {
-            action()
-        } label: {
-            VStack {
-                Text(value, format: .currency(code: "USD"))
-                
                 Text(title)
-                    .font(.caption)
+                Spacer()
+                Button {
+                    action()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.body.smallCaps())
+                }
             }
         }
-        .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
     }
 }
 
+
+// MARK: - LES Item Field
+extension PaycheckDetailView {
+    private struct LESItemField: View {
+        @Binding var lesItem: Paycheck.LESItem
+        @FocusState var focus: FocusedField?
+        
+        // MARK: - Body
+        var body: some View {
+            LabeledContent {
+                CurrencyField(lesItem.name, value: $lesItem.amount)
+                    .multilineTextAlignment(.trailing)
+                    .keyboardType(.decimalPad)
+                    .focused($focus, equals: .lesAmount(lesItem.id))
+            } label: {
+                HStack {
+                    if lesItem.isEntitlement {
+                        Menu {
+                            Picker("Entitlement Type", selection: $lesItem.category) {
+                                ForEach(Paycheck.LESItem.Category.entitlementCases) { entitlement in
+                                    LabeledContent(String(describing: entitlement)) {
+                                        Image(systemName: icon(for: entitlement))
+                                    }
+                                    .tag(entitlement)
+                                }
+                            }
+                            .pickerStyle(.inline)
+                        } label: {
+                            Image(systemName: icon(for: lesItem.category))
+                        }
+                    }
+                    
+                    TextField("Item Name", text: $lesItem.name)
+                }
+            }
+        }
+        
+        // MARK: - Methods
+        private func icon(for entitlement: Paycheck.LESItem.Category) -> String {
+            switch entitlement {
+            case .specialPay:
+                "s.square"
+            case .incentivePay:
+                "i.square"
+            case .bonusPay:
+                "b.square"
+            case .allowance:
+                "a.square"
+            default:
+                ""
+            }
+        }
+    }
+}
+
+
+// MARK: - TSP Stepper
+extension PaycheckDetailView {
+    private struct TSPStepper: View {
+        let title: LocalizedStringKey
+        @Binding var value: Decimal
+        let max: Decimal
+        
+        init(_ title: LocalizedStringKey, value: Binding<Decimal>, max: Decimal) {
+            self.title = title
+            self._value = value
+            self.max = max
+        }
+        
+        var body: some View {
+            Stepper(
+                value: $value,
+                in: 0.00...max,
+                step: 0.01
+            ) {
+                HStack {
+                    Text(title)
+                    Spacer()
+                    Text(value, format: .percent)
+                }
+            }
+        }
+    }
+}
+
+
+// MARK: - Dismiss Keyboard
 fileprivate func dismissKeyboard() {
     UIApplication.shared.sendAction(
         #selector(UIResponder.resignFirstResponder),
@@ -602,14 +392,16 @@ fileprivate func dismissKeyboard() {
     )
 }
 
+
 // MARK: - Preview
 #Preview {
     @Previewable @State var paycheck = Paycheck.example
 
     NavigationStack {
-        PaycheckDetailView(for: paycheck)
+        PaycheckDetailView(paycheck: paycheck)
             .navigationTitle($paycheck.name)
             .navigationBarTitleDisplayMode(.inline)
     }
+    .environment(WithholdingTableRepository(from: "withholding_tables.json"))
     .modelContainer(PreviewController.container)
 }

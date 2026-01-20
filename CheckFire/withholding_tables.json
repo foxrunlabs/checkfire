@@ -1,10 +1,14 @@
 [
   {
     "year": 2025,
-    "childTaxCredit": 2000,
-    "otherDependentTaxCredit": 500,
-    "medicareRate": 0.0145,
-    "socialSecurityRate": 0.062,
+    "taxCredits": {
+        "child": 2000,
+        "otherDependent": 500
+    },
+    "ficaRates": {
+        "medicare": 0.0145,
+        "socialSecurity": 0.062
+    },
     "taxBrackets": {
       "standard": {
         "single": [
@@ -266,10 +270,14 @@
   },
   {
     "year": 2024,
-    "childTaxCredit": 2000,
-    "otherDependentTaxCredit": 500,
-    "medicareRate": 0.0145,
-    "socialSecurityRate": 0.062,
+    "taxCredits": {
+        "child": 2000,
+        "otherDependent": 500
+    },
+    "ficaRates": {
+        "medicare": 0.0145,
+        "socialSecurity": 0.062
+    },
     "taxBrackets": {
       "standard": {
         "single": [
@@ -531,10 +539,14 @@
   },
   {
     "year": 2023,
-    "childTaxCredit": 2000,
-    "otherDependentTaxCredit": 500,
-    "medicareRate": 0.0145,
-    "socialSecurityRate": 0.062,
+    "taxCredits": {
+        "child": 2000,
+        "otherDependent": 500
+    },
+    "ficaRates": {
+        "medicare": 0.0145,
+        "socialSecurity": 0.062
+    },
     "taxBrackets": {
       "standard": {
         "single": [

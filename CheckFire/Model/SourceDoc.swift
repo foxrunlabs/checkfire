@@ -1,7 +1,7 @@
 import Foundation
 
-struct SourceDocumentation: Decodable, Identifiable {
-    let id = UUID()
+struct SourceDoc: Decodable, Identifiable {
+    let id: UUID = UUID()
     let name: String
     let url: URL
     
