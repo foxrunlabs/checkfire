@@ -271,7 +271,7 @@ extension Paycheck {
         
         // MARK: - Example
         static let example = WithholdingForm(
-            maritalStatus: .married,
+            maritalStatus: .marriedFilingJointly,
             multipleJobs: true,
             childDependents: 2
         )

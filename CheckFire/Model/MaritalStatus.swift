@@ -9,7 +9,8 @@ enum MaritalStatus:
     Identifiable
 {
     case single
-    case married
+    case marriedFilingJointly
+    case marriedFilingSeparately
     case headOfHousehold
     
     // MARK: - CustomStringConvertible
@@ -17,8 +18,10 @@ enum MaritalStatus:
         switch self {
         case .single:
             "Single"
-        case .married:
-            "Married"
+        case .marriedFilingJointly:
+            "Married Filing Jointly"
+        case .marriedFilingSeparately:
+            "Married Filing Separately"
         case .headOfHousehold:
             "Head of Household"
         }
