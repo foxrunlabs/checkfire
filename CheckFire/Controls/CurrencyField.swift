@@ -13,16 +13,6 @@ struct CurrencyField: View {
         self._value = value
     }
     
-    // MARK: - Computed Properties
-    private let plainFormatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .none
-        f.minimumFractionDigits = 2
-        f.maximumFractionDigits = 2
-        f.generatesDecimalNumbers = true
-        return f
-    }()
-    
     // MARK: - Body
     var body: some View {
         TextField(title, text: $text)
@@ -31,7 +21,7 @@ struct CurrencyField: View {
             .onChange(of: isFocused) { _, focused in
                 if focused {
                     // when entering edit mode, show a plain editable number
-                    text = plainFormatter.string(from: value as NSDecimalNumber) ?? ""
+                    text = value.formatted(.number.precision(.fractionLength(2)).grouping(.never))
                 } else {
                     // when leaving edit mode, show currency again
                     commit()
