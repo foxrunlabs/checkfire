@@ -208,12 +208,6 @@ struct PaycheckDetailView: View {
                 .disabled(paycheck.rothTSP.basicPayRate.isZero)
             }
         }
-        .onChange(of: paycheck.traditionalTSP.basicPayRate) {
-            validateTraditional()
-        }
-        .onChange(of: paycheck.rothTSP.basicPayRate) {
-            validateRoth()
-        }
         .toolbar {
             ToolbarItem(placement: .keyboard) {
                 switch focus {
@@ -246,22 +240,6 @@ struct PaycheckDetailView: View {
     
     private func deleteLESItem(at index: Int) {
         paycheck.lesItems.remove(at: index)
-    }
-    
-    private func validateTraditional() {
-        if paycheck.traditionalTSP.basicPayRate.isZero {
-            paycheck.traditionalTSP.specialPayRate = 0.00
-            paycheck.traditionalTSP.incentivePayRate = 0.00
-            paycheck.traditionalTSP.bonusPayRate = 0.00
-        }
-    }
-
-    private func validateRoth() {
-        if paycheck.rothTSP.basicPayRate.isZero {
-            paycheck.rothTSP.specialPayRate = 0.00
-            paycheck.rothTSP.incentivePayRate = 0.00
-            paycheck.rothTSP.bonusPayRate = 0.00
-        }
     }
 }
 
