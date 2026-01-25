@@ -9,11 +9,22 @@ struct WithholdingTable: Decodable {
     let taxBrackets: [WithholdingSchedule: [MaritalStatus: [WithholdingData]]]
     
     // MARK: - Methods
+    
+    /// Calculate federal withholding and FICA taxes for a paycheck.
+    /// - Parameter paycheck: Paycheck for calculation.
+    /// - Returns: Tuple `(federal?, medicare, socialSecurity)` representing taxes withheld.
+    func calculateTaxes(for paycheck: Paycheck) -> (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)? {
+        guard let federal = calculateWithholding(for: paycheck) else { return nil }
+        let socialSecurity = calculateSocialSecurity(for: paycheck)
+        let medicare = calculateMedicare(for: paycheck)
+        return (federal, socialSecurity, medicare)
+    }
+    
     /// Calculate Medicare tax for a paycheck.
     /// - Parameters:
     ///   - paycheck: Paycheck for calculation.
     /// - Returns: Medicare tax owed in dollars.
-    func calculateMedicare(for paycheck: Paycheck) -> Decimal {
+    private func calculateMedicare(for paycheck: Paycheck) -> Decimal {
         (paycheck.ficaWages * ficaRates.medicare).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
@@ -21,7 +32,7 @@ struct WithholdingTable: Decodable {
     /// - Parameters:
     ///   - paycheck: Paycheck for calculation.
     /// - Returns: Social Security tax owed.
-    func calculateSocialSecurity(for paycheck: Paycheck) -> Decimal {
+    private func calculateSocialSecurity(for paycheck: Paycheck) -> Decimal {
         (paycheck.ficaWages * ficaRates.socialSecurity).rounded(.toNearestOrAwayFromZero, digits: 2)
     }
     
@@ -29,7 +40,7 @@ struct WithholdingTable: Decodable {
     /// - Parameters:
     ///   - paycheck: Paycheck for calculation.
     /// - Returns: Federal income tax withholding in dollars.
-    func calculateWithholding(for paycheck: Paycheck) -> Decimal? {
+    private func calculateWithholding(for paycheck: Paycheck) -> Decimal? {
         let wageFrequency: Decimal = 12
         
         // adjust the wage amount

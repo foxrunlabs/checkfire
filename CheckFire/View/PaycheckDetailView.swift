@@ -153,65 +153,65 @@ struct PaycheckDetailView: View {
             Section("Traditional TSP") {
                 TSPStepper(
                     "Basic Pay",
-                    value: $paycheck.thriftSavingsPlan.traditional.basicPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.roth.basicPayRate
+                    value: $paycheck.traditionalTSP.basicPayRate,
+                    max: 1 - paycheck.rothTSP.basicPayRate
                 )
 
                 TSPStepper(
                     "Special Pay",
-                    value: $paycheck.thriftSavingsPlan.traditional.specialPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.roth.specialPayRate
+                    value: $paycheck.traditionalTSP.specialPayRate,
+                    max: 1 - paycheck.rothTSP.specialPayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+                .disabled(paycheck.traditionalTSP.basicPayRate.isZero)
 
                 TSPStepper(
                     "Incentive Pay",
-                    value: $paycheck.thriftSavingsPlan.traditional.incentivePayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.roth.incentivePayRate
+                    value: $paycheck.traditionalTSP.incentivePayRate,
+                    max: 1 - paycheck.rothTSP.incentivePayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+                .disabled(paycheck.traditionalTSP.basicPayRate.isZero)
 
                 TSPStepper(
                     "Bonus Pay",
-                    value: $paycheck.thriftSavingsPlan.traditional.bonusPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.roth.bonusPayRate
+                    value: $paycheck.traditionalTSP.bonusPayRate,
+                    max: 1 - paycheck.rothTSP.bonusPayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero)
+                .disabled(paycheck.traditionalTSP.basicPayRate.isZero)
             }
 
             Section("Roth TSP") {
                 TSPStepper(
                     "Basic Pay",
-                    value: $paycheck.thriftSavingsPlan.roth.basicPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.traditional.basicPayRate
+                    value: $paycheck.rothTSP.basicPayRate,
+                    max: 1 - paycheck.traditionalTSP.basicPayRate
                 )
 
                 TSPStepper(
                     "Special Pay",
-                    value: $paycheck.thriftSavingsPlan.roth.specialPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.traditional.specialPayRate
+                    value: $paycheck.rothTSP.specialPayRate,
+                    max: 1 - paycheck.traditionalTSP.specialPayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+                .disabled(paycheck.rothTSP.basicPayRate.isZero)
 
                 TSPStepper(
                     "Incentive Pay",
-                    value: $paycheck.thriftSavingsPlan.roth.incentivePayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.traditional.incentivePayRate
+                    value: $paycheck.rothTSP.incentivePayRate,
+                    max: 1 - paycheck.traditionalTSP.incentivePayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+                .disabled(paycheck.rothTSP.basicPayRate.isZero)
 
                 TSPStepper(
                     "Bonus Pay",
-                    value: $paycheck.thriftSavingsPlan.roth.bonusPayRate,
-                    max: 1 - paycheck.thriftSavingsPlan.traditional.bonusPayRate
+                    value: $paycheck.rothTSP.bonusPayRate,
+                    max: 1 - paycheck.traditionalTSP.bonusPayRate
                 )
-                .disabled(paycheck.thriftSavingsPlan.roth.basicPayRate.isZero)
+                .disabled(paycheck.rothTSP.basicPayRate.isZero)
             }
         }
-        .onChange(of: paycheck.thriftSavingsPlan.traditional.basicPayRate) {
+        .onChange(of: paycheck.traditionalTSP.basicPayRate) {
             validateTraditional()
         }
-        .onChange(of: paycheck.thriftSavingsPlan.roth.basicPayRate) {
+        .onChange(of: paycheck.rothTSP.basicPayRate) {
             validateRoth()
         }
         .toolbar {
@@ -249,18 +249,18 @@ struct PaycheckDetailView: View {
     }
     
     private func validateTraditional() {
-        if paycheck.thriftSavingsPlan.traditional.basicPayRate.isZero {
-            paycheck.thriftSavingsPlan.traditional.specialPayRate = 0.00
-            paycheck.thriftSavingsPlan.traditional.incentivePayRate = 0.00
-            paycheck.thriftSavingsPlan.traditional.bonusPayRate = 0.00
+        if paycheck.traditionalTSP.basicPayRate.isZero {
+            paycheck.traditionalTSP.specialPayRate = 0.00
+            paycheck.traditionalTSP.incentivePayRate = 0.00
+            paycheck.traditionalTSP.bonusPayRate = 0.00
         }
     }
 
     private func validateRoth() {
-        if paycheck.thriftSavingsPlan.roth.basicPayRate.isZero {
-            paycheck.thriftSavingsPlan.roth.specialPayRate = 0.00
-            paycheck.thriftSavingsPlan.roth.incentivePayRate = 0.00
-            paycheck.thriftSavingsPlan.roth.bonusPayRate = 0.00
+        if paycheck.rothTSP.basicPayRate.isZero {
+            paycheck.rothTSP.specialPayRate = 0.00
+            paycheck.rothTSP.incentivePayRate = 0.00
+            paycheck.rothTSP.bonusPayRate = 0.00
         }
     }
 }

@@ -5,14 +5,21 @@ import SwiftData
 final class Paycheck {
     typealias Year = Int
     
+    enum TSPType {
+        case traditional
+        case roth
+    }
+    
+    // MARK: - Properties
     var name: String = "New Paycheck"
-    var date: Date = Date.now
+    var date: Date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
     var payGrade: PayGrade = PayGrade.e1
     var yearsOfService: YearsOfService = YearsOfService.lessThanOrEqual2
     var basicPay: Decimal = 0.00
     var lesItems: [LESItem] = []
     var withholdingForm: WithholdingForm = WithholdingForm()
-    var thriftSavingsPlan: ThriftSavingsPlan = ThriftSavingsPlan()
+    var traditionalTSP: ThriftSavingsPlan = ThriftSavingsPlan()
+    var rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
     
     // MARK: - Initializers
     init(
@@ -23,7 +30,8 @@ final class Paycheck {
         basicPay: Decimal = 0.00,
         lesItems: [LESItem] = [],
         withholdingForm: WithholdingForm = WithholdingForm(),
-        thriftSavingsPlan: ThriftSavingsPlan = ThriftSavingsPlan()
+        traditionalTSP: ThriftSavingsPlan = ThriftSavingsPlan(),
+        rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
     ) {
         self.name = name
         self.date = Calendar.current.lastDateOfMonth(from: date) ?? date
@@ -32,7 +40,8 @@ final class Paycheck {
         self.basicPay = basicPay
         self.lesItems = lesItems
         self.withholdingForm = withholdingForm
-        self.thriftSavingsPlan = thriftSavingsPlan
+        self.traditionalTSP = traditionalTSP
+        self.rothTSP = rothTSP
     }
     
     convenience init(_ other: Paycheck) {
@@ -48,39 +57,60 @@ final class Paycheck {
             basicPay: other.basicPay,
             lesItems: copiedLESItems,
             withholdingForm: other.withholdingForm,
-            thriftSavingsPlan: other.thriftSavingsPlan
+            traditionalTSP: other.traditionalTSP,
+            rothTSP: other.rothTSP
         )
     }
     
     // MARK: - Computed Properties
     var year: Year { Calendar.current.component(.year, from: date) }
     var ficaWages: Decimal { basicPay }
-    
-    var grossPay: Decimal {
-        let entitlements = lesItems.filter { $0.isEntitlement }
-        let gross = basicPay + entitlements.reduce(0.00) { sum, entitlement in
-            sum + entitlement.amount
-        }
-        
-        return gross
-    }
-    
-    var traditionalTSPContribution: Decimal {
-        thriftSavingsPlan.traditional.totalContribution(for: self)
-    }
-    
-    var rothTSPContribution: Decimal {
-        thriftSavingsPlan.roth.totalContribution(for: self)
-    }
+    var grossPay: Decimal { basicPay + lesItems.filter { $0.isEntitlement }.sum(\.amount) }
     
     var wagePeriod: Decimal {
-        var taxableWage = basicPay - traditionalTSPContribution
-        let taxableItems = lesItems.filter { $0.isTaxable }
-        taxableWage += taxableItems.reduce(0.00) { sum, taxableItem in
-            sum + taxableItem.amount
+        var taxableWage = basicPay - tspContribution(.traditional)
+        taxableWage += lesItems.filter { $0.isTaxable }.sum(\.amount)
+        return taxableWage
+    }
+    
+    // MARK: - Methods
+    func tspContribution(_ tspType: TSPType) -> Decimal {
+        let plan = switch tspType {
+        case .traditional:
+            traditionalTSP
+        case .roth:
+            rothTSP
         }
         
-        return taxableWage
+        var contribution = basicPay * plan.basicPayRate
+        let entitlements = lesItems.filter { $0.isEntitlement }
+        contribution += entitlements.reduce(0.00) { sum, entitlement in
+            let rate = switch entitlement.category {
+            case .specialPay:
+                plan.specialPayRate
+            case .incentivePay:
+                plan.incentivePayRate
+            case .bonusPay:
+                plan.bonusPayRate
+            default:
+                Decimal.zero
+            }
+            
+            return sum + entitlement.amount * rate
+        }
+        
+        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
+    }
+    
+    func netPay(taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)) -> Decimal {
+        var net = grossPay
+        net -= tspContribution(.traditional)
+        net -= tspContribution(.roth)
+        net -= taxes.federal
+        net -= taxes.socialSecurity
+        net -= taxes.medicare
+        net -= lesItems.filter { $0.isEntitlement == false }.sum(\.amount)
+        return net
     }
     
     // MARK: - Example
@@ -99,7 +129,8 @@ final class Paycheck {
             LESItem("TRICARE Dental", amount: 29.98, category: .allotment),
         ],
         withholdingForm: .example,
-        thriftSavingsPlan: .example
+        traditionalTSP: ThriftSavingsPlan(basicPayRate: 0.11),
+        rothTSP: ThriftSavingsPlan()
     )
 }
 
@@ -278,48 +309,13 @@ extension Paycheck {
     }
 }
 
-
-// MARK: - Thrift Savings Plan
+// MARK: - Thrift Savings Plan Contribution Rates
 extension Paycheck {
     struct ThriftSavingsPlan: Codable {
-        var traditional: Contributions = Contributions()
-        var roth: Contributions = Contributions()
-        
-        // MARK: - Example
-        static let example = ThriftSavingsPlan(traditional: Contributions(basicPayRate: 0.11))
-    }
-}
-
-
-// MARK: - Thrift Savings Plan Contribution Rates
-extension Paycheck.ThriftSavingsPlan {
-    struct Contributions: Codable {
         var basicPayRate: Decimal = 0.00
         var specialPayRate: Decimal = 0.00
         var incentivePayRate: Decimal = 0.00
         var bonusPayRate: Decimal = 0.00
-        
-        // MARK: - Methods
-        func totalContribution(for paycheck: Paycheck) -> Decimal {
-            let entitlements = paycheck.lesItems.filter { $0.isEntitlement }
-            var contribution = paycheck.basicPay * basicPayRate
-            contribution += entitlements.reduce(0.00) { sum, entitlement in
-                let rate = switch entitlement.category {
-                case .specialPay:
-                    specialPayRate
-                case .incentivePay:
-                    incentivePayRate
-                case .bonusPay:
-                    bonusPayRate
-                default:
-                    Decimal.zero
-                }
-                
-                return sum + entitlement.amount * rate
-            }
-            
-            return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-        }
     }
 }
 
