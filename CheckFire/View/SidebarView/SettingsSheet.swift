@@ -1,3 +1,4 @@
+import Foundation
 import SwiftData
 import SwiftUI
 
@@ -31,13 +32,13 @@ struct SettingsSheet: View {
                     Button("Delete All Data", systemImage: "trash", role: .destructive) {
                         showDeleteAlert.toggle()
                     }
-                    .disabled(paychecks.isEmpty)
                     .confirmationDialog("Delete All Data?", isPresented: $showDeleteAlert) {
                         Button("Delete", role: .destructive) { deleteAllData() }
                         Button("Cancel", role: .cancel) {}
                     } message: {
                         Text("Are you sure?")
                     }
+                    .disabled(paychecks.isEmpty)
                 }
             }
             .navigationTitle("Settings")
@@ -45,7 +46,7 @@ struct SettingsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Done", systemImage: "checkmark") { dismiss() }
-                        .modifier(DoneButtonStyle())
+                        .buttonStyle(.glassProminent)
                 }
             }
         }
@@ -54,23 +55,6 @@ struct SettingsSheet: View {
     // MARK: - Methods
     private func deleteAllData() {
         paychecks.forEach { modelContext.delete($0) }
-    }
-}
-
-
-// MARK: - Button Style
-extension SettingsSheet {
-    private struct DoneButtonStyle: ViewModifier {
-        func body(content: Content) -> some View {
-            if #available(iOS 26, *) {
-                content
-                    .labelStyle(.automatic)
-                    .buttonStyle(.glassProminent)
-            } else {
-                content
-                    .labelStyle(.titleOnly)
-            }
-        }
     }
 }
 

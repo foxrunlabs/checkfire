@@ -1,10 +1,8 @@
-import SwiftData
 import SwiftUI
 
 struct SidebarView: View {
     @Binding var selectedNavigation: SidebarNavigation?
     
-    @Query private var paychecks: [Paycheck]
     @State private var showSettingsSheet = false
     
     // MARK: - Body
@@ -12,11 +10,8 @@ struct SidebarView: View {
         List(selection: $selectedNavigation) {
             Section {
                 ForEach(SidebarNavigation.allCases) { navigationItem in
-                    ListRow(
-                        navigation: navigationItem,
-                        badge: badgeCount(for: navigationItem)
-                    )
-                    .tag(navigationItem)
+                    ListRow(navigation: navigationItem)
+                        .tag(navigationItem)
                 }
             }
         }
@@ -32,32 +27,21 @@ struct SidebarView: View {
             SettingsSheet()
         }
     }
-    
-    // MARK: - Methods
-    private func badgeCount(for navigation: SidebarNavigation) -> Int {
-        switch navigation {
-        case .paychecks: paychecks.count
-        }
-    }
 }
 
 
 // MARK: - List Row
-extension SidebarView {
-    private struct ListRow: View {
-        let navigation: SidebarNavigation
-        let badge: Int
-        
-        // MARK: - Body
-        var body: some View {
-            NavigationLink(value: navigation) {
-                Label {
-                    Text(String(describing: navigation))
-                        .badge(badge)
-                } icon: {
-                    Image(systemName: navigation.icon)
-                        .foregroundStyle(navigation.color)
-                }
+fileprivate struct ListRow: View {
+    let navigation: SidebarNavigation
+    
+    // MARK: - Body
+    var body: some View {
+        NavigationLink(value: navigation) {
+            Label {
+                Text(String(describing: navigation))
+            } icon: {
+                Image(systemName: navigation.icon)
+                    .foregroundStyle(navigation.color)
             }
         }
     }

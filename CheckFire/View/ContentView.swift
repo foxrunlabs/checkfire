@@ -25,49 +25,45 @@ struct ContentView: View {
 
 
 // MARK: - Content View Controller
-extension ContentView {
-    private struct ContentViewController: View {
-        let selectedNavigation: SidebarNavigation?
-        @Binding var selectedDetail: DetailSelection?
-        
-        // MARK: - Body
-        var body: some View {
-            if let selectedNavigation {
-                switch selectedNavigation {
-                case .paychecks:
-                    PaychecksListView(selection: $selectedDetail)
-                }
-            } else {
-                ContentUnavailableView(
-                    "Nothing Selected",
-                    systemImage: "sidebar.left",
-                    description: Text("Please select a sidebar item.")
-                )
+fileprivate struct ContentViewController: View {
+    let selectedNavigation: SidebarNavigation?
+    @Binding var selectedDetail: DetailSelection?
+    
+    // MARK: - Body
+    var body: some View {
+        if let selectedNavigation {
+            switch selectedNavigation {
+            case .paychecks:
+                PaychecksListView(selection: $selectedDetail)
             }
+        } else {
+            ContentUnavailableView(
+                "Nothing Selected",
+                systemImage: "sidebar.left",
+                description: Text("Please select a sidebar item.")
+            )
         }
     }
 }
 
 
 // MARK: - Detail View Controller
-extension ContentView {
-    private struct DetailViewController: View {
-        @Binding var selectedDetail: DetailSelection?
-        
-        // MARK: - Body
-        var body: some View {
-            if let selectedDetail {
-                switch selectedDetail {
-                case .paycheck(let selectedPaycheck):
-                    PaycheckTabView(paycheck: selectedPaycheck, selection: $selectedDetail)
-                }
-            } else {
-                ContentUnavailableView(
-                    "Nothing Selected",
-                    systemImage: "document",
-                    description: Text("Please make a selection.")
-                )
+fileprivate struct DetailViewController: View {
+    @Binding var selectedDetail: DetailSelection?
+    
+    // MARK: - Body
+    var body: some View {
+        if let selectedDetail {
+            switch selectedDetail {
+            case .paycheck(let selectedPaycheck):
+                PaycheckDetailView(paycheck: selectedPaycheck, selection: $selectedDetail)
             }
+        } else {
+            ContentUnavailableView(
+                "Nothing Selected",
+                systemImage: "document",
+                description: Text("Please make a selection.")
+            )
         }
     }
 }

@@ -57,20 +57,12 @@ struct PaychecksListView: View {
                         }
                         .pickerStyle(.inline)
                     }
-                    
-                    if #unavailable(iOS 26) {
-                        Button("Add Paycheck", systemImage: "plus") {
-                            addPaycheck()
-                        }
-                    }
                 }
                 
-                if #available(iOS 26, *) {
-                    ToolbarItemGroup(placement: .bottomBar) {
-                        Spacer()
-                        Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
-                            .buttonStyle(.glassProminent)
-                    }
+                ToolbarItemGroup(placement: .bottomBar) {
+                    Spacer()
+                    Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
+                        .buttonStyle(.glassProminent)
                 }
             }
     }
@@ -85,79 +77,75 @@ struct PaychecksListView: View {
 
 
 // MARK: - Query View
-extension PaychecksListView {
-    struct QueryView: View {
-        @Binding var selection: DetailSelection?
-        
-        @Environment(\.modelContext) private var modelContext
-        @Query private var paychecks: [Paycheck]
-        
-        // MARK: - Initializer
-        init(selection: Binding<DetailSelection?>, sort: [SortDescriptor<Paycheck>]) {
-            self._selection = selection
-            self._paychecks = Query(sort: sort)
-        }
-        
-        // MARK: - Body
-        var body: some View {
-            if paychecks.isEmpty {
-                ContentUnavailableView(
-                    "No Paychecks Found",
-                    systemImage: "dollarsign",
-                    description: Text("Please add a new paycheck.")
-                )
-            } else {
-                List(selection: $selection) {
-                    ForEach(paychecks) { paycheck in
-                        ListRow(paycheck: paycheck)
-                            .tag(DetailSelection.paycheck(paycheck))
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    deletePaycheck(paycheck)
-                                }
-                                
-                                Button("Copy", systemImage: "document.on.document") {
-                                    copyPaycheck(paycheck)
-                                }
-                                .tint(.accentColor)
+fileprivate struct QueryView: View {
+    @Binding var selection: DetailSelection?
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var paychecks: [Paycheck]
+    
+    // MARK: - Initializer
+    init(selection: Binding<DetailSelection?>, sort: [SortDescriptor<Paycheck>]) {
+        self._selection = selection
+        self._paychecks = Query(sort: sort)
+    }
+    
+    // MARK: - Body
+    var body: some View {
+        if paychecks.isEmpty {
+            ContentUnavailableView(
+                "No Paychecks Found",
+                systemImage: "dollarsign",
+                description: Text("Please add a new paycheck.")
+            )
+        } else {
+            List(selection: $selection) {
+                ForEach(paychecks) { paycheck in
+                    ListRow(paycheck: paycheck)
+                        .tag(DetailSelection.paycheck(paycheck))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                deletePaycheck(paycheck)
                             }
-                    }
+                            
+                            Button("Copy", systemImage: "document.on.document") {
+                                copyPaycheck(paycheck)
+                            }
+                            .tint(.accentColor)
+                        }
                 }
-                .listStyle(.inset)
             }
+            .listStyle(.inset)
         }
-        
-        // MARK: - Methods
-        private func copyPaycheck(_ other: Paycheck) {
-            let newPaycheck = Paycheck(other)
-            newPaycheck.name = other.name + " (copy)"
-            modelContext.insert(newPaycheck)
-            selection = .paycheck(newPaycheck)
-        }
-        
-        private func deletePaycheck(_ paycheck: Paycheck) {
-            modelContext.delete(paycheck)
-            selection = nil
-        }
+    }
+    
+    // MARK: - Methods
+    private func copyPaycheck(_ other: Paycheck) {
+        let newPaycheck = Paycheck(other)
+        newPaycheck.name = other.name + " (copy)"
+        modelContext.insert(newPaycheck)
+        selection = .paycheck(newPaycheck)
+    }
+    
+    private func deletePaycheck(_ paycheck: Paycheck) {
+        modelContext.delete(paycheck)
+        selection = nil
     }
 }
 
 
 // MARK: - List Row
-extension PaychecksListView.QueryView {
-    struct ListRow: View {
-        let paycheck: Paycheck
-        
-        // MARK: - Body
-        var body: some View {
-            NavigationLink(value: paycheck) {
-                VStack(alignment: .leading) {
-                    Text(paycheck.name)
-                        .font(.headline)
-                    
-                    Text(paycheck.date, format: .dateTime.month(.wide).year())
-                        .font(.subheadline)
-                }
+fileprivate struct ListRow: View {
+    let paycheck: Paycheck
+    
+    // MARK: - Body
+    var body: some View {
+        NavigationLink(value: paycheck) {
+            VStack(alignment: .leading) {
+                Text(paycheck.name)
+                    .font(.headline)
+                
+                Text(paycheck.date, format: .dateTime.month(.wide).year())
+                    .font(.subheadline)
             }
         }
     }

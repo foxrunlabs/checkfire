@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct CurrencyField: View {
@@ -16,6 +17,7 @@ struct CurrencyField: View {
     // MARK: - Body
     var body: some View {
         TextField(title, text: $text)
+            .monospacedDigit()
             .focused($isFocused)
             .onAppear { text = value.formatted(.currency(code: "USD")) }
             .onChange(of: isFocused) { _, focused in
@@ -37,9 +39,7 @@ struct CurrencyField: View {
         if trimmed.isEmpty {
             value = 0.00
         } else {
-            if let number = try? Decimal(trimmed, format: .number) {
-                value = number
-            }
+            if let number = try? Decimal(trimmed, format: .number) { value = number }
         }
     }
 }
