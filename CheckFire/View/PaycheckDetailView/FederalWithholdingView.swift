@@ -12,10 +12,10 @@ struct FederalWithholdingView: View {
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck, taxes: taxes)
-                .padding(.horizontal)
+                .padding()
             
             Divider()
-                .padding([.horizontal, .top])
+                .padding(.horizontal)
             
             List {
                 DetailView(paycheck: paycheck)

@@ -9,10 +9,10 @@ struct TSPDetailView: View {
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck)
-                .padding(.horizontal)
+                .padding()
             
             Divider()
-                .padding([.horizontal, .top])
+                .padding(.horizontal)
             
             List {
                 SectionView(paycheck: paycheck, type: .traditional)

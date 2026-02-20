@@ -12,9 +12,9 @@ struct NetPayView: View {
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck, taxes: taxes)
+                .padding(.vertical)
             
             Divider()
-                .padding(.vertical)
             
             ScrollView {
                 EntitlementsListView(paycheck: paycheck)
@@ -29,6 +29,7 @@ struct NetPayView: View {
                 
                 AllotmentsListView(paycheck: paycheck)
             }
+            .padding(.top)
             .scrollBounceBehavior(.basedOnSize)
         }
         .padding(.horizontal)

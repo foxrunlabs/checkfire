@@ -4,11 +4,6 @@ import SwiftUI
 import UIKit
 
 struct PaycheckDetailView: View {
-    private enum FocusedField: Hashable {
-        case basicPay
-        case lesAmount(UUID)
-    }
-    
     // MARK: - Properties
     @Bindable var paycheck: Paycheck
     @Binding var selection: DetailSelection?
@@ -16,7 +11,6 @@ struct PaycheckDetailView: View {
     @Environment(WithholdingTableRepository.self) private var withholdingTables
     @Environment(\.modelContext) private var modelContext
     @Query private var paychecks: [Paycheck]
-    @FocusState private var focus: FocusedField?
     
     // MARK: - Computed Properties
     private var grossPay: Decimal {
@@ -36,7 +30,7 @@ struct PaycheckDetailView: View {
         return taxes.federal + taxes.socialSecurity + taxes.medicare
     }
     
-    private var deductions: Decimal {
+    private var otherOutflows: Decimal {
         paycheck.lesItems.filter { $0.isEntitlement == false }.sum(\.amount)
     }
     
@@ -46,9 +40,12 @@ struct PaycheckDetailView: View {
             VStack {
                 if let taxes {
                     HeaderView(paycheck: paycheck)
+                        .padding(.horizontal)
+                    
                     SummaryView(paycheck: paycheck, taxes: taxes) {
                         NetPayView(paycheck: paycheck, taxes: taxes)
                     }
+                    .padding(.horizontal)
                     
                     List {
                         ListRow("Entitlements", value: grossPay, color: .primary) {
@@ -63,7 +60,7 @@ struct PaycheckDetailView: View {
                             FederalWithholdingView(paycheck: paycheck, taxes: taxes)
                         }
                         
-                        ListRow("Deductions & Allotments", value: deductions, color: .orange) {
+                        ListRow("Deductions & Allotments", value: otherOutflows, color: .orange) {
                             DeductionsAndAllotmentsView(paycheck: paycheck)
                         }
                     }
@@ -73,7 +70,6 @@ struct PaycheckDetailView: View {
                     ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
                 }
             }
-            .padding(.horizontal)
             .navigationTitle($paycheck.name)
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -109,7 +105,7 @@ fileprivate struct HeaderView: View {
 fileprivate struct SummaryView<Destination: View>: View {
     let paycheck: Paycheck
     let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
-    @ViewBuilder let destination: Destination
+    let destination: () -> Destination
     
     // MARK: - Computed Properties
     private var chartData: [(category: String, total: Decimal)] {
@@ -129,7 +125,7 @@ fileprivate struct SummaryView<Destination: View>: View {
     // MARK: - Body
     var body: some View {
         NavigationLink {
-            destination
+            destination()
         } label: {
             HStack {
                 Grid {
@@ -216,17 +212,6 @@ fileprivate struct ListRow<Destination: View>: View {
         }
     }
 }
-
-
-//// MARK: - Dismiss Keyboard
-//fileprivate func dismissKeyboard() {
-//    UIApplication.shared.sendAction(
-//        #selector(UIResponder.resignFirstResponder),
-//        to: nil,
-//        from: nil,
-//        for: nil
-//    )
-//}
 
 
 // MARK: - Preview
