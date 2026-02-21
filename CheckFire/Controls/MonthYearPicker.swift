@@ -1,20 +1,22 @@
 import Foundation
 import SwiftUI
 
-struct MonthYearPicker: View {
+struct MonthYearPicker<Label: View>: View {
     typealias Year = Int
     typealias Month = Int
     
     // MARK: - Properties
     @Binding var selection: Date
     let yearRange: ClosedRange<Year>
+    let label: () -> Label
     
     @State private var showPickerPopover = false
     
     // MARK: - Initializer
-    init(selection: Binding<Date>, in yearRange: ClosedRange<Year>) {
+    init(selection: Binding<Date>, in yearRange: ClosedRange<Year>, label: @escaping () -> Label) {
         self._selection = selection
         self.yearRange = yearRange
+        self.label = label
     }
     
     // MARK: - Body
@@ -22,13 +24,9 @@ struct MonthYearPicker: View {
         Button {
             showPickerPopover.toggle()
         } label: {
-            HStack(spacing: 5) {
-                Text(selection.formatted(.dateTime.month().year()))
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.footnote)
-            }
+            label()
         }
-        .buttonStyle(.borderless)
+        .buttonStyle(.plain)
         .popover(isPresented: $showPickerPopover, arrowEdge: .top) {
             PickerPopover(selection: $selection, in: yearRange)
                 .presentationCompactAdaptation(.popover)
@@ -198,7 +196,11 @@ extension MonthYearPicker {
     
     Form {
         LabeledContent("Date") {
-            MonthYearPicker(selection: $date, in: years)
+            MonthYearPicker(selection: $date, in: years) {
+                Text(date.formatted(.dateTime.month().year()))
+                    .font(.title2)
+                    .bold()
+            }
         }
     }
 }

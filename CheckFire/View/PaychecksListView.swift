@@ -62,7 +62,6 @@ struct PaychecksListView: View {
                 ToolbarItemGroup(placement: .bottomBar) {
                     Spacer()
                     Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
-                        .buttonStyle(.glassProminent)
                 }
             }
     }

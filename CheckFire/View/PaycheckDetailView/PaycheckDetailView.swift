@@ -37,7 +37,7 @@ struct PaycheckDetailView: View {
     // MARK: - Body
     var body: some View {
         VStack {
-            HeaderView(paycheck: paycheck)
+            HeaderView(paycheck: paycheck, years: withholdingTables.years)
                 .padding([.horizontal, .top])
             
             if let taxes {
@@ -77,7 +77,8 @@ struct PaycheckDetailView: View {
 
 // MARK: - HeaderView
 fileprivate struct HeaderView: View {
-    let paycheck: Paycheck
+    @Bindable var paycheck: Paycheck
+    let years: ClosedRange<Int>
     
     // MARK: - Computed Properties
     private var payPeriod: String {
@@ -91,7 +92,13 @@ fileprivate struct HeaderView: View {
     // MARK: - Body
     var body: some View {
         HStack {
-            Text(payPeriod).font(.title2).bold()
+            MonthYearPicker(selection: $paycheck.date, in: years) {
+                HStack {
+                    Text(payPeriod).font(.title2).bold()
+                    Image(systemName: "chevron.down")
+                }
+            }
+            
             Spacer()
             Text(payGrade).font(.title2).bold()
         }
