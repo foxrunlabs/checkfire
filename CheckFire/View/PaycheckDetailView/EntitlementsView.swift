@@ -32,6 +32,7 @@ struct EntitlementsView: View {
                 .padding(.horizontal)
             
             LabeledCurrencyField("Basic Pay", value: $paycheck.basicPay)
+                .onTapGesture(perform: dismissKeyboard)
                 .padding([.top, .horizontal])
                         
             List {

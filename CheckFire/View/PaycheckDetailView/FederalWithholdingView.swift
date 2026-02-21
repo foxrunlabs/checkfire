@@ -27,6 +27,7 @@ struct FederalWithholdingView: View {
         .navigationTitle("Federal Withholding")
         .navigationSubtitle(paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
+        .onTapGesture(perform: dismissKeyboard)
     }
 }
 

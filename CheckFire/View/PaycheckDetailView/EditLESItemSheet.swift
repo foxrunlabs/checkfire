@@ -34,23 +34,9 @@ struct EditLESItemSheet: View {
                     Button("Done", systemImage: "checkmark") { dismiss() }
                         .buttonStyle(.glassProminent)
                 }
-                
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { dismissKeyboard() }
-                }
             }
+            .onTapGesture(perform: dismissKeyboard)
         }
-    }
-    
-    // MARK: - Methods
-    private func dismissKeyboard() {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-        )
     }
 }
 
