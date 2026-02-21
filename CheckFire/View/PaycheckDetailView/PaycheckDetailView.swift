@@ -36,43 +36,41 @@ struct PaycheckDetailView: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationStack {
-            VStack {
-                if let taxes {
-                    HeaderView(paycheck: paycheck)
-                        .padding(.horizontal)
-                    
-                    SummaryView(paycheck: paycheck, taxes: taxes) {
-                        NetPayView(paycheck: paycheck, taxes: taxes)
-                    }
-                    .padding(.horizontal)
-                    
-                    List {
-                        ListRow("Entitlements", value: grossPay, color: .primary) {
-                            EntitlementsView(paycheck: paycheck)
-                        }
-                        
-                        ListRow("Thrift Savings Plan", value: totalTSP, color: .blue) {
-                            TSPDetailView(paycheck: paycheck)
-                        }
-                        
-                        ListRow("Federal Withholding", value: totalWithholding, color: .red) {
-                            FederalWithholdingView(paycheck: paycheck, taxes: taxes)
-                        }
-                        
-                        ListRow("Deductions & Allotments", value: otherOutflows, color: .orange) {
-                            DeductionsAndAllotmentsView(paycheck: paycheck)
-                        }
-                    }
-                    .listStyle(.plain)
-                    .scrollBounceBehavior(.basedOnSize)
-                } else {
-                    ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
+        VStack {
+            HeaderView(paycheck: paycheck)
+                .padding([.horizontal, .top])
+            
+            if let taxes {
+                SummaryView(paycheck: paycheck, taxes: taxes) {
+                    NetPayView(paycheck: paycheck, taxes: taxes)
                 }
+                .padding(.horizontal)
+                
+                List {
+                    ListRow("Entitlements", value: grossPay, color: .primary) {
+                        EntitlementsView(paycheck: paycheck)
+                    }
+                    
+                    ListRow("Thrift Savings Plan", value: totalTSP, color: .blue) {
+                        TSPDetailView(paycheck: paycheck)
+                    }
+                    
+                    ListRow("Federal Withholding", value: totalWithholding, color: .red) {
+                        FederalWithholdingView(paycheck: paycheck, taxes: taxes)
+                    }
+                    
+                    ListRow("Deductions & Allotments", value: otherOutflows, color: .orange) {
+                        DeductionsAndAllotmentsView(paycheck: paycheck)
+                    }
+                }
+                .listStyle(.plain)
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
             }
-            .navigationTitle($paycheck.name)
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle($paycheck.name)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

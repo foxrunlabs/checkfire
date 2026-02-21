@@ -36,13 +36,11 @@ fileprivate struct ListRow: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationLink(value: navigation) {
-            Label {
-                Text(String(describing: navigation))
-            } icon: {
-                Image(systemName: navigation.icon)
-                    .foregroundStyle(navigation.color)
-            }
+        Label {
+            Text(String(describing: navigation))
+        } icon: {
+            Image(systemName: navigation.icon)
+                .foregroundStyle(navigation.color)
         }
     }
 }

@@ -54,9 +54,11 @@ fileprivate struct DetailViewController: View {
     // MARK: - Body
     var body: some View {
         if let selectedDetail {
-            switch selectedDetail {
-            case .paycheck(let selectedPaycheck):
-                PaycheckDetailView(paycheck: selectedPaycheck, selection: $selectedDetail)
+            NavigationStack {
+                switch selectedDetail {
+                case .paycheck(let selectedPaycheck):
+                    PaycheckDetailView(paycheck: selectedPaycheck, selection: $selectedDetail)
+                }
             }
         } else {
             ContentUnavailableView(

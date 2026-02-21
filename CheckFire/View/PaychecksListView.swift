@@ -139,14 +139,12 @@ fileprivate struct ListRow: View {
     
     // MARK: - Body
     var body: some View {
-        NavigationLink(value: paycheck) {
-            VStack(alignment: .leading) {
-                Text(paycheck.name)
-                    .font(.headline)
-                
-                Text(paycheck.date, format: .dateTime.month(.wide).year())
-                    .font(.subheadline)
-            }
+        VStack(alignment: .leading) {
+            Text(paycheck.name)
+                .font(.headline)
+            
+            Text(paycheck.date, format: .dateTime.month(.wide).year())
+                .font(.subheadline)
         }
     }
 }
