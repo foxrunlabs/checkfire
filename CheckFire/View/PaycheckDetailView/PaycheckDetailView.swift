@@ -80,6 +80,8 @@ fileprivate struct HeaderView: View {
     @Bindable var paycheck: Paycheck
     let years: ClosedRange<Int>
     
+    @State private var showSheet = false
+    
     // MARK: - Computed Properties
     private var payPeriod: String {
         let month = Calendar.current.component(.month, from: paycheck.date)
@@ -94,13 +96,31 @@ fileprivate struct HeaderView: View {
         HStack {
             MonthYearPicker(selection: $paycheck.date, in: years) {
                 HStack {
-                    Text(payPeriod).font(.title2).bold()
+                    Text(payPeriod)
+                        .font(.title2)
+                        .bold()
+                    
                     Image(systemName: "chevron.down")
                 }
             }
             
             Spacer()
-            Text(payGrade).font(.title2).bold()
+            
+            Button {
+                showSheet.toggle()
+            } label: {
+                HStack {
+                    Image(systemName: "chevron.down")
+                    Text(payGrade)
+                        .font(.title2)
+                        .bold()
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .sheet(isPresented: $showSheet) {
+            GradeAndYearsOfServiceSheet(paycheck: paycheck)
+                .presentationDetents([.medium])
         }
     }
 }
@@ -214,6 +234,59 @@ fileprivate struct ListRow<Destination: View>: View {
                 }
             }
             .padding(.vertical)
+        }
+    }
+}
+
+
+// MARK: - Preview
+fileprivate struct GradeAndYearsOfServiceSheet: View {
+    @Bindable var paycheck: Paycheck
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    // MARK: - Body
+    var body: some View {
+        NavigationStack {
+            VStack {
+                HStack {
+                    VStack {
+                        Text("Pay Grade")
+                            .font(.title2)
+                            .bold()
+                        
+                        Picker("Pay Grade", selection: $paycheck.payGrade) {
+                            ForEach(Paycheck.PayGrade.allCases) { payGrade in
+                                Text(String(describing: payGrade))
+                                    .tag(payGrade)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                    }
+                    
+                    VStack {
+                        Text("Years of Service")
+                            .font(.title2)
+                            .bold()
+                        
+                        Picker("Years of Service", selection: $paycheck.yearsOfService) {
+                            ForEach(Paycheck.YearsOfService.allCases) { serviceYears in
+                                Text(String(describing: serviceYears))
+                                    .tag(serviceYears)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                    }
+                }
+                
+                Spacer()
+            }
+            .padding(.vertical)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done", systemImage: "checkmark", role: .confirm) { dismiss() }
+                }
+            }
         }
     }
 }
