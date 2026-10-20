@@ -34,8 +34,13 @@ struct EntitlementsView: View {
                 .padding(.horizontal)
             
             LabeledCurrencyField("Basic Pay", value: $paycheck.basicPay)
-                .onTapGesture(perform: dismissKeyboard)
                 .padding([.top, .horizontal])
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { dismissKeyboard() }
+                    }
+                }
                         
             List {
                 SectionView(category: .allowance, paycheck: paycheck, selectedID: $selectedID)

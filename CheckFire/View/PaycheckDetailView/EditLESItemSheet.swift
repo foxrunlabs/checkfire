@@ -22,6 +22,7 @@ struct EditLESItemSheet: View {
                 }
                 
                 LabeledCurrencyField("Amount", value: $lesItem.amount)
+                
                 Picker("Type", selection: $lesItem.category) {
                     ForEach(categories) { category in
                         Text(category.displayName)
@@ -36,8 +37,12 @@ struct EditLESItemSheet: View {
                     Button("Done", systemImage: "checkmark") { dismiss() }
                         .buttonStyle(.glassProminent)
                 }
+                
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { dismissKeyboard() }
+                }
             }
-            .onTapGesture(perform: dismissKeyboard)
         }
     }
 }

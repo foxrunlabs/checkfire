@@ -27,7 +27,12 @@ struct FederalWithholdingView: View {
         .navigationTitle("Federal Withholding")
         .navigationSubtitle(paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onTapGesture(perform: dismissKeyboard)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { dismissKeyboard() }
+            }
+        }
     }
 }
 
@@ -121,26 +126,26 @@ fileprivate struct DetailView: View {
             "Other Income",
             value: $paycheck.withholdingForm.otherIncome.animation(),
             tip: """
-    If you want tax withheld for other income you expect this year that won’t \
-    have withholding, enter the amount of other income here. This may include \
-    interest, dividends, and retirement income.
-    """
+If you want tax withheld for other income you expect this year that won’t \
+have withholding, enter the amount of other income here. This may include \
+interest, dividends, and retirement income.
+"""
         )
         
         LabeledCurrencyField(
             "Other Deductions",
             value: $paycheck.withholdingForm.deductions.animation(),
             tip: """
-    If you enter $0.00, your withholding will be based on the standard deduction.
-    """
+If you enter $0.00, your withholding will be based on the standard deduction.
+"""
         )
         
         LabeledCurrencyField(
             "Extra Withholding",
             value: $paycheck.withholdingForm.extraWithholding.animation(),
             tip: """
-    Enter any additional tax you want withheld each month.
-    """
+Enter any additional tax you want withheld each month.
+"""
         )
     }
 }
