@@ -102,6 +102,10 @@ fileprivate struct SectionView: View {
         type == .traditional ? $paycheck.traditionalTSP : $paycheck.rothTSP
     }
     
+    private var otherPlan: Paycheck.ThriftSavingsPlan {
+        type == .traditional ? paycheck.rothTSP : paycheck.traditionalTSP
+    }
+    
     private var total: Decimal { paycheck.tspContribution(type) }
     
     // MARK: - Body
@@ -111,27 +115,27 @@ fileprivate struct SectionView: View {
             TSPStepper(
                 "Basic Pay",
                 value: tsp.basicPayRate,
-                max: 1 - tsp.wrappedValue.basicPayRate
+                max: 1 - otherPlan.basicPayRate
             )
             
             TSPStepper(
                 "Special Pay",
                 value: tsp.specialPayRate,
-                max: 1 - tsp.wrappedValue.specialPayRate
+                max: 1 - otherPlan.specialPayRate
             )
             .disabled(tsp.wrappedValue.basicPayRate.isZero)
             
             TSPStepper(
                 "Incentive Pay",
                 value: tsp.incentivePayRate,
-                max: 1 - tsp.wrappedValue.incentivePayRate
+                max: 1 - otherPlan.incentivePayRate
             )
             .disabled(tsp.wrappedValue.basicPayRate.isZero)
             
             TSPStepper(
                 "Bonus Pay",
                 value: tsp.bonusPayRate,
-                max: 1 - tsp.wrappedValue.bonusPayRate
+                max: 1 - otherPlan.bonusPayRate
             )
             .disabled(tsp.wrappedValue.basicPayRate.isZero)
         } header: {
