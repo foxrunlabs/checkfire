@@ -10,7 +10,8 @@ struct SettingsView: View {
     @State private var showDeleteAlert = false
     
     private let contactURL = URL(string: "mailto:labs@thefoxrun.net")!
-    private let sourceDocs: [SourceDoc] = Bundle.main.decode(from: "source_documentation.json")
+    private let supportURL = URL(string: "https://labs.thefoxrun.net/checkfire/")!
+    private let privacyURL = URL(string: "https://labs.thefoxrun.net/checkfire/privacy.html")!
     
     // MARK: - Body
     
@@ -18,16 +19,25 @@ struct SettingsView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Copyright © 2025 Ryan Clarke")
-                    Text("Version " + Bundle.main.versionString)
-                    Link(destination: contactURL) { Label("Contact", systemImage: "envelope") }
+                    NavigationLink {
+                        DocumentationView()
+                    } label: {
+                        Label("Official Documentation", systemImage: "book.pages")
+                    }
                 }
                 
-                Section("Official Documentation") {
-                    ForEach(sourceDocs) { sourceDoc in
-                        Link(destination: sourceDoc.url) {
-                            Label(sourceDoc.name, systemImage: "network")
-                        }
+                Section("Support and Legal") {
+                    Label("Version \(Bundle.main.versionString)", systemImage: "tag")
+                    Link(destination: contactURL) { Label("Contact", systemImage: "envelope") }
+                    Link(destination: supportURL) {
+                        Label("Support", systemImage: "questionmark.circle")
+                    }
+                    
+                    Link(destination: privacyURL) { Label("Privacy Policy", systemImage: "lock") }
+                    NavigationLink {
+                        LicenseView()
+                    } label: {
+                        Label("License", systemImage: "text.page")
                     }
                 }
                 
@@ -55,6 +65,7 @@ struct SettingsView: View {
     }
     
     // MARK: - Methods
+    
     private func deleteAllData() {
         paychecks.forEach { modelContext.delete($0) }
     }
