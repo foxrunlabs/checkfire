@@ -2,15 +2,18 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-struct SettingsSheet: View {
-    private let contactURL = URL(string: "mailto:foxrunlabs@icloud.com")!
-    private let sourceDocs: [SourceDoc] = Bundle.main.decode(from: "source_documentation.json")
+struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    
     @Query private var paychecks: [Paycheck]
     @State private var showDeleteAlert = false
     
+    private let contactURL = URL(string: "mailto:labs@thefoxrun.net")!
+    private let sourceDocs: [SourceDoc] = Bundle.main.decode(from: "source_documentation.json")
+    
     // MARK: - Body
+    
     var body: some View {
         NavigationStack {
             List {
@@ -44,9 +47,8 @@ struct SettingsSheet: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Done", systemImage: "checkmark") { dismiss() }
-                        .buttonStyle(.glassProminent)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close", systemImage: "xmark") { dismiss() }
                 }
             }
         }
@@ -63,12 +65,8 @@ struct SettingsSheet: View {
 #Preview {
     @Previewable @State var showSheet = true
     
-    Button("Show Sheet") {
-        showSheet.toggle()
-    }
-    .sheet(isPresented: $showSheet) {
-        SettingsSheet()
-    }
-    .modelContainer(PreviewController.container)
+    Button("Show Sheet") { showSheet = true }
+        .sheet(isPresented: $showSheet) { SettingsView() }
+        .modelContainer(PreviewController.container)
 }
 

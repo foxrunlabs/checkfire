@@ -11,6 +11,7 @@ extension Paycheck {
         var extraWithholding: Decimal = 0.00
         
         // MARK: - Example
+        
         static let example = WithholdingForm(
             maritalStatus: .marriedFilingJointly,
             multipleJobs: true,

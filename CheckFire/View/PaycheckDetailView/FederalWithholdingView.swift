@@ -33,6 +33,7 @@ struct FederalWithholdingView: View {
 
 
 // MARK: - Withholding Summary View
+
 fileprivate struct SummaryView: View {
     let paycheck: Paycheck
     let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
@@ -51,6 +52,7 @@ fileprivate struct SummaryView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent("Income Tax", value: taxes.federal, format: .currency(code: "USD"))
@@ -85,6 +87,7 @@ fileprivate struct SummaryView: View {
 
 
 // MARK: - Withholding Detail View
+
 fileprivate struct DetailView: View {
     @Bindable var paycheck: Paycheck
     
@@ -94,7 +97,7 @@ fileprivate struct DetailView: View {
     var body: some View {
         Picker("Filing Status", selection: $paycheck.withholdingForm.maritalStatus.animation()) {
             ForEach(MaritalStatus.allCases) { status in
-                Text(String(describing: status))
+                Text(status.displayName)
                     .tag(status)
             }
         }
@@ -144,6 +147,7 @@ fileprivate struct DetailView: View {
 
 
 // MARK: - Preview
+
 #Preview {
     let withholdingTables = WithholdingTableRepository(from: "withholding_tables.json")
     let paycheck: Paycheck = .example

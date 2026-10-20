@@ -6,6 +6,7 @@ struct TSPDetailView: View {
     @Bindable var paycheck: Paycheck
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck)
@@ -28,11 +29,13 @@ struct TSPDetailView: View {
 }
 
 
-// MARK: - Summary View {
+// MARK: - Summary View
+
 fileprivate struct SummaryView: View {
     let paycheck: Paycheck
     
     // MARK: - Computed Properties
+    
     private var maximumContribution: Decimal {
         let eligibleEntitlements = paycheck.lesItems.filter { lesItem in
             lesItem.isEntitlement && lesItem.category != .allowance
@@ -53,6 +56,7 @@ fileprivate struct SummaryView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent(
@@ -87,11 +91,13 @@ fileprivate struct SummaryView: View {
 
 
 // MARK: - Section View
+
 fileprivate struct SectionView: View {
     @Bindable var paycheck: Paycheck
     let type: Paycheck.TSPType
     
     // MARK: - Computed Properties
+    
     private var tsp: Binding<Paycheck.ThriftSavingsPlan> {
         type == .traditional ? $paycheck.traditionalTSP : $paycheck.rothTSP
     }
@@ -99,6 +105,7 @@ fileprivate struct SectionView: View {
     private var total: Decimal { paycheck.tspContribution(type) }
     
     // MARK: - Body
+    
     var body: some View {
         Section {
             TSPStepper(
@@ -129,7 +136,7 @@ fileprivate struct SectionView: View {
             .disabled(tsp.wrappedValue.basicPayRate.isZero)
         } header: {
             HStack {
-                Text(String(describing: type))
+                Text(type.displayName)
                 Spacer()
                 Text(total, format: .currency(code: "USD"))
             }
@@ -140,6 +147,7 @@ fileprivate struct SectionView: View {
 
 
 // MARK: - Preview
+
 #Preview {
     NavigationStack {
         TSPDetailView(paycheck: .example)

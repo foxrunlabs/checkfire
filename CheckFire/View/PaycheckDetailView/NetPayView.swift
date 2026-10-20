@@ -9,6 +9,7 @@ struct NetPayView: View {
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck, taxes: taxes)
@@ -41,6 +42,7 @@ struct NetPayView: View {
 
 
 // MARK: - Take Home Summary View
+
 fileprivate struct SummaryView: View {
     let paycheck: Paycheck
     let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
@@ -66,6 +68,7 @@ fileprivate struct SummaryView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent("Total", value: paycheck.netPay(taxes: taxes), format: .currency(code: "USD"))
@@ -88,10 +91,12 @@ fileprivate struct SummaryView: View {
 
 
 // MARK: - Entitlements View
+
 fileprivate struct EntitlementsListView: View {
     let paycheck: Paycheck
     
     // MARK: - Computed Properties
+    
     private var entitlements: [Paycheck.LESItem] {
         paycheck.lesItems.filter { $0.isEntitlement }.sorted { $1.name > $0.name }
     }
@@ -101,6 +106,7 @@ fileprivate struct EntitlementsListView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent("Entitlements", value: totalEntitlements, format: .currency(code: "USD"))
@@ -123,11 +129,13 @@ fileprivate struct EntitlementsListView: View {
 
 
 // MARK: - Deductions View
+
 fileprivate struct DeductionsListView: View {
     let paycheck: Paycheck
     let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
     
     // MARK: - Computed Properties
+    
     private var deductions: [Paycheck.LESItem] {
         paycheck.lesItems.filter { $0.category == .deduction }
     }
@@ -140,6 +148,7 @@ fileprivate struct DeductionsListView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent("Deductions", value: totalDeductions, format: .currency(code: "USD"))
@@ -168,7 +177,7 @@ fileprivate struct DeductionsListView: View {
             ForEach(Paycheck.TSPType.allCases) { tspType in
                 if paycheck.tspContribution(tspType) > 0.00 {
                     LabeledContent(
-                        String(describing: tspType) + " TSP",
+                        "\(tspType.displayName) TSP",
                         value: paycheck.tspContribution(tspType),
                         format: .currency(code: "USD")
                     )
@@ -182,15 +191,18 @@ fileprivate struct DeductionsListView: View {
 
 
 // MARK: Allotments View
+
 fileprivate struct AllotmentsListView: View {
     let paycheck: Paycheck
     
     // MARK: - Computed Properties
+    
     private var allotments: [Paycheck.LESItem] {
         paycheck.lesItems.filter { $0.category == .allotment }
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent("Allotments", value: allotments.sum(\.amount), format: .currency(code: "USD"))
@@ -209,6 +221,7 @@ fileprivate struct AllotmentsListView: View {
 
 
 // MARK: - Preview
+
 #Preview {
     let withholdingTables = WithholdingTableRepository(from: "withholding_tables.json")
     let paycheck: Paycheck = .example

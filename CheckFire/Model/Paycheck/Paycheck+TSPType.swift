@@ -1,10 +1,11 @@
 extension Paycheck {
-    enum TSPType: CaseIterable, CustomStringConvertible, Identifiable {
+    enum TSPType: CaseIterable, Identifiable {
         case traditional
         case roth
         
-        // MARK: - CustomStringConvertible {
-        var description: String {
+        // MARK: - Computed Properties
+        
+        var displayName: String {
             switch self {
             case .traditional:
                 "Traditional"
@@ -14,6 +15,7 @@ extension Paycheck {
         }
         
         // MARK: - Identifiable
+        
         var id: Self { self }
     }
 }

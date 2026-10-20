@@ -6,11 +6,13 @@ struct EditLESItemSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - Computed Properties
+    
     private var categories: [Paycheck.LESItem.Category] {
         lesItem.isEntitlement ? Paycheck.LESItem.Category.entitlementCases : [.deduction, .allotment]
     }
     
     // MARK: - Body
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -22,7 +24,7 @@ struct EditLESItemSheet: View {
                 LabeledCurrencyField("Amount", value: $lesItem.amount)
                 Picker("Type", selection: $lesItem.category) {
                     ForEach(categories) { category in
-                        Text(String(describing: category))
+                        Text(category.displayName)
                             .tag(category)
                     }
                 }
@@ -42,6 +44,7 @@ struct EditLESItemSheet: View {
 
 
 // MARK: - Preview
+
 #Preview {
     @Previewable @State var showSheet = true
     @Previewable @State var lesItem = Paycheck.example.lesItems[0]

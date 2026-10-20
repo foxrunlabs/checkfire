@@ -6,6 +6,7 @@ struct MonthYearPicker<Label: View>: View {
     typealias Month = Int
     
     // MARK: - Properties
+    
     @Binding var selection: Date
     let yearRange: ClosedRange<Year>
     let label: () -> Label
@@ -13,6 +14,7 @@ struct MonthYearPicker<Label: View>: View {
     @State private var showPickerPopover = false
     
     // MARK: - Initializer
+    
     init(selection: Binding<Date>, in yearRange: ClosedRange<Year>, label: @escaping () -> Label) {
         self._selection = selection
         self.yearRange = yearRange
@@ -20,6 +22,7 @@ struct MonthYearPicker<Label: View>: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         Button {
             showPickerPopover.toggle()
@@ -36,6 +39,7 @@ struct MonthYearPicker<Label: View>: View {
 
 
 // MARK: - Picker Popover
+
 extension MonthYearPicker {
     private struct PickerPopover: View {
         @Binding var selection: Date
@@ -65,6 +69,7 @@ extension MonthYearPicker {
 
 
 // MARK: - Year Stepper
+
 extension MonthYearPicker {
     private struct YearStepper: View {
         @Binding var year: Year
@@ -87,7 +92,7 @@ extension MonthYearPicker {
                 }
                 .disabled(year == yearRange.lowerBound)
                 
-                Text(String(describing: year))
+                Text(year, format: .number.grouping(.never))
                     .foregroundStyle(.primary)
                     .bold()
                 
@@ -105,6 +110,7 @@ extension MonthYearPicker {
 
 
 // MARK: - Month Picker
+
 extension MonthYearPicker {
     private struct MonthPicker: View {
         @Binding var selection: Date
@@ -155,6 +161,7 @@ extension MonthYearPicker {
 
 
 // MARK: - Month Button Style
+
 extension MonthYearPicker {
     private struct MonthButtonStyle: ButtonStyle {
         let isSelected: Bool
@@ -162,6 +169,7 @@ extension MonthYearPicker {
         @Environment(\.isEnabled) private var isEnabled
         
         // MARK: - Computed Properties
+        
         private var foregroundColor: Color {
             if isEnabled {
                 isSelected ? .accentColor : .primary
@@ -171,6 +179,7 @@ extension MonthYearPicker {
         }
         
         // MARK: - ButtonStyle
+        
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
                 .frame(width: 50, height: 35)
@@ -184,6 +193,7 @@ extension MonthYearPicker {
 
 
 // MARK: - Preview
+
 #Preview {
     @Previewable @State var date = DateComponents(
         calendar: .current,

@@ -4,15 +4,15 @@ import SwiftUI
 import UIKit
 
 struct PaycheckDetailView: View {
-    // MARK: - Properties
     @Bindable var paycheck: Paycheck
-    @Binding var selection: DetailSelection?
     
     @Environment(WithholdingTableRepository.self) private var withholdingTables
     @Environment(\.modelContext) private var modelContext
+    
     @Query private var paychecks: [Paycheck]
     
     // MARK: - Computed Properties
+    
     private var grossPay: Decimal {
         paycheck.basicPay + paycheck.lesItems.filter { $0.isEntitlement }.sum(\.amount)
     }
@@ -35,6 +35,7 @@ struct PaycheckDetailView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             HeaderView(paycheck: paycheck, years: withholdingTables.years)
@@ -75,7 +76,8 @@ struct PaycheckDetailView: View {
 }
 
 
-// MARK: - HeaderView
+// MARK: - Header View
+
 fileprivate struct HeaderView: View {
     @Bindable var paycheck: Paycheck
     let years: ClosedRange<Int>
@@ -83,15 +85,17 @@ fileprivate struct HeaderView: View {
     @State private var showSheet = false
     
     // MARK: - Computed Properties
+    
     private var payPeriod: String {
         let month = Calendar.current.component(.month, from: paycheck.date)
         let monthSymbol = Calendar.current.shortMonthSymbols[month - 1]
         return "\(monthSymbol) \(paycheck.year)"
     }
     
-    private var payGrade: String { "\(paycheck.payGrade) \(paycheck.yearsOfService)" }
+    private var payGrade: String { "\(paycheck.payGrade.displayName) \(paycheck.yearsOfService.displayName)" }
     
     // MARK: - Body
+    
     var body: some View {
         HStack {
             MonthYearPicker(selection: $paycheck.date, in: years) {
@@ -127,12 +131,14 @@ fileprivate struct HeaderView: View {
 
 
 // MARK: - Summary View
+
 fileprivate struct SummaryView<Destination: View>: View {
     let paycheck: Paycheck
     let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
     let destination: () -> Destination
     
     // MARK: - Computed Properties
+    
     private var chartData: [(category: String, total: Decimal)] {
         let totalTsp = paycheck.tspContribution(.traditional) + paycheck.tspContribution(.roth)
         let totalTax = taxes.federal + taxes.socialSecurity + taxes.medicare
@@ -148,6 +154,7 @@ fileprivate struct SummaryView<Destination: View>: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         NavigationLink {
             destination()
@@ -196,6 +203,7 @@ fileprivate struct SummaryView<Destination: View>: View {
 
 
 // MARK: - List Row
+
 fileprivate struct ListRow<Destination: View>: View {
     let title: String
     let value: Decimal
@@ -203,6 +211,7 @@ fileprivate struct ListRow<Destination: View>: View {
     let destination: Destination
     
     // MARK: - Initializer
+    
     init(
         _ title: String,
         value: Decimal,
@@ -216,6 +225,7 @@ fileprivate struct ListRow<Destination: View>: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         NavigationLink {
             destination
@@ -240,6 +250,7 @@ fileprivate struct ListRow<Destination: View>: View {
 
 
 // MARK: - Preview
+
 fileprivate struct GradeAndYearsOfServiceSheet: View {
     @Bindable var paycheck: Paycheck
     
@@ -257,7 +268,7 @@ fileprivate struct GradeAndYearsOfServiceSheet: View {
                         
                         Picker("Pay Grade", selection: $paycheck.payGrade) {
                             ForEach(Paycheck.PayGrade.allCases) { payGrade in
-                                Text(String(describing: payGrade))
+                                Text(payGrade.displayName)
                                     .tag(payGrade)
                             }
                         }
@@ -271,7 +282,7 @@ fileprivate struct GradeAndYearsOfServiceSheet: View {
                         
                         Picker("Years of Service", selection: $paycheck.yearsOfService) {
                             ForEach(Paycheck.YearsOfService.allCases) { serviceYears in
-                                Text(String(describing: serviceYears))
+                                Text(serviceYears.displayName)
                                     .tag(serviceYears)
                             }
                         }
@@ -293,11 +304,10 @@ fileprivate struct GradeAndYearsOfServiceSheet: View {
 
 
 // MARK: - Preview
+
 #Preview {
-    @Previewable @State var selection: DetailSelection?
-    
     NavigationStack {
-        PaycheckDetailView(paycheck: .example, selection: $selection)
+        PaycheckDetailView(paycheck: .example)
     }
     .environment(WithholdingTableRepository(from: "withholding_tables.json"))
     .modelContainer(PreviewController.container)

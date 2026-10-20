@@ -1,12 +1,5 @@
-// MARK: - Years of Service
 extension Paycheck {
-    enum YearsOfService:
-        String,
-        CaseIterable,
-        Codable,
-        CustomStringConvertible,
-        Identifiable
-    {
+    enum YearsOfService: String, CaseIterable, Codable, Identifiable {
         case lessThan4Months = "lt_4_months"
         case lessThanOrEqual2 = "le_2"
         case over2 = "gt_2"
@@ -31,23 +24,25 @@ extension Paycheck {
         case over38 = "gt_38"
         case over40 = "gt_40"
         
-        // MARK: - CustomStringConvertible
-        var description: String {
-                switch self {
-                case .lessThan4Months:
-                    return "< 4 Months"
-                default:
-                    if rawValue.hasPrefix("gt_") {
-                        return "Over \(rawValue.dropFirst(3))"
-                    } else if rawValue.hasPrefix("le_") {
-                        return "\(rawValue.dropFirst(3)) or Less"
-                    } else {
-                        return rawValue
-                    }
+        // MARK: - Computed Properties
+        
+        var displayName: String {
+            switch self {
+            case .lessThan4Months:
+                return "< 4 Months"
+            default:
+                if rawValue.hasPrefix("gt_") {
+                    return "Over \(rawValue.dropFirst(3))"
+                } else if rawValue.hasPrefix("le_") {
+                    return "\(rawValue.dropFirst(3)) or Less"
+                } else {
+                    return rawValue
                 }
             }
+        }
         
         // MARK: - Identifiable
+        
         var id: Self { self }
     }
 }

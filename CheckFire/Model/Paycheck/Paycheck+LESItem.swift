@@ -7,23 +7,26 @@ extension Paycheck {
         var amount: Decimal
         var category: Category
         
+        // MARK: - Computed Properties
+        
+        var isEntitlement: Bool { Category.entitlementCases.contains(category) }
+        var isTaxable: Bool { isEntitlement && category != .allowance }
+        
         // MARK: - Initializer
+        
         init(_ name: String, amount: Decimal, category: Category) {
             self.name = name
             self.amount = amount
             self.category = category
         }
-        
-        // MARK: - Computed Properties
-        var isEntitlement: Bool { Category.entitlementCases.contains(category) }
-        var isTaxable: Bool { isEntitlement && category != .allowance }
     }
 }
 
 
 // MARK: - LES Item Category
+
 extension Paycheck.LESItem {
-    enum Category: String, CaseIterable, Codable, CustomStringConvertible, Identifiable {
+    enum Category: String, CaseIterable, Codable, Identifiable {
         case specialPay
         case incentivePay
         case bonusPay
@@ -32,10 +35,12 @@ extension Paycheck.LESItem {
         case allotment
         
         // MARK: - Properties
+        
         static let entitlementCases: [Self] = [.specialPay, .incentivePay, .bonusPay, .allowance]
         
-        // MARK: - CustomStringConvertible
-        var description: String {
+        // MARK: - Computed Properties
+        
+        var displayName: String {
             switch self {
             case .specialPay:
                 "Special Pay"
@@ -53,6 +58,7 @@ extension Paycheck.LESItem {
         }
         
         // MARK: - Identifiable
+        
         var id: Self { self }
     }
 }

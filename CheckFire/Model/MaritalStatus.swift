@@ -1,20 +1,14 @@
 import Foundation
 
-enum MaritalStatus:
-    String,
-    CaseIterable,
-    Codable,
-    CodingKeyRepresentable,
-    CustomStringConvertible,
-    Identifiable
-{
+enum MaritalStatus: String, CaseIterable, Codable, CodingKeyRepresentable, Identifiable {
     case single
     case marriedFilingJointly
     case marriedFilingSeparately
     case headOfHousehold
     
-    // MARK: - CustomStringConvertible
-    var description: String {
+    // MARK: - Computed Properties
+    
+    var displayName: String {
         switch self {
         case .single:
             "Single"
@@ -28,6 +22,7 @@ enum MaritalStatus:
     }
 
     // MARK: - Identifiable
+    
     var id: Self { self }
 }
 

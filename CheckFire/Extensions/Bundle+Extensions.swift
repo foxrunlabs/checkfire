@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Decode
+
 extension Bundle {
     /// Find and decode a JSON file from a bundle.
     /// - Parameter from: filename of JSON from which to decode.
@@ -31,6 +32,7 @@ extension Bundle {
 
 
 // MARK: - Version Strings
+
 extension Bundle {
     /// The bundle’s marketing version (CFBundleShortVersionString).
     var marketingVersion: String {

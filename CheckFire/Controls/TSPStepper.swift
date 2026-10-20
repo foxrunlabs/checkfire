@@ -7,6 +7,7 @@ struct TSPStepper: View {
     let max: Decimal
     
     // MARK: - Initializer
+    
     init(_ title: LocalizedStringKey, value: Binding<Decimal>, max: Decimal) {
         self.title = title
         self._value = value
@@ -14,6 +15,7 @@ struct TSPStepper: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         Stepper(value: $value, in: 0.00...max, step: 0.01) {
             HStack {

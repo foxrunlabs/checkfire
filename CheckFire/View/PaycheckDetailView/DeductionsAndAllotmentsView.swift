@@ -23,6 +23,7 @@ struct DeductionsAndAllotmentsView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             SummaryView(paycheck: paycheck)
@@ -68,8 +69,9 @@ struct DeductionsAndAllotmentsView: View {
     }
     
     // MARK: - Methods
+    
     private func addLESItem(category: Paycheck.LESItem.Category) {
-        let name = "New " + String(describing: category)
+        let name = "New \(category.displayName)"
         let newItem = Paycheck.LESItem(name, amount: 0.00, category: category)
         paycheck.lesItems.append(newItem)
         selectedID = newItem.id
@@ -78,10 +80,12 @@ struct DeductionsAndAllotmentsView: View {
 
 
 // MARK: - Summary View
+
 fileprivate struct SummaryView: View {
     let paycheck: Paycheck
     
     // MARK: - Computed Properties
+    
     private var totalDeductions: Decimal {
         paycheck.lesItems.filter { $0.category == .deduction }.sum(\.amount)
     }
@@ -98,6 +102,7 @@ fileprivate struct SummaryView: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         VStack {
             LabeledContent(
@@ -127,17 +132,20 @@ fileprivate struct SummaryView: View {
 
 
 // MARK: - Section View
+
 fileprivate struct SectionView: View {
     let category: Paycheck.LESItem.Category
     let paycheck: Paycheck
     @Binding var selectedID: Paycheck.LESItem.ID?
     
     // MARK: - Computed Properties
+    
     private var lesItems: [Paycheck.LESItem] {
         paycheck.lesItems.filter { $0.category == category }
     }
     
     // MARK: - Body
+    
     var body: some View {
         Section {
             ForEach(lesItems) { lesItem in
@@ -160,7 +168,7 @@ fileprivate struct SectionView: View {
             }
         } header: {
             HStack {
-                Text(String(describing: category) + "s")
+                Text("\(category.displayName)s")
                 Spacer()
                 Text(lesItems.sum(\.amount), format: .currency(code: "USD"))
             }
@@ -169,6 +177,7 @@ fileprivate struct SectionView: View {
     }
     
     // MARK: - Methods
+    
     private func deleteLESItem(_ lesItem: Paycheck.LESItem) {
         guard let i = paycheck.lesItems.firstIndex(where: { $0.id == lesItem.id }) else { return }
         paycheck.lesItems.remove(at: i)
@@ -178,6 +187,7 @@ fileprivate struct SectionView: View {
 
 
 // MARK: - Preview
+
 #Preview {
     NavigationStack {
         DeductionsAndAllotmentsView(paycheck: .example)

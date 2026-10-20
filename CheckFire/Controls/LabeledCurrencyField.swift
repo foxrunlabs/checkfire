@@ -9,6 +9,7 @@ struct LabeledCurrencyField: View {
     @State private var showTip = false
     
     // MARK: - Initializer
+    
     init(_ title: String, value: Binding<Decimal>, tip: LocalizedStringKey? = nil) {
         self.title = title
         self._value = value
@@ -16,6 +17,7 @@ struct LabeledCurrencyField: View {
     }
     
     // MARK: - Body
+    
     var body: some View {
         LabeledContent {
             CurrencyField(title, value: $value)
@@ -51,6 +53,7 @@ struct LabeledCurrencyField: View {
 
 
 // MARK: - Currency Field
+
 fileprivate struct CurrencyField: View {
     let title: String
     @Binding var value: Decimal
@@ -59,12 +62,14 @@ fileprivate struct CurrencyField: View {
     @FocusState private var isFocused: Bool
     
     // MARK: - Initializer
+    
     init(_ title: String, value: Binding<Decimal>) {
         self.title = title
         self._value = value
     }
     
     // MARK: - Body
+    
     var body: some View {
         TextField(title, text: $text)
             .monospacedDigit()
@@ -83,6 +88,7 @@ fileprivate struct CurrencyField: View {
     }
     
     // MARK: - Methods
+    
     private func commit() {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         

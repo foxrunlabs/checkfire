@@ -6,6 +6,7 @@ final class Paycheck {
     typealias Year = Int
     
     // MARK: - Properties
+    
     var name: String = "New Paycheck"
     var date: Date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
     var payGrade: PayGrade = PayGrade.e1
@@ -17,6 +18,7 @@ final class Paycheck {
     var rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
     
     // MARK: - Initializers
+    
     init(
         name: String = "New Paycheck",
         date: Date = .now,
@@ -58,6 +60,7 @@ final class Paycheck {
     }
     
     // MARK: - Computed Properties
+    
     var year: Year { Calendar.current.component(.year, from: date) }
     var ficaWages: Decimal { basicPay }
     var grossPay: Decimal { basicPay + lesItems.filter { $0.isEntitlement }.sum(\.amount) }
@@ -69,6 +72,7 @@ final class Paycheck {
     }
     
     // MARK: - Methods
+    
     func tspContribution(_ tspType: TSPType) -> Decimal {
         let plan = switch tspType {
         case .traditional:
@@ -109,6 +113,7 @@ final class Paycheck {
     }
     
     // MARK: - Example
+    
     static let example = Paycheck(
         name: "Example",
         date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
