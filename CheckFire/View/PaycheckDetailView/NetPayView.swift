@@ -160,13 +160,37 @@ fileprivate struct DeductionsListView: View {
                 .monospacedDigit()
                 .foregroundStyle(.primary)
             
-            LabeledContent("Social Security", value: taxes.socialSecurity, format: .currency(code: "USD"))
-                .monospacedDigit()
-                .foregroundStyle(.primary)
+            LabeledContent {
+                Text(taxes.socialSecurity, format: .currency(code: "USD"))
+            } label: {
+                HStack {
+                    Text("Social Security")
+                    TipButton("""
+                        Social Security estimate is based on monthly pay only and does not \
+                        consider the annual wage limit.
+                        """,
+                        systemName: "info.circle"
+                    )
+                }
+            }
+            .monospacedDigit()
+            .foregroundStyle(.primary)
             
-            LabeledContent("Medicare", value: taxes.medicare, format: .currency(code: "USD"))
-                .monospacedDigit()
-                .foregroundStyle(.primary)
+            LabeledContent {
+                Text(taxes.medicare, format: .currency(code: "USD"))
+            } label: {
+                HStack {
+                    Text("Medicare")
+                    TipButton("""
+                        Medicare estimate is based on monthly pay only and does not \
+                        compute additional medicare withholding for higher incomes.
+                        """,
+                        systemName: "info.circle"
+                    )
+                }
+            }
+            .monospacedDigit()
+            .foregroundStyle(.primary)
             
             ForEach(deductions) { deduction in
                 LabeledContent(deduction.name, value: deduction.amount, format: .currency(code: "USD"))
