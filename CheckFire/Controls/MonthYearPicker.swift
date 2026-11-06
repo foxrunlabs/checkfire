@@ -2,20 +2,17 @@ import Foundation
 import SwiftUI
 
 struct MonthYearPicker<Label: View>: View {
-    typealias Year = Int
-    typealias Month = Int
-    
     // MARK: - Properties
     
     @Binding var selection: Date
-    let yearRange: ClosedRange<Year>
+    let yearRange: ClosedRange<Int>
     let label: () -> Label
     
     @State private var showPickerPopover = false
     
     // MARK: - Initializer
     
-    init(selection: Binding<Date>, in yearRange: ClosedRange<Year>, label: @escaping () -> Label) {
+    init(selection: Binding<Date>, in yearRange: ClosedRange<Int>, label: @escaping () -> Label) {
         self._selection = selection
         self.yearRange = yearRange
         self.label = label
@@ -43,12 +40,12 @@ struct MonthYearPicker<Label: View>: View {
 extension MonthYearPicker {
     private struct PickerPopover: View {
         @Binding var selection: Date
-        let yearRange: ClosedRange<Year>
+        let yearRange: ClosedRange<Int>
         
-        @State private var pickerYear: Year
+        @State private var pickerYear: Int
         
         // MARK: - Initializer
-        init(selection: Binding<Date>, in yearRange: ClosedRange<Year>) {
+        init(selection: Binding<Date>, in yearRange: ClosedRange<Int>) {
             self._selection = selection
             self.yearRange = yearRange
             
@@ -72,11 +69,11 @@ extension MonthYearPicker {
 
 extension MonthYearPicker {
     private struct YearStepper: View {
-        @Binding var year: Year
-        let yearRange: ClosedRange<Year>
+        @Binding var year: Int
+        let yearRange: ClosedRange<Int>
         
         // MARK: - Initializer
-        init(year: Binding<Year>, in yearRange: ClosedRange<Year>) {
+        init(year: Binding<Int>, in yearRange: ClosedRange<Int>) {
             self._year = year
             self.yearRange = yearRange
         }
@@ -114,13 +111,13 @@ extension MonthYearPicker {
 extension MonthYearPicker {
     private struct MonthPicker: View {
         @Binding var selection: Date
-        let year: Year
+        let year: Int
         
         private let columns = Array(repeating: GridItem(), count: 3)
         private let symbols = Calendar.current.shortMonthSymbols
         
         // MARK: - Initializer
-        init(selection: Binding<Date>, year: Year) {
+        init(selection: Binding<Date>, year: Int) {
             self._selection = selection
             self.year = year
         }
@@ -139,12 +136,12 @@ extension MonthYearPicker {
         }
         
         // MARK: - Methods
-        private func isCurrentDate(month: Month) -> Bool {
+        private func isCurrentDate(month: Int) -> Bool {
             let selectionComponents = Calendar.current.dateComponents([.year, .month], from: selection)
             return (month == selectionComponents.month) && (year == selectionComponents.year)
         }
         
-        private func updateSelection(month: Month) {
+        private func updateSelection(month: Int) {
             let calendar = Calendar.current
             
             guard
@@ -202,8 +199,7 @@ extension MonthYearPicker {
         day: 28
     ).date!
     
-    let years = WithholdingTableRepository(from: "withholding_tables.json").years
-    
+    let years = PaySystem(from: "withholding_tables.json").taxYears
     Form {
         LabeledContent("Date") {
             MonthYearPicker(selection: $date, in: years) {

@@ -4,25 +4,35 @@ import SwiftUI
 
 struct FederalWithholdingView: View {
     @Bindable var paycheck: Paycheck
-    let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
     
-    @Environment(\.dismiss) private var dismiss
+    @Environment(PaySystem.self) private var paySystem
+    
+    // MARK: - Computed Properties
+    
+    private var paycheckResult: PaySystem.PaycheckResult? {
+        try? paySystem.calculate(paycheck)
+    }
+    
     
     // MARK: - Body
     var body: some View {
         VStack {
-            SummaryView(paycheck: paycheck, taxes: taxes)
-                .padding()
-            
-            Divider()
-                .padding(.horizontal)
-            
-            List {
-                DetailView(paycheck: paycheck)
-                    .listRowSeparator(.hidden)
+            if let paycheckResult {
+                SummaryView(paycheckResult: paycheckResult)
+                    .padding()
+                
+                Divider()
+                    .padding(.horizontal)
+                
+                List {
+                    DetailView(paycheck: paycheck)
+                        .listRowSeparator(.hidden)
+                }
+                .listStyle(.plain)
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
             }
-            .listStyle(.plain)
-            .scrollBounceBehavior(.basedOnSize)
         }
         .navigationTitle("Federal Withholding")
         .navigationSubtitle(paycheck.name)
@@ -40,19 +50,15 @@ struct FederalWithholdingView: View {
 // MARK: - Withholding Summary View
 
 fileprivate struct SummaryView: View {
-    let paycheck: Paycheck
-    let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
+    let paycheckResult: PaySystem.PaycheckResult
     
     // MARK: - Computed Properties
-    private var totalTaxes: Decimal {
-        taxes.federal + taxes.socialSecurity + taxes.medicare
-    }
     
     private var chartData: [(category: String, total: Decimal)] {
         [
-            ("Income Tax", taxes.federal),
-            ("Social Security", taxes.socialSecurity),
-            ("Medicare", taxes.medicare)
+            ("Income Tax", paycheckResult.federalWithholding),
+            ("Social Security", paycheckResult.socialSecurity),
+            ("Medicare", paycheckResult.medicare)
         ]
     }
     
@@ -60,13 +66,17 @@ fileprivate struct SummaryView: View {
     
     var body: some View {
         VStack {
-            LabeledContent("Income Tax", value: taxes.federal, format: .currency(code: "USD"))
-                .monospacedDigit()
-                .foregroundStyle(.primary)
+            LabeledContent(
+                "Income Tax",
+                value: paycheckResult.federalWithholding,
+                format: .currency(code: "USD")
+            )
+            .monospacedDigit()
+            .foregroundStyle(.primary)
             
             
             LabeledContent {
-                Text(taxes.socialSecurity, format: .currency(code: "USD"))
+                Text(paycheckResult.socialSecurity, format: .currency(code: "USD"))
             } label: {
                 HStack {
                     Text("Social Security")
@@ -82,7 +92,7 @@ fileprivate struct SummaryView: View {
             .foregroundStyle(.primary)
             
             LabeledContent {
-                Text(taxes.medicare, format: .currency(code: "USD"))
+                Text(paycheckResult.medicare, format: .currency(code: "USD"))
             } label: {
                 HStack {
                     Text("Medicare")
@@ -97,7 +107,7 @@ fileprivate struct SummaryView: View {
             .monospacedDigit()
             .foregroundStyle(.primary)
             
-            LabeledContent("Total", value: totalTaxes, format: .currency(code: "USD"))
+            LabeledContent("Total", value: paycheckResult.totalTax, format: .currency(code: "USD"))
                 .monospacedDigit()
                 .foregroundStyle(.primary)
                 .bold()
@@ -120,8 +130,6 @@ fileprivate struct SummaryView: View {
 
 fileprivate struct DetailView: View {
     @Bindable var paycheck: Paycheck
-    
-    @State private var showTip = false
     
     // MARK: - Body
     var body: some View {
@@ -151,26 +159,26 @@ fileprivate struct DetailView: View {
             "Other Income",
             value: $paycheck.withholdingForm.otherIncome.animation(),
             tip: """
-If you want tax withheld for other income you expect this year that won’t \
-have withholding, enter the amount of other income here. This may include \
-interest, dividends, and retirement income.
-"""
+                If you want tax withheld for other income you expect this year that won’t \
+                have withholding, enter the amount of other income here. This may include \
+                interest, dividends, and retirement income.
+                """
         )
         
         LabeledCurrencyField(
             "Other Deductions",
             value: $paycheck.withholdingForm.deductions.animation(),
             tip: """
-If you enter $0.00, your withholding will be based on the standard deduction.
-"""
+                If you enter $0.00, your withholding will be based on the standard deduction.
+                """
         )
         
         LabeledCurrencyField(
             "Extra Withholding",
             value: $paycheck.withholdingForm.extraWithholding.animation(),
             tip: """
-Enter any additional tax you want withheld each month.
-"""
+                Enter any additional tax you want withheld each month.
+                """
         )
     }
 }
@@ -179,11 +187,8 @@ Enter any additional tax you want withheld each month.
 // MARK: - Preview
 
 #Preview {
-    let withholdingTables = WithholdingTableRepository(from: "withholding_tables.json")
-    let paycheck: Paycheck = .example
-    let taxes = withholdingTables.table(for: paycheck.year)!.calculateTaxes(for: paycheck)!
-    
     NavigationStack {
-        FederalWithholdingView(paycheck: paycheck, taxes: taxes)
+        FederalWithholdingView(paycheck: .example)
     }
+    .environment(PreviewController.paySystem)
 }

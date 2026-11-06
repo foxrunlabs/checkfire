@@ -8,6 +8,7 @@ struct DeductionsAndAllotmentsView: View {
     @State private var selectedID: Paycheck.LESItem.ID?
     
     // MARK: - Computed Properties
+    
     private var showSheet: Binding<Bool> {
         Binding(
             get: { selectedID != nil },
@@ -33,8 +34,11 @@ struct DeductionsAndAllotmentsView: View {
                 .padding(.horizontal)
             
             List {
-                SectionView(category: .deduction, paycheck: paycheck, selectedID: $selectedID)
-                SectionView(category: .allotment, paycheck: paycheck, selectedID: $selectedID)
+                ForEach(Paycheck.LESItem.Category.adjustmentCases) { category in
+                    if !paycheck.lesItems(category).isEmpty {
+                        SectionView(paycheck: paycheck, category: category, selectedID: $selectedID)
+                    }
+                }
             }
             .scrollBounceBehavior(.basedOnSize)
             .listStyle(.plain)
@@ -46,12 +50,13 @@ struct DeductionsAndAllotmentsView: View {
             ToolbarItemGroup(placement: .bottomBar) {
                 Spacer()
                 Menu {
-                    Button("New Allotment", systemImage: "tray.and.arrow.down") {
-                        addLESItem(category: .allotment)
-                    }
-                    
-                    Button("New Deduction", systemImage: "minus.circle") {
-                        addLESItem(category: .deduction)
+                    ForEach(Paycheck.LESItem.Category.adjustmentCases.reversed()) { category in
+                        Button(
+                            "New \(category.displayName)",
+                            systemImage: sfSymbol(for: category)
+                        ) {
+                            addLESItem(category: category)
+                        }
                     }
                 } label: {
                     Label("Add", systemImage: "plus")
@@ -73,8 +78,19 @@ struct DeductionsAndAllotmentsView: View {
     private func addLESItem(category: Paycheck.LESItem.Category) {
         let name = "New \(category.displayName)"
         let newItem = Paycheck.LESItem(name, amount: 0.00, category: category)
-        paycheck.lesItems.append(newItem)
+        withAnimation { paycheck.lesItems.append(newItem) }
         selectedID = newItem.id
+    }
+    
+    private func sfSymbol(for category: Paycheck.LESItem.Category) -> String {
+        switch category {
+        case .deduction:
+            "minus.circle"
+        case .allotment:
+            "tray.and.arrow.down"
+        default:
+            ""
+        }
     }
 }
 
@@ -86,18 +102,14 @@ fileprivate struct SummaryView: View {
     
     // MARK: - Computed Properties
     
-    private var totalDeductions: Decimal {
-        paycheck.lesItems.filter { $0.category == .deduction }.sum(\.amount)
-    }
-    
-    private var totalAllotments: Decimal {
-        paycheck.lesItems.filter { $0.category == .allotment }.sum(\.amount)
+    private var totalAdjustments: Decimal {
+        paycheck.adjustments.sum(\.amount)
     }
     
     private var chartData: [(category: String, total: Decimal)] {
         [
-            ("Deductions", paycheck.lesItems.filter { $0.category == .deduction}.sum(\.amount)),
-            ("Allotments", paycheck.lesItems.filter { $0.category == .allotment}.sum(\.amount)),
+            ("Deductions", paycheck.lesItems(.deduction).sum(\.amount)),
+            ("Allotments", paycheck.lesItems(.allotment).sum(\.amount)),
         ]
     }
     
@@ -105,9 +117,21 @@ fileprivate struct SummaryView: View {
     
     var body: some View {
         VStack {
+            ForEach(Paycheck.LESItem.Category.adjustmentCases) { category in
+                if !paycheck.lesItems(category).isEmpty {
+                    LabeledContent(
+                        "\(category.displayName)s",
+                        value: paycheck.lesItems(category).sum(\.amount),
+                        format: .currency(code: "USD")
+                    )
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                }
+            }
+            
             LabeledContent(
                 "Total",
-                value: totalDeductions + totalAllotments,
+                value: totalAdjustments,
                 format: .currency(code: "USD")
             )
             .monospacedDigit()
@@ -134,21 +158,15 @@ fileprivate struct SummaryView: View {
 // MARK: - Section View
 
 fileprivate struct SectionView: View {
-    let category: Paycheck.LESItem.Category
     let paycheck: Paycheck
+    let category: Paycheck.LESItem.Category
     @Binding var selectedID: Paycheck.LESItem.ID?
-    
-    // MARK: - Computed Properties
-    
-    private var lesItems: [Paycheck.LESItem] {
-        paycheck.lesItems.filter { $0.category == category }
-    }
     
     // MARK: - Body
     
     var body: some View {
-        Section {
-            ForEach(lesItems) { lesItem in
+        Section("\(category.displayName)s") {
+            ForEach(paycheck.lesItems(category)) { lesItem in
                 Button {
                     selectedID = lesItem.id
                 } label: {
@@ -166,12 +184,6 @@ fileprivate struct SectionView: View {
                     }
                 }
             }
-        } header: {
-            HStack {
-                Text("\(category.displayName)s")
-                Spacer()
-                Text(lesItems.sum(\.amount), format: .currency(code: "USD"))
-            }
         }
         .listRowSeparator(.hidden)
     }
@@ -180,7 +192,7 @@ fileprivate struct SectionView: View {
     
     private func deleteLESItem(_ lesItem: Paycheck.LESItem) {
         guard let i = paycheck.lesItems.firstIndex(where: { $0.id == lesItem.id }) else { return }
-        paycheck.lesItems.remove(at: i)
+        withAnimation { paycheck.lesItems.remove(at: i) }
         selectedID = nil
     }
 }

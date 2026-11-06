@@ -3,13 +3,13 @@ import SwiftUI
 
 @main
 struct CheckFireApp: App {
-    private let withholdingTables = WithholdingTableRepository(from: "withholding_tables.json")
+    private let paySystem = PaySystem(from: "withholding_tables.json")
     
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .environment(withholdingTables)
+        .environment(paySystem)
         .modelContainer(for: Paycheck.self)
     }
 }

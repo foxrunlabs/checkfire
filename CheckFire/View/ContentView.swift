@@ -100,6 +100,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environment(WithholdingTableRepository(from: "withholding_tables.json"))
+        .environment(PreviewController.paySystem)
         .modelContainer(PreviewController.container)
 }

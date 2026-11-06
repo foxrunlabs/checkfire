@@ -6,61 +6,54 @@ import UIKit
 struct PaycheckDetailView: View {
     @Bindable var paycheck: Paycheck
     
-    @Environment(WithholdingTableRepository.self) private var withholdingTables
+    @Environment(PaySystem.self) private var paySystem
     @Environment(\.modelContext) private var modelContext
     
     @Query private var paychecks: [Paycheck]
     
     // MARK: - Computed Properties
     
-    private var grossPay: Decimal {
-        paycheck.basicPay + paycheck.lesItems.filter { $0.isEntitlement }.sum(\.amount)
-    }
-    
-    private var totalTSP: Decimal {
-        paycheck.tspContribution(.traditional) + paycheck.tspContribution(.roth)
-    }
-    
-    private var taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)? {
-        withholdingTables.table(for: paycheck.year)?.calculateTaxes(for: paycheck)
-    }
-    
-    private var totalWithholding: Decimal {
-        guard let taxes else { return 0.00 }
-        return taxes.federal + taxes.socialSecurity + taxes.medicare
-    }
-    
-    private var otherOutflows: Decimal {
-        paycheck.lesItems.filter { $0.isEntitlement == false }.sum(\.amount)
+    private var paycheckResult: PaySystem.PaycheckResult? {
+        try? paySystem.calculate(paycheck)
     }
     
     // MARK: - Body
     
     var body: some View {
         VStack {
-            HeaderView(paycheck: paycheck, years: withholdingTables.years)
+            HeaderView(paycheck: paycheck, years: paySystem.taxYears)
                 .padding([.horizontal, .top])
             
-            if let taxes {
-                SummaryView(paycheck: paycheck, taxes: taxes) {
-                    NetPayView(paycheck: paycheck, taxes: taxes)
-                }
-                .padding(.horizontal)
+            if let paycheckResult {
+                SummaryView(paycheckResult: paycheckResult)
+                    .padding(.horizontal)
                 
                 List {
-                    ListRow("Entitlements", value: grossPay, color: .primary) {
+                    ListRow("Entitlements", value: paycheckResult.grossPay, color: .primary) {
                         EntitlementsView(paycheck: paycheck)
                     }
                     
-                    ListRow("Thrift Savings Plan", value: totalTSP, color: .blue) {
+                    ListRow(
+                        "Thrift Savings Plan",
+                        value: paycheckResult.totalTSP,
+                        color: .blue
+                    ) {
                         TSPDetailView(paycheck: paycheck)
                     }
                     
-                    ListRow("Federal Withholding", value: totalWithholding, color: .red) {
-                        FederalWithholdingView(paycheck: paycheck, taxes: taxes)
+                    ListRow(
+                        "Federal Taxes",
+                        value: paycheckResult.totalTax,
+                        color: .red
+                    ) {
+                        FederalWithholdingView(paycheck: paycheck)
                     }
                     
-                    ListRow("Deductions & Allotments", value: otherOutflows, color: .orange) {
+                    ListRow(
+                        "Deductions & Allotments",
+                        value: paycheckResult.adjustments,
+                        color: .orange
+                    ) {
                         DeductionsAndAllotmentsView(paycheck: paycheck)
                     }
                 }
@@ -87,9 +80,7 @@ fileprivate struct HeaderView: View {
     // MARK: - Computed Properties
     
     private var payPeriod: String {
-        let month = Calendar.current.component(.month, from: paycheck.date)
-        let monthSymbol = Calendar.current.shortMonthSymbols[month - 1]
-        return "\(monthSymbol) \(paycheck.year)"
+        "\(paycheck.date.formatted(.dateTime.month(.abbreviated))) \(paycheck.year)"
     }
     
     private var payGrade: String { "\(paycheck.payGrade.displayName) \(paycheck.yearsOfService.displayName)" }
@@ -132,72 +123,55 @@ fileprivate struct HeaderView: View {
 
 // MARK: - Summary View
 
-fileprivate struct SummaryView<Destination: View>: View {
-    let paycheck: Paycheck
-    let taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)
-    let destination: () -> Destination
+fileprivate struct SummaryView: View {
+    let paycheckResult: PaySystem.PaycheckResult
     
     // MARK: - Computed Properties
     
     private var chartData: [(category: String, total: Decimal)] {
-        let totalTsp = paycheck.tspContribution(.traditional) + paycheck.tspContribution(.roth)
-        let totalTax = taxes.federal + taxes.socialSecurity + taxes.medicare
-        let other = paycheck.lesItems.filter { $0.isEntitlement == false }.sum(\.amount)
-        let netPay = paycheck.netPay(taxes: taxes)
-        
-        return [
-            ("TSP", totalTsp),
-            ("Taxes", totalTax),
-            ("Other", other),
-            ("Net Pay", netPay)
+        [
+            ("TSP", paycheckResult.totalTSP),
+            ("Taxes", paycheckResult.totalTax),
+            ("Other", paycheckResult.adjustments),
+            ("Net Pay", paycheckResult.netPay)
         ]
     }
     
     // MARK: - Body
     
     var body: some View {
-        NavigationLink {
-            destination()
-        } label: {
-            HStack {
-                Grid {
-                    GridRow {
-                        Chart(chartData, id: \.category) { item in
-                            SectorMark(
-                                angle: .value("Total", item.total),
-                                innerRadius: .ratio(0.5),
-                                angularInset: 0.5
-                            )
-                            .cornerRadius(3)
-                            .foregroundStyle(by: .value("Category", item.category))
-                        }
-                        .chartLegend(.hidden)
-                        .chartForegroundStyleScale(
-                            ["TSP": .blue, "Taxes": .red, "Other": .orange, "Net Pay": .green]
-                        )
-                        .scaledToFit()
-                        .padding()
-                        
-                        VStack(alignment: .leading) {
-                            Text("Net Pay")
-                                .font(.body.lowercaseSmallCaps())
-                            
-                            Text(paycheck.netPay(taxes: taxes), format: .currency(code: "USD"))
-                                .font(.title3)
-                                .monospacedDigit()
-                                .bold()
-                                .foregroundStyle(.green)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
+        Grid {
+            GridRow {
+                Chart(chartData, id: \.category) { item in
+                    SectorMark(
+                        angle: .value("Total", item.total),
+                        innerRadius: .ratio(0.5),
+                        angularInset: 0.5
+                    )
+                    .cornerRadius(3)
+                    .foregroundStyle(by: .value("Category", item.category))
                 }
-                .contentShape(Rectangle())
+                .chartLegend(.hidden)
+                .chartForegroundStyleScale(
+                    ["TSP": .blue, "Taxes": .red, "Other": .orange, "Net Pay": .green]
+                )
+                .scaledToFit()
+                .padding()
                 
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading) {
+                    Text("Net Pay")
+                        .font(.body.lowercaseSmallCaps())
+                    
+                    Text(paycheckResult.netPay, format: .currency(code: "USD"))
+                        .font(.title3)
+                        .monospacedDigit()
+                        .bold()
+                        .foregroundStyle(.green)
+                }
+                .frame(maxWidth: .infinity)
             }
         }
-        .buttonStyle(.plain)
+        .contentShape(Rectangle())
     }
 }
 
@@ -309,6 +283,6 @@ fileprivate struct GradeAndYearsOfServiceSheet: View {
     NavigationStack {
         PaycheckDetailView(paycheck: .example)
     }
-    .environment(WithholdingTableRepository(from: "withholding_tables.json"))
+    .environment(PreviewController.paySystem)
     .modelContainer(PreviewController.container)
 }

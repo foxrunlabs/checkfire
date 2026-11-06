@@ -13,4 +13,7 @@ class PreviewController {
             fatalError("Failed to create preview container: \(error)")
         }
     }()
+    
+    static let paySystem = PaySystem(from: "withholding_tables.json")
+    static let paycheckResult = try? paySystem.calculate(.example)
 }

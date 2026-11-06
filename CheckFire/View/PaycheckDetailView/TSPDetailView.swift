@@ -5,22 +5,35 @@ import SwiftUI
 struct TSPDetailView: View {
     @Bindable var paycheck: Paycheck
     
+    @Environment(PaySystem.self) private var paySystem
+    
+    // MARK: - Computed Properties
+    
+    private var paycheckResult: PaySystem.PaycheckResult? {
+        try? paySystem.calculate(paycheck)
+    }
+    
     // MARK: - Body
     
     var body: some View {
         VStack {
-            SummaryView(paycheck: paycheck)
-                .padding()
-            
-            Divider()
-                .padding(.horizontal)
-            
-            List {
-                SectionView(paycheck: paycheck, type: .traditional)
-                SectionView(paycheck: paycheck, type: .roth)
+            if let paycheckResult {
+                SummaryView(paycheckResult: paycheckResult)
+                    .padding()
+                
+                Divider()
+                    .padding(.horizontal)
+                
+                List {
+                    ForEach(Paycheck.TSPType.allCases) { tspType in
+                        SectionView(paycheck: paycheck, type: tspType)
+                    }
+                }
+                .scrollBounceBehavior(.basedOnSize)
+                .listStyle(.plain)
+            } else {
+                ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .listStyle(.plain)
         }
         .navigationTitle("Thrift Savings Plan")
         .navigationSubtitle(paycheck.name)
@@ -32,26 +45,14 @@ struct TSPDetailView: View {
 // MARK: - Summary View
 
 fileprivate struct SummaryView: View {
-    let paycheck: Paycheck
+    let paycheckResult: PaySystem.PaycheckResult
     
     // MARK: - Computed Properties
     
-    private var maximumContribution: Decimal {
-        let eligibleEntitlements = paycheck.lesItems.filter { lesItem in
-            lesItem.isEntitlement && lesItem.category != .allowance
-        }
-        
-        return paycheck.basicPay + eligibleEntitlements.sum(\.amount)
-    }
-    
-    private var totalContribution: Decimal {
-        paycheck.tspContribution(.traditional) + paycheck.tspContribution(.roth)
-    }
-    
     private var chartData: [(category: String, total: Decimal)] {
         [
-            ("Traditional", paycheck.tspContribution(.traditional)),
-            ("Roth", paycheck.tspContribution(.roth))
+            ("Traditional", paycheckResult.traditionalTSP),
+            ("Roth", paycheckResult.rothTSP)
         ]
     }
     
@@ -60,8 +61,16 @@ fileprivate struct SummaryView: View {
     var body: some View {
         VStack {
             LabeledContent(
-                "Maximum Contribution",
-                value: maximumContribution,
+                "Traditional",
+                value: paycheckResult.traditionalTSP,
+                format: .currency(code: "USD")
+            )
+            .monospacedDigit()
+            .foregroundStyle(.primary)
+            
+            LabeledContent(
+                "Roth",
+                value: paycheckResult.rothTSP,
                 format: .currency(code: "USD")
             )
             .monospacedDigit()
@@ -69,7 +78,7 @@ fileprivate struct SummaryView: View {
             
             LabeledContent(
                 "Total",
-                value: totalContribution,
+                value: paycheckResult.totalTSP,
                 format: .currency(code: "USD")
             )
             .monospacedDigit()
@@ -106,12 +115,10 @@ fileprivate struct SectionView: View {
         type == .traditional ? paycheck.rothTSP : paycheck.traditionalTSP
     }
     
-    private var total: Decimal { paycheck.tspContribution(type) }
-    
     // MARK: - Body
     
     var body: some View {
-        Section {
+        Section(type.displayName) {
             TSPStepper(
                 "Basic Pay",
                 value: tsp.basicPayRate,
@@ -138,12 +145,6 @@ fileprivate struct SectionView: View {
                 max: 1 - otherPlan.bonusPayRate
             )
             .disabled(tsp.wrappedValue.basicPayRate.isZero)
-        } header: {
-            HStack {
-                Text(type.displayName)
-                Spacer()
-                Text(total, format: .currency(code: "USD"))
-            }
         }
         .listRowSeparator(.hidden)
     }
@@ -156,5 +157,6 @@ fileprivate struct SectionView: View {
     NavigationStack {
         TSPDetailView(paycheck: .example)
     }
+    .environment(PreviewController.paySystem)
 }
 

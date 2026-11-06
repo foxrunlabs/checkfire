@@ -27,16 +27,17 @@ extension Paycheck {
 
 extension Paycheck.LESItem {
     enum Category: String, CaseIterable, Codable, Identifiable {
-        case specialPay
-        case incentivePay
-        case bonusPay
         case allowance
+        case bonusPay
+        case incentivePay
+        case specialPay
         case deduction
         case allotment
         
         // MARK: - Properties
         
-        static let entitlementCases: [Self] = [.specialPay, .incentivePay, .bonusPay, .allowance]
+        static let entitlementCases: [Self] = [.allowance, .bonusPay, .incentivePay, .specialPay]
+        static let adjustmentCases: [Self] = [.deduction, .allotment]
         
         // MARK: - Computed Properties
         

@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class Paycheck {
-    typealias Year = Int
+    static let wageFrequency: Decimal = 12
     
     // MARK: - Properties
     
@@ -16,6 +16,19 @@ final class Paycheck {
     var withholdingForm: WithholdingForm = WithholdingForm()
     var traditionalTSP: ThriftSavingsPlan = ThriftSavingsPlan()
     var rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
+    
+    // MARK: - Computed Properties
+    
+    var year: Int { Calendar.current.component(.year, from: date) }
+    var entitlements: [LESItem] { lesItems.filter { $0.isEntitlement } }
+    var taxableLESItems: [LESItem] { lesItems.filter { $0.isTaxable } }
+    var adjustments: [LESItem] { lesItems.filter { !$0.isEntitlement } }
+    
+    var tspEligibleEntitlements: [LESItem] {
+        lesItems.filter { lesItem in
+            lesItem.isEntitlement && lesItem.category != .allowance
+        }
+    }
     
     // MARK: - Initializers
     
@@ -59,57 +72,10 @@ final class Paycheck {
         )
     }
     
-    // MARK: - Computed Properties
-    
-    var year: Year { Calendar.current.component(.year, from: date) }
-    var ficaWages: Decimal { basicPay }
-    var grossPay: Decimal { basicPay + lesItems.filter { $0.isEntitlement }.sum(\.amount) }
-    
-    var wagePeriod: Decimal {
-        var taxableWage = basicPay - tspContribution(.traditional)
-        taxableWage += lesItems.filter { $0.isTaxable }.sum(\.amount)
-        return taxableWage
-    }
-    
     // MARK: - Methods
     
-    func tspContribution(_ tspType: TSPType) -> Decimal {
-        let plan = switch tspType {
-        case .traditional:
-            traditionalTSP
-        case .roth:
-            rothTSP
-        }
-        
-        var contribution = basicPay * plan.basicPayRate
-        let entitlements = lesItems.filter { $0.isEntitlement }
-        contribution += entitlements.reduce(0.00) { sum, entitlement in
-            let rate = switch entitlement.category {
-            case .specialPay:
-                plan.specialPayRate
-            case .incentivePay:
-                plan.incentivePayRate
-            case .bonusPay:
-                plan.bonusPayRate
-            default:
-                Decimal.zero
-            }
-            
-            return sum + entitlement.amount * rate
-        }
-        
-        return contribution.rounded(.toNearestOrAwayFromZero, digits: 2)
-    }
-    
-    func netPay(taxes: (federal: Decimal, socialSecurity: Decimal, medicare: Decimal)) -> Decimal {
-        var net = grossPay
-        net -= tspContribution(.traditional)
-        net -= tspContribution(.roth)
-        net -= taxes.federal
-        net -= taxes.socialSecurity
-        net -= taxes.medicare
-        net -= lesItems.filter { $0.isEntitlement == false }.sum(\.amount)
-        return net
+    func lesItems(_ category: LESItem.Category) -> [LESItem] {
+        lesItems.filter { $0.category == category }
     }
     
     // MARK: - Example

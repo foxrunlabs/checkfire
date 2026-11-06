@@ -9,7 +9,7 @@ struct EntitlementsView: View {
     
     // MARK: - Computed Properties
     
-    private var showSheet: Binding<Bool> {
+    private var showLESItemEditorSheet: Binding<Bool> {
         Binding(
             get: { selectedID != nil },
             set: { isPresented in
@@ -43,10 +43,11 @@ struct EntitlementsView: View {
                 }
                         
             List {
-                SectionView(category: .allowance, paycheck: paycheck, selectedID: $selectedID)
-                SectionView(category: .bonusPay, paycheck: paycheck, selectedID: $selectedID)
-                SectionView(category: .incentivePay, paycheck: paycheck, selectedID: $selectedID)
-                SectionView(category: .specialPay, paycheck: paycheck, selectedID: $selectedID)
+                ForEach(Paycheck.LESItem.Category.entitlementCases) { category in
+                    if !paycheck.lesItems(category).isEmpty {
+                        SectionView(paycheck: paycheck, category: category, selectedID: $selectedID)
+                    }
+                }
             }
             .scrollBounceBehavior(.basedOnSize)
             .listStyle(.plain)
@@ -58,27 +59,20 @@ struct EntitlementsView: View {
             ToolbarItemGroup(placement: .bottomBar) {
                 Spacer()
                 Menu {
-                    Button("New Special Pay", systemImage: "star") {
-                        addLESItem(category: .specialPay)
-                    }
-                    
-                    Button("New Incentive Pay", systemImage: "bolt") {
-                        addLESItem(category: .incentivePay)
-                    }
-                    
-                    Button("New Bonus Pay", systemImage: "banknote") {
-                        addLESItem(category: .bonusPay)
-                    }
-                    
-                    Button("New Allowance", systemImage: "house") {
-                        addLESItem(category: .allowance)
+                    ForEach(Paycheck.LESItem.Category.entitlementCases.reversed()) { category in
+                        Button(
+                            "New \(category.displayName)",
+                            systemImage: sfSymbol(for: category)
+                        ) {
+                            addLESItem(category: category)
+                        }
                     }
                 } label: {
                     Label("Add", systemImage: "plus")
                 }
             }
         }
-        .sheet(isPresented: showSheet) {
+        .sheet(isPresented: showLESItemEditorSheet) {
             if let selectionIndex {
                 EditLESItemSheet(lesItem: $paycheck.lesItems[selectionIndex])
                     .presentationDetents([.medium])
@@ -93,8 +87,23 @@ struct EntitlementsView: View {
     private func addLESItem(category: Paycheck.LESItem.Category) {
         let name = "New \(category.displayName)"
         let newItem = Paycheck.LESItem(name, amount: 0.00, category: category)
-        paycheck.lesItems.append(newItem)
+        withAnimation { paycheck.lesItems.append(newItem) }
         selectedID = newItem.id
+    }
+    
+    private func sfSymbol(for category: Paycheck.LESItem.Category) -> String {
+        switch category {
+        case .allowance:
+            "house"
+        case .bonusPay:
+            "banknote"
+        case .incentivePay:
+            "bolt"
+        case .specialPay:
+            "star"
+        default:
+            ""
+        }
     }
 }
 
@@ -106,7 +115,7 @@ fileprivate struct SummaryView: View {
     
     // MARK: - Computed Properties
     private var totalEntitlements: Decimal {
-        paycheck.basicPay + paycheck.lesItems.filter { $0.isEntitlement }.sum(\.amount)
+        paycheck.basicPay + paycheck.entitlements.sum(\.amount)
     }
     
     private var chartData: [(category: String, total: Decimal)] {
@@ -123,6 +132,26 @@ fileprivate struct SummaryView: View {
     
     var body: some View {
         VStack {
+            LabeledContent(
+                "Basic Pay",
+                value: paycheck.basicPay,
+                format: .currency(code: "USD")
+            )
+            .monospacedDigit()
+            .foregroundStyle(.primary)
+            
+            ForEach(Paycheck.LESItem.Category.entitlementCases) { category in
+                if !paycheck.lesItems(category).isEmpty {
+                    LabeledContent(
+                        "\(category.displayName)s",
+                        value: paycheck.lesItems(category).sum(\.amount),
+                        format: .currency(code: "USD")
+                    )
+                    .monospacedDigit()
+                    .foregroundStyle(.primary)
+                }
+            }
+            
             LabeledContent(
                 "Total",
                 value: totalEntitlements,
@@ -155,19 +184,14 @@ fileprivate struct SummaryView: View {
 // MARK: - Section View
 
 fileprivate struct SectionView: View {
-    let category: Paycheck.LESItem.Category
     let paycheck: Paycheck
+    let category: Paycheck.LESItem.Category
     @Binding var selectedID: Paycheck.LESItem.ID?
-    
-    // MARK: - Computed Properties
-    private var lesItems: [Paycheck.LESItem] {
-        paycheck.lesItems.filter { $0.category == category }
-    }
     
     // MARK: - Body
     var body: some View {
-        Section {
-            ForEach(lesItems) { lesItem in
+        Section("\(category.displayName)s") {
+            ForEach(paycheck.lesItems(category)) { lesItem in
                 Button {
                     selectedID = lesItem.id
                 } label: {
@@ -185,12 +209,6 @@ fileprivate struct SectionView: View {
                     }
                 }
             }
-        } header: {
-            HStack {
-                Text("\(category.displayName)s")
-                Spacer()
-                Text(lesItems.sum(\.amount), format: .currency(code: "USD"))
-            }
         }
         .listRowSeparator(.hidden)
     }
@@ -199,7 +217,7 @@ fileprivate struct SectionView: View {
     
     private func deleteLESItem(_ lesItem: Paycheck.LESItem) {
         guard let i = paycheck.lesItems.firstIndex(where: { $0.id == lesItem.id }) else { return }
-        paycheck.lesItems.remove(at: i)
+        withAnimation { paycheck.lesItems.remove(at: i) }
         selectedID = nil
     }
 }

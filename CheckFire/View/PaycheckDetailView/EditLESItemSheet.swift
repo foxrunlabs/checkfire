@@ -8,7 +8,7 @@ struct EditLESItemSheet: View {
     // MARK: - Computed Properties
     
     private var categories: [Paycheck.LESItem.Category] {
-        lesItem.isEntitlement ? Paycheck.LESItem.Category.entitlementCases : [.deduction, .allotment]
+        lesItem.isEntitlement ? Paycheck.LESItem.Category.entitlementCases : Paycheck.LESItem.Category.adjustmentCases
     }
     
     // MARK: - Body
