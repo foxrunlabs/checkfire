@@ -79,19 +79,17 @@ fileprivate struct HeaderView: View {
     
     // MARK: - Computed Properties
     
-    private var payPeriod: String {
-        "\(paycheck.date.formatted(.dateTime.month(.abbreviated))) \(paycheck.year)"
+    private var payGrade: String {
+        "\(paycheck.payGrade.displayName) \(paycheck.yearsOfService.displayName)"
     }
-    
-    private var payGrade: String { "\(paycheck.payGrade.displayName) \(paycheck.yearsOfService.displayName)" }
     
     // MARK: - Body
     
     var body: some View {
         HStack {
-            MonthYearPicker(selection: $paycheck.date, in: years) {
+            PayPeriodPicker(selection: $paycheck.payPeriod, in: years) {
                 HStack {
-                    Text(payPeriod)
+                    Text(paycheck.payPeriod.formatted(width: .abbreviated))
                         .font(.title2)
                         .bold()
                     

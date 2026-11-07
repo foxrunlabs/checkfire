@@ -8,7 +8,8 @@ final class Paycheck {
     // MARK: - Properties
     
     var name: String = "New Paycheck"
-    var date: Date = Calendar.current.lastDateOfMonth(from: .now) ?? .now
+    var year: Int = 2023
+    var month: Month = Month.january
     var payGrade: PayGrade = PayGrade.e1
     var yearsOfService: YearsOfService = YearsOfService.lessThanOrEqual2
     var basicPay: Decimal = 0.00
@@ -19,7 +20,14 @@ final class Paycheck {
     
     // MARK: - Computed Properties
     
-    var year: Int { Calendar.current.component(.year, from: date) }
+    var payPeriod: PayPeriod {
+        get { PayPeriod(year: year, month: month) }
+        set {
+            self.year = newValue.year
+            self.month = newValue.month
+        }
+    }
+    
     var entitlements: [LESItem] { lesItems.filter { $0.isEntitlement } }
     var taxableLESItems: [LESItem] { lesItems.filter { $0.isTaxable } }
     var adjustments: [LESItem] { lesItems.filter { !$0.isEntitlement } }
@@ -34,17 +42,19 @@ final class Paycheck {
     
     init(
         name: String = "New Paycheck",
-        date: Date = .now,
+        year: Int = 2023,
+        month: Month = .january,
         payGrade: PayGrade = .e1,
         yearsOfService: YearsOfService = .lessThanOrEqual2,
         basicPay: Decimal = 0.00,
         lesItems: [LESItem] = [],
-        withholdingForm: WithholdingForm = WithholdingForm(),
-        traditionalTSP: ThriftSavingsPlan = ThriftSavingsPlan(),
-        rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
+        withholdingForm: WithholdingForm = .init(),
+        traditionalTSP: ThriftSavingsPlan = .init(),
+        rothTSP: ThriftSavingsPlan = .init()
     ) {
         self.name = name
-        self.date = Calendar.current.lastDateOfMonth(from: date) ?? date
+        self.year = year
+        self.month = month
         self.payGrade = payGrade
         self.yearsOfService = yearsOfService
         self.basicPay = basicPay
@@ -61,7 +71,8 @@ final class Paycheck {
         
         self.init(
             name: other.name,
-            date: other.date,
+            year: other.year,
+            month: other.month,
             payGrade: other.payGrade,
             yearsOfService: other.yearsOfService,
             basicPay: other.basicPay,
@@ -82,7 +93,8 @@ final class Paycheck {
     
     static let example = Paycheck(
         name: "Example",
-        date: DateComponents(calendar: .current, year: 2025, month: 2, day: 28).date!,
+        year: 2025,
+        month: .february,
         payGrade: .o5,
         yearsOfService: .over20,
         basicPay: 11592.30,

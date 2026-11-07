@@ -70,7 +70,7 @@ fileprivate struct ListRow: View {
                 Text(paycheck.name)
                     .font(.headline)
                 
-                Text(paycheck.date, format: .dateTime.month(.wide).year())
+                Text(paycheck.payPeriod.formatted())
                     .font(.subheadline)
             }
         }

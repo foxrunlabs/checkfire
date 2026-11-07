@@ -9,14 +9,14 @@ struct ContentView: View {
     }
     
     private enum SortOption: String {
-        case date
+        case payPeriod
         case name
     }
     
     // MARK: - Properties
     @Environment(\.modelContext) private var modelContext
     
-    @AppStorage(DefaultsKey.sortBy) private var sortBy = SortOption.date
+    @AppStorage(DefaultsKey.sortBy) private var sortBy = SortOption.payPeriod
     @AppStorage(DefaultsKey.sortOrder) private var sortOrder = SortOrder.forward
     
     @State private var path = NavigationPath()
@@ -24,20 +24,22 @@ struct ContentView: View {
     
     // MARK: - Computed Properties
     
-    private var ascendingLabel: String { sortBy == .date ? "Oldest First" : "A to Z" }
-    private var descendingLabel: String { sortBy == .date ? "Newest First" : "Z to A" }
+    private var ascendingLabel: String { sortBy == .payPeriod ? "Oldest First" : "A to Z" }
+    private var descendingLabel: String { sortBy == .payPeriod ? "Newest First" : "Z to A" }
     
     private var sort: [SortDescriptor<Paycheck>] {
         switch sortBy {
-        case .date:
+        case .payPeriod:
             [
-                SortDescriptor(\Paycheck.date, order: sortOrder),
+                SortDescriptor(\Paycheck.year, order: sortOrder),
+                SortDescriptor(\Paycheck.month.rawValue, order: sortOrder),
                 SortDescriptor(\Paycheck.name, order: sortOrder)
             ]
         case .name:
             [
                 SortDescriptor(\Paycheck.name, order: sortOrder),
-                SortDescriptor(\Paycheck.date, order: sortOrder)
+                SortDescriptor(\Paycheck.year, order: sortOrder),
+                SortDescriptor(\Paycheck.month.rawValue, order: sortOrder)             
             ]
         }
     }
@@ -61,7 +63,7 @@ struct ContentView: View {
                     ToolbarItemGroup(placement: .topBarTrailing) {
                         Menu("Sort By", systemImage: "arrow.up.arrow.down") {
                             Picker("Sort By", selection: $sortBy) {
-                                Text("Date").tag(SortOption.date)
+                                Text("Date").tag(SortOption.payPeriod)
                                 Text("Name").tag(SortOption.name)
                             }
                             .pickerStyle(.inline)

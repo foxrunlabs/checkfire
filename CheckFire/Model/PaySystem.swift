@@ -71,8 +71,8 @@ final class PaySystem {
         // calculate the tentative withholding amount based on tax bracket data
         let schedule: WithholdingTable.Schedule = paycheck.withholdingForm.multipleJobs ? .multipleJobs : .standard
         
-        guard let table = withholdingTables[paycheck.year] else {
-            throw PaySystemError.noTaxTable(paycheck.year)
+        guard let table = withholdingTables[paycheck.payPeriod.year] else {
+            throw PaySystemError.noTaxTable(paycheck.payPeriod.year)
         }
         
         let brackets = table.taxBrackets[schedule]?[paycheck.withholdingForm.maritalStatus]

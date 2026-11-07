@@ -217,7 +217,7 @@ fileprivate struct SectionView: View {
     
     private func deleteLESItem(_ lesItem: Paycheck.LESItem) {
         guard let i = paycheck.lesItems.firstIndex(where: { $0.id == lesItem.id }) else { return }
-        withAnimation { paycheck.lesItems.remove(at: i) }
+        withAnimation { _ = paycheck.lesItems.remove(at: i) }
         selectedID = nil
     }
 }
