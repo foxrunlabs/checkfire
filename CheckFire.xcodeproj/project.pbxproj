@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		94800D0B30A151CF00B0FDB8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 94871EEB2DA2F68D002976DA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 94871EF22DA2F68D002976DA;
+			remoteInfo = CheckFire;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		94800D0730A151CF00B0FDB8 /* CheckFireTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CheckFireTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		94871EF32DA2F68D002976DA /* CheckFire.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CheckFire.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		94800D0830A151CF00B0FDB8 /* CheckFireTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CheckFireTests;
+			sourceTree = "<group>";
+		};
 		94871EF52DA2F68D002976DA /* CheckFire */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		94800D0430A151CF00B0FDB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		94871EF02DA2F68D002976DA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				94871EF52DA2F68D002976DA /* CheckFire */,
+				94800D0830A151CF00B0FDB8 /* CheckFireTests */,
 				94871EF42DA2F68D002976DA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				94871EF32DA2F68D002976DA /* CheckFire.app */,
+				94800D0730A151CF00B0FDB8 /* CheckFireTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		94800D0630A151CF00B0FDB8 /* CheckFireTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 94800D0F30A151CF00B0FDB8 /* Build configuration list for PBXNativeTarget "CheckFireTests" */;
+			buildPhases = (
+				94800D0330A151CF00B0FDB8 /* Sources */,
+				94800D0430A151CF00B0FDB8 /* Frameworks */,
+				94800D0530A151CF00B0FDB8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				94800D0C30A151CF00B0FDB8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				94800D0830A151CF00B0FDB8 /* CheckFireTests */,
+			);
+			name = CheckFireTests;
+			packageProductDependencies = (
+			);
+			productName = CheckFireTests;
+			productReference = 94800D0730A151CF00B0FDB8 /* CheckFireTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		94871EF22DA2F68D002976DA /* CheckFire */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 94871EFE2DA2F68F002976DA /* Build configuration list for PBXNativeTarget "CheckFire" */;
@@ -90,9 +138,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1630;
+				LastSwiftUpdateCheck = 2720;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					94800D0630A151CF00B0FDB8 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = 94871EF22DA2F68D002976DA;
+					};
 					94871EF22DA2F68D002976DA = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				94871EF22DA2F68D002976DA /* CheckFire */,
+				94800D0630A151CF00B0FDB8 /* CheckFireTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		94800D0530A151CF00B0FDB8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		94871EF12DA2F68D002976DA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		94800D0330A151CF00B0FDB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		94871EEF2DA2F68D002976DA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,67 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		94800D0C30A151CF00B0FDB8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 94871EF22DA2F68D002976DA /* CheckFire */;
+			targetProxy = 94800D0B30A151CF00B0FDB8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		94800D0D30A151CF00B0FDB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WP957Y9Q92;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.thefoxrun.labs.CheckFireTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CheckFire.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CheckFire";
+			};
+			name = Debug;
+		};
+		94800D0E30A151CF00B0FDB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WP957Y9Q92;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = net.thefoxrun.labs.CheckFireTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CheckFire.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CheckFire";
+			};
+			name = Release;
+		};
 		94871EFC2DA2F68F002976DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -267,7 +394,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = WP957Y9Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -305,7 +432,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = WP957Y9Q92;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -338,6 +465,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		94800D0F30A151CF00B0FDB8 /* Build configuration list for PBXNativeTarget "CheckFireTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				94800D0D30A151CF00B0FDB8 /* Debug */,
+				94800D0E30A151CF00B0FDB8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		94871EEE2DA2F68D002976DA /* Build configuration list for PBXProject "CheckFire" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

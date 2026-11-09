@@ -3,7 +3,7 @@ import Observation
 
 @Observable
 final class PaySystem {
-    struct PaycheckResult {
+    struct PaycheckResult: Equatable {
         let grossPay: Decimal
         let federalTaxableWages: Decimal
         let ficaWages: Decimal
