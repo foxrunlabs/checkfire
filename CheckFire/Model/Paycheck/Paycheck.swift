@@ -9,7 +9,7 @@ final class Paycheck {
     
     var name: String = "New Paycheck"
     var year: Int = 2023
-    var month: Month = Month.january
+    var monthValue: Int = Month.january.rawValue
     var payGrade: PayGrade = PayGrade.e1
     var yearsOfService: YearsOfService = YearsOfService.lessThanOrEqual2
     var basicPay: Decimal = 0.00
@@ -19,6 +19,11 @@ final class Paycheck {
     var rothTSP: ThriftSavingsPlan = ThriftSavingsPlan()
     
     // MARK: - Computed Properties
+    
+    var month: Month {
+        get { Month(rawValue: self.monthValue) ?? .january }
+        set { self.monthValue = newValue.rawValue }
+    }
     
     var payPeriod: PayPeriod {
         get { PayPeriod(year: year, month: month) }
@@ -43,7 +48,7 @@ final class Paycheck {
     init(
         name: String = "New Paycheck",
         year: Int = 2023,
-        month: Month = .january,
+        monthValue: Int = 1,
         payGrade: PayGrade = .e1,
         yearsOfService: YearsOfService = .lessThanOrEqual2,
         basicPay: Decimal = 0.00,
@@ -54,7 +59,7 @@ final class Paycheck {
     ) {
         self.name = name
         self.year = year
-        self.month = month
+        self.monthValue = monthValue
         self.payGrade = payGrade
         self.yearsOfService = yearsOfService
         self.basicPay = basicPay
@@ -72,7 +77,7 @@ final class Paycheck {
         self.init(
             name: other.name,
             year: other.year,
-            month: other.month,
+            monthValue: other.monthValue,
             payGrade: other.payGrade,
             yearsOfService: other.yearsOfService,
             basicPay: other.basicPay,
@@ -94,7 +99,7 @@ final class Paycheck {
     static let example = Paycheck(
         name: "Example",
         year: 2025,
-        month: .february,
+        monthValue: Month.february.rawValue,
         payGrade: .o5,
         yearsOfService: .over20,
         basicPay: 11592.30,

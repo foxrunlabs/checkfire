@@ -14,13 +14,13 @@ struct ContentView: View {
     }
     
     // MARK: - Properties
-    @Environment(\.modelContext) private var modelContext
     
     @AppStorage(DefaultsKey.sortBy) private var sortBy = SortOption.payPeriod
     @AppStorage(DefaultsKey.sortOrder) private var sortOrder = SortOrder.forward
     
     @State private var path = NavigationPath()
     @State private var showSettings = false
+    @State private var showAddPaycheck = false
     
     // MARK: - Computed Properties
     
@@ -32,14 +32,14 @@ struct ContentView: View {
         case .payPeriod:
             [
                 SortDescriptor(\Paycheck.year, order: sortOrder),
-                SortDescriptor(\Paycheck.month.rawValue, order: sortOrder),
+                SortDescriptor(\Paycheck.monthValue, order: sortOrder),
                 SortDescriptor(\Paycheck.name, order: sortOrder)
             ]
         case .name:
             [
                 SortDescriptor(\Paycheck.name, order: sortOrder),
                 SortDescriptor(\Paycheck.year, order: sortOrder),
-                SortDescriptor(\Paycheck.month.rawValue, order: sortOrder)             
+                SortDescriptor(\Paycheck.monthValue, order: sortOrder)             
             ]
         }
     }
@@ -78,22 +78,17 @@ struct ContentView: View {
                     
                     ToolbarItemGroup(placement: .bottomBar) {
                         Spacer()
-                        Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
+                        Button("Add Paycheck", systemImage: "plus") { showAddPaycheck = true }
                             .buttonStyle(.glassProminent)
                     }
                 }
                 .sheet(isPresented: $showSettings) {
                     SettingsView()
                 }
+                .sheet(isPresented: $showAddPaycheck) {
+                    AddPaycheckView(path: $path)
+                }
         }
-    }
-    
-    // MARK: - Methods
-    
-    private func addPaycheck() {
-        let newPaycheck = Paycheck()
-        modelContext.insert(newPaycheck)
-        path.append(newPaycheck)
     }
 }
 
