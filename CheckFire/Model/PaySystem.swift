@@ -72,13 +72,13 @@ final class PaySystem {
         let schedule: WithholdingTable.Schedule = paycheck.withholdingForm.multipleJobs ? .multipleJobs : .standard
         
         guard let table = withholdingTables[paycheck.payPeriod.year] else {
-            throw PaySystemError.noTaxTable(paycheck.payPeriod.year)
+            throw Error.noTaxTable(paycheck.payPeriod.year)
         }
         
         let brackets = table.taxBrackets[schedule]?[paycheck.withholdingForm.maritalStatus]
         
         guard let bracket = brackets?.last(where: { adjustedWage >= $0.atLeast }) else {
-            throw PaySystemError.noTaxBracket(adjustedWage)
+            throw Error.noTaxBracket(adjustedWage)
         }
         
         var federalWithholding = bracket.tentativeAmount + (adjustedWage - bracket.atLeast) * bracket.rate
@@ -156,25 +156,27 @@ final class PaySystem {
 
 // MARK: - Pay System Error
 
-enum PaySystemError: LocalizedError {
-    case noTaxTable(Int)
-    case noTaxBracket(Decimal)
-    
-    var errorDescription: String? {
-        switch self {
-        case .noTaxTable:
-            "Missing tax table"
-        case .noTaxBracket:
-            "Missing tax bracket"
+extension PaySystem {
+    enum Error: LocalizedError {
+        case noTaxTable(Int)
+        case noTaxBracket(Decimal)
+        
+        var errorDescription: String? {
+            switch self {
+            case .noTaxTable:
+                "Missing tax table"
+            case .noTaxBracket:
+                "Missing tax bracket"
+            }
         }
-    }
-    
-    var failureReason: String? {
-        switch self {
-        case .noTaxTable(let year):
-            "Missing tax table for \(year.formatted(.number.grouping(.never)))"
-        case .noTaxBracket(let income):
-            "No tax bracket for \(income.formatted(.currency(code: "USD")))"
+        
+        var failureReason: String? {
+            switch self {
+            case .noTaxTable(let year):
+                "Missing tax table for \(year.formatted(.number.grouping(.never)))"
+            case .noTaxBracket(let income):
+                "No tax bracket for \(income.formatted(.currency(code: "USD")))"
+            }
         }
     }
 }
