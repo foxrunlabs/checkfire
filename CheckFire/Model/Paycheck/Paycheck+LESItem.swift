@@ -1,6 +1,6 @@
 import Foundation
 
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     struct LESItem: Codable, Identifiable {
         var id: UUID = UUID()
         var name: String
@@ -25,7 +25,7 @@ extension Paycheck {
 
 // MARK: - LES Item Category
 
-extension Paycheck.LESItem {
+extension CheckFireSchemaV1.Paycheck.LESItem {
     enum Category: String, CaseIterable, Codable, Identifiable {
         case allowance
         case bonusPay

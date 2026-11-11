@@ -1,6 +1,6 @@
 import Foundation
 
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     struct WithholdingForm: Codable {
         var maritalStatus: MaritalStatus = .single
         var multipleJobs = false

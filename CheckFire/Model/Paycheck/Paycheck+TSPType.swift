@@ -1,4 +1,4 @@
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     enum TSPType: CaseIterable, Identifiable {
         case traditional
         case roth

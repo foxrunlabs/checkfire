@@ -1,4 +1,4 @@
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     enum PayGrade: String, CaseIterable, Codable, Identifiable {
         case o10 = "o10", o9 = "o9", o8 = "o8", o7 = "o7", o6 = "o6", o5 = "o5", o4 = "o4", o3 = "o3", o2 = "o2", o1 = "o1"
         case o3e = "o3e", o2e = "o2e", o1e = "o1e"

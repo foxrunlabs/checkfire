@@ -1,4 +1,4 @@
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     enum YearsOfService: String, CaseIterable, Codable, Identifiable {
         case lessThan4Months = "lt_4_months"
         case lessThanOrEqual2 = "le_2"

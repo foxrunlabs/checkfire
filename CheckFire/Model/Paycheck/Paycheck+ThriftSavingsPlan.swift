@@ -1,6 +1,6 @@
 import Foundation
 
-extension Paycheck {
+extension CheckFireSchemaV1.Paycheck {
     struct ThriftSavingsPlan: Codable {
         var basicPayRate: Decimal = 0.00 {
             didSet {
