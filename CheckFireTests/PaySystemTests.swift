@@ -84,6 +84,13 @@ import Testing
         #expect(result.netPay == money("8697.55"))
     }
     
+    @Test("Negative Wages") func negativeWages() throws {
+        let paycheck = Paycheck(year: 2025, basicPay: money("-1000.00"))
+        let result = try paySystem.calculate(paycheck)
+        
+        #expect(result.federalWithholding == money("0.00"))
+    }
+    
     @Test("Negative Net Pay") func negativeNetPay() throws {
         let paycheck = Paycheck(
             year: 2025,
