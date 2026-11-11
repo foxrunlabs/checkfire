@@ -61,6 +61,58 @@ import Testing
             }
         }
         
+        @Test("Tax Years", arguments: [
+            (year: 2023, expected: money("1573.04")),
+            (year: 2024, expected: money("1528.16")),
+            (year: 2025, expected: money("1503.86")),
+        ])
+        func taxYears(year: Int, expected: Decimal) throws {
+            let paycheck = Paycheck(year: year, basicPay: money("10000.00"))
+            let result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == expected)
+        }
+        
+        @Test("Filing Status") func filingStatus() throws {
+            // Single
+            let paycheck = Paycheck(year: 2025, basicPay: money("10000.00"))
+            var result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("1503.86"))
+            
+            // Married filing jointly
+            paycheck.withholdingForm.maritalStatus = .marriedFilingJointly
+            result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("860.24"))
+            
+            // Married filing separately
+            paycheck.withholdingForm.maritalStatus = .marriedFilingSeparately
+            result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("1503.86"))
+            
+            // Head of household
+            paycheck.withholdingForm.maritalStatus = .headOfHousehold
+            result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("1218.76"))
+        }
+        
+        @Test("Multiple Jobs") func multipleJobs() throws {
+            // One job
+            let paycheck = Paycheck(year: 2025, basicPay: money("10000.00"))
+            var result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("1503.86"))
+            
+            // Multiple jobs
+            paycheck.withholdingForm.multipleJobs = true
+            result = try WithholdingTableTests.paySystem.calculate(paycheck)
+            
+            #expect(result.federalWithholding == money("2044.26"))
+        }
+        
         @Suite("Withholding Adjustment Tests") struct WithholdingAdjustmentTests {
             @Test("Other Income") func otherIncome() throws {
                 let paycheck = Paycheck(
