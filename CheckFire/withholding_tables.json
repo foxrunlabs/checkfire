@@ -1,13 +1,366 @@
 [
   {
-    "year": 2025,
+    "year": 2026,
     "taxCredits": {
-        "child": 2000,
-        "otherDependent": 500
+      "child": 2200,
+      "otherDependent": 500
     },
     "ficaRates": {
-        "medicare": 0.0145,
-        "socialSecurity": 0.062
+      "medicare": 0.0145,
+      "socialSecurity": 0.062
+    },
+    "taxBrackets": {
+      "standard": {
+        "single": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 1342,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 2375,
+            "tentativeAmount": 103.3,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 5542,
+            "tentativeAmount": 483.34,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 10150,
+            "tentativeAmount": 1497.1,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 18156,
+            "tentativeAmount": 3418.54,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 22694,
+            "tentativeAmount": 4870.7,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 54725,
+            "tentativeAmount": 16081.55,
+            "rate": 0.37
+          }
+        ],
+        "marriedFilingJointly": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 2683,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 4750,
+            "tentativeAmount": 206.7,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 11083,
+            "tentativeAmount": 966.66,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 20300,
+            "tentativeAmount": 2994.4,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 36313,
+            "tentativeAmount": 6837.52,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 45388,
+            "tentativeAmount": 9741.52,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 66742,
+            "tentativeAmount": 17215.42,
+            "rate": 0.37
+          }
+        ],
+        "marriedFilingSeparately": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 1342,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 2375,
+            "tentativeAmount": 103.3,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 5542,
+            "tentativeAmount": 483.34,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 10150,
+            "tentativeAmount": 1497.1,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 18156,
+            "tentativeAmount": 3418.54,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 22694,
+            "tentativeAmount": 4870.7,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 54725,
+            "tentativeAmount": 16081.55,
+            "rate": 0.37
+          }
+        ],
+        "headOfHousehold": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 2013,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 3488,
+            "tentativeAmount": 147.5,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 7633,
+            "tentativeAmount": 644.9,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 10821,
+            "tentativeAmount": 1346.26,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 18825,
+            "tentativeAmount": 3267.22,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 23363,
+            "tentativeAmount": 4719.38,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 55396,
+            "tentativeAmount": 15930.93,
+            "rate": 0.37
+          }
+        ]
+      },
+      "multipleJobs": {
+        "single": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 671,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 1188,
+            "tentativeAmount": 51.7,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 2771,
+            "tentativeAmount": 241.66,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 5075,
+            "tentativeAmount": 748.54,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 9078,
+            "tentativeAmount": 1709.26,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 11347,
+            "tentativeAmount": 2435.34,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 27363,
+            "tentativeAmount": 8040.94,
+            "rate": 0.37
+          }
+        ],
+        "marriedFilingJointly": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 1342,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 2375,
+            "tentativeAmount": 103.3,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 5542,
+            "tentativeAmount": 483.34,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 10150,
+            "tentativeAmount": 1497.1,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 18156,
+            "tentativeAmount": 3418.54,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 22694,
+            "tentativeAmount": 4870.7,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 33371,
+            "tentativeAmount": 8607.65,
+            "rate": 0.37
+          }
+        ],
+        "marriedFilingSeparately": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 671,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 1188,
+            "tentativeAmount": 51.7,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 2771,
+            "tentativeAmount": 241.66,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 5075,
+            "tentativeAmount": 748.54,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 9078,
+            "tentativeAmount": 1709.26,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 11347,
+            "tentativeAmount": 2435.34,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 27363,
+            "tentativeAmount": 8040.94,
+            "rate": 0.37
+          }
+        ],
+        "headOfHousehold": [
+          {
+            "atLeast": 0,
+            "tentativeAmount": 0,
+            "rate": 0
+          },
+          {
+            "atLeast": 1006,
+            "tentativeAmount": 0,
+            "rate": 0.1
+          },
+          {
+            "atLeast": 1744,
+            "tentativeAmount": 73.8,
+            "rate": 0.12
+          },
+          {
+            "atLeast": 3817,
+            "tentativeAmount": 322.56,
+            "rate": 0.22
+          },
+          {
+            "atLeast": 5410,
+            "tentativeAmount": 673.02,
+            "rate": 0.24
+          },
+          {
+            "atLeast": 9413,
+            "tentativeAmount": 1633.74,
+            "rate": 0.32
+          },
+          {
+            "atLeast": 11681,
+            "tentativeAmount": 2359.5,
+            "rate": 0.35
+          },
+          {
+            "atLeast": 27698,
+            "tentativeAmount": 7965.45,
+            "rate": 0.37
+          }
+        ]
+      }
+    }
+  },
+  {
+    "year": 2025,
+    "taxCredits": {
+      "child": 2200,
+      "otherDependent": 500
+    },
+    "ficaRates": {
+      "medicare": 0.0145,
+      "socialSecurity": 0.062
     },
     "taxBrackets": {
       "standard": {
@@ -355,12 +708,12 @@
   {
     "year": 2024,
     "taxCredits": {
-        "child": 2000,
-        "otherDependent": 500
+      "child": 2000,
+      "otherDependent": 500
     },
     "ficaRates": {
-        "medicare": 0.0145,
-        "socialSecurity": 0.062
+      "medicare": 0.0145,
+      "socialSecurity": 0.062
     },
     "taxBrackets": {
       "standard": {
@@ -708,12 +1061,12 @@
   {
     "year": 2023,
     "taxCredits": {
-        "child": 2000,
-        "otherDependent": 500
+      "child": 2000,
+      "otherDependent": 500
     },
     "ficaRates": {
-        "medicare": 0.0145,
-        "socialSecurity": 0.062
+      "medicare": 0.0145,
+      "socialSecurity": 0.062
     },
     "taxBrackets": {
       "standard": {
