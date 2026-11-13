@@ -163,19 +163,10 @@ extension PaySystem {
         
         var errorDescription: String? {
             switch self {
-            case .noTaxTable:
-                "Missing tax table"
-            case .noTaxBracket:
-                "Missing tax bracket"
-            }
-        }
-        
-        var failureReason: String? {
-            switch self {
             case .noTaxTable(let year):
-                "Missing tax table for \(year.formatted(.number.grouping(.never)))"
+                "Tax data unavailable for \(year.formatted(.number.grouping(.never)))."
             case .noTaxBracket(let income):
-                "No tax bracket for \(income.formatted(.currency(code: "USD")))"
+                "No tax bracket for \(income.formatted(.currency(code: "USD")))."
             }
         }
     }

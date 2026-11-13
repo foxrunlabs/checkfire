@@ -13,8 +13,8 @@ struct PaycheckDetailView: View {
     
     // MARK: - Computed Properties
     
-    private var paycheckResult: PaySystem.PaycheckResult? {
-        try? paySystem.calculate(paycheck)
+    private var paycheckResult: Result<PaySystem.PaycheckResult, any Error> {
+        Result { try paySystem.calculate(paycheck) }
     }
     
     // MARK: - Body
@@ -24,50 +24,46 @@ struct PaycheckDetailView: View {
             HeaderView(paycheck: paycheck, years: paySystem.taxYears)
                 .padding([.horizontal, .top])
             
-            if let paycheckResult {
-                SummaryView(paycheckResult: paycheckResult)
+            switch paycheckResult {
+            case .success(let result):
+                SummaryView(paycheckResult: result)
                     .padding(.horizontal)
                 
                 List {
-                    ListRow("Entitlements", value: paycheckResult.grossPay, color: .primary) {
+                    ListRow("Entitlements", value: result.grossPay, color: .primary) {
                         EntitlementsView(paycheck: paycheck)
                     }
                     
-                    ListRow(
-                        "Thrift Savings Plan",
-                        value: paycheckResult.totalTSP,
-                        color: .blue
-                    ) {
+                    ListRow("Thrift Savings Plan", value: result.totalTSP, color: .blue) {
                         TSPDetailView(paycheck: paycheck)
                     }
                     
-                    ListRow(
-                        "Federal Taxes",
-                        value: paycheckResult.totalTax,
-                        color: .red
-                    ) {
+                    ListRow("Federal Taxes", value: result.totalTax, color: .red) {
                         FederalWithholdingView(paycheck: paycheck)
                     }
                     
-                    ListRow(
-                        "Deductions & Allotments",
-                        value: paycheckResult.adjustments,
-                        color: .orange
-                    ) {
+                    ListRow("Deductions & Allotments", value: result.adjustments, color: .orange) {
                         DeductionsAndAllotmentsView(paycheck: paycheck)
                     }
                 }
                 .listStyle(.plain)
                 .scrollBounceBehavior(.basedOnSize)
-            } else {
-                ContentUnavailableView("Missing Tax Data", systemImage: "questionmark.text.page")
+                
+            case .failure(let error):
+                ContentUnavailableView(
+                    "Pay System Error",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text(error.localizedDescription)
+                )
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.foreground, .yellow)
             }
         }
         .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
-
+    
 
 // MARK: - Header View
 
