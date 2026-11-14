@@ -121,7 +121,7 @@ fileprivate struct CurrencyField: View {
             return false
         }
         
-        value = number
+        value = number.rounded(.toNearestOrAwayFromZero, digits: 2)
         validationMessage = nil
         return true
     }
