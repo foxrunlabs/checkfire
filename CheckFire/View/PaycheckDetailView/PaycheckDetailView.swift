@@ -155,9 +155,9 @@ fileprivate struct SummaryView: View {
                                 Image(systemName: "exclamationmark.triangle")
                                     .font(.largeTitle)
                                     .foregroundStyle(.yellow)
-                                    .accessibilityLabel("Deductions & allotments exceed entitlements")
+                                    .accessibilityLabel("Adjustments exceed entitlements")
                                 
-                                Text("Deductions & Allotments Exceed Entitlements")
+                                Text("Adjustments Exceed Entitlements")
                                     .multilineTextAlignment(.center)
                                     .font(.body.lowercaseSmallCaps())
                             }
