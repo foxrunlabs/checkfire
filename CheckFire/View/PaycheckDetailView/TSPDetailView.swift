@@ -94,6 +94,7 @@ fileprivate struct SummaryView: View {
             )
             .chartXAxis(.hidden)
             .frame(height: 25)
+            .opacity(paycheckResult.totalTSP.isZero ? 0 : 1)
         }
     }
 }

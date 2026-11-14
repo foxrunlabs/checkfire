@@ -56,10 +56,9 @@ struct EntitlementsView: View {
         .navigationSubtitle(paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .bottomBar) {
-                Spacer()
+            ToolbarItem(placement: .confirmationAction) {
                 Menu {
-                    ForEach(Paycheck.LESItem.Category.entitlementCases.reversed()) { category in
+                    ForEach(Paycheck.LESItem.Category.entitlementCases) { category in
                         Button(
                             "New \(category.displayName)",
                             systemImage: sfSymbol(for: category)
@@ -176,6 +175,7 @@ fileprivate struct SummaryView: View {
             )
             .chartXAxis(.hidden)
             .frame(height: 25)
+            .opacity(totalEntitlements.isZero ? 0 : 1)
         }
     }
 }

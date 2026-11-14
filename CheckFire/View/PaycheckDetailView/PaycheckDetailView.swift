@@ -6,8 +6,9 @@ import UIKit
 struct PaycheckDetailView: View {
     @Bindable var paycheck: Paycheck
     
-    @Environment(PaySystem.self) private var paySystem
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(PaySystem.self) private var paySystem
     
     @Query private var paychecks: [Paycheck]
     
@@ -61,6 +62,20 @@ struct PaycheckDetailView: View {
         }
         .navigationTitle($paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .destructiveAction) {
+                Button("Delete", systemImage: "trash") {
+                    deletePaycheck()
+                    dismiss()
+                }
+            }
+        }
+    }
+    
+    // MARK: - Methods
+    
+    private func deletePaycheck() {
+        modelContext.delete(paycheck)
     }
 }
     
@@ -277,7 +292,7 @@ fileprivate struct GradeAndYearsOfServiceSheet: View {
                             .bold()
                         
                         Picker("Years of Service", selection: $paycheck.yearsOfService) {
-                            ForEach(Paycheck.YearsOfService.allCases) { serviceYears in
+                            ForEach(Paycheck.YearsOfService.allCases.reversed()) { serviceYears in
                                 Text(serviceYears.displayName)
                                     .tag(serviceYears)
                             }

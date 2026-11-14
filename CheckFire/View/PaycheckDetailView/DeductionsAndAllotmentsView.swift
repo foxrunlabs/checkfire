@@ -47,10 +47,9 @@ struct DeductionsAndAllotmentsView: View {
         .navigationSubtitle(paycheck.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .bottomBar) {
-                Spacer()
+            ToolbarItem(placement: .confirmationAction) {
                 Menu {
-                    ForEach(Paycheck.LESItem.Category.adjustmentCases.reversed()) { category in
+                    ForEach(Paycheck.LESItem.Category.adjustmentCases) { category in
                         Button(
                             "New \(category.displayName)",
                             systemImage: sfSymbol(for: category)
@@ -150,6 +149,7 @@ fileprivate struct SummaryView: View {
             )
             .chartXAxis(.hidden)
             .frame(height: 25)
+            .opacity(totalAdjustments.isZero ? 0 : 1)
         }
     }
 }

@@ -121,6 +121,7 @@ fileprivate struct SummaryView: View {
             )
             .chartXAxis(.hidden)
             .frame(height: 25)
+            .opacity(paycheckResult.totalTax.isZero ? 0 : 1)
         }
     }
 }
