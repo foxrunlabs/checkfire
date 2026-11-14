@@ -136,21 +136,49 @@ fileprivate struct SummaryView: View {
     var body: some View {
         Grid {
             GridRow {
-                Chart(chartData, id: \.category) { item in
-                    SectorMark(
-                        angle: .value("Total", item.total),
-                        innerRadius: .ratio(0.5),
-                        angularInset: 0.5
-                    )
-                    .cornerRadius(3)
-                    .foregroundStyle(by: .value("Category", item.category))
-                }
-                .chartLegend(.hidden)
-                .chartForegroundStyleScale(
-                    ["TSP": .blue, "Taxes": .red, "Other": .orange, "Net Pay": .green]
-                )
-                .scaledToFit()
-                .padding()
+                Color.clear
+                    .aspectRatio(1, contentMode: .fit)
+                    .overlay {
+                        if paycheckResult.grossPay == 0.00 {
+                            VStack {
+                                Image(systemName: "chart.pie")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.secondary)
+                                    .accessibilityLabel("No entitlements entered")
+                                
+                                Text("No Entitlements Entered")
+                                    .multilineTextAlignment(.center)
+                                    .font(.body.lowercaseSmallCaps())
+                            }
+                        } else if paycheckResult.netPay < 0.00 {
+                            VStack {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.yellow)
+                                    .accessibilityLabel("Deductions & allotments exceed entitlements")
+                                
+                                Text("Deductions & Allotments Exceed Entitlements")
+                                    .multilineTextAlignment(.center)
+                                    .font(.body.lowercaseSmallCaps())
+                            }
+                        } else {
+                            Chart(chartData, id: \.category) { item in
+                                SectorMark(
+                                    angle: .value("Total", item.total),
+                                    innerRadius: .ratio(0.5),
+                                    angularInset: 0.5
+                                )
+                                .cornerRadius(3)
+                                .foregroundStyle(by: .value("Category", item.category))
+                            }
+                            .chartLegend(.hidden)
+                            .chartForegroundStyleScale(
+                                ["TSP": .blue, "Taxes": .red, "Other": .orange, "Net Pay": .green]
+                            )
+                            .scaledToFit()
+                            .padding()
+                        }
+                    }
                 
                 VStack(alignment: .leading) {
                     Text("Net Pay")
@@ -160,7 +188,7 @@ fileprivate struct SummaryView: View {
                         .font(.title3)
                         .monospacedDigit()
                         .bold()
-                        .foregroundStyle(.green)
+                        .foregroundStyle(paycheckResult.netPay < 0.00 ? .red : .green)
                 }
                 .frame(maxWidth: .infinity)
             }
