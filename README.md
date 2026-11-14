@@ -1,146 +1,193 @@
 # CheckFire
 
-**A native iOS application for estimating U.S. military pay, deductions, taxes, and take-home compensation.**
+A native iPhone app for estimating monthly U.S. military pay, taxes, deductions, TSP contributions, and take-home compensation.
 
 Built with Swift, SwiftUI, SwiftData, and Swift Charts.
 
 ## Overview
 
-CheckFire is a personal software development project designed to help U.S. military service members understand and estimate their monthly take-home pay.
+CheckFire helps service members explore how compensation, withholding elections, retirement contributions, and other deductions affect estimated monthly net pay.
 
-Military compensation is more complex than a conventional salary. Basic pay, allowances, special and incentive pays, retirement contributions, federal withholding, and other deductions interact to determine net compensation. CheckFire brings these components together in a single, interactive application.
+Create and save multiple paycheck scenarios, edit their inputs, and compare the resulting breakdowns. Calculations run locally, and saved scenarios remain on the device.
 
-The project also serves as part of my professional software engineering portfolio, demonstrating native iOS development, financial calculations, persistent data modeling, and the translation of complex domain-specific requirements into usable software.
+CheckFire is also a personal software engineering portfolio project demonstrating native iOS development, financial calculations, versioned persistence, and automated testing.
 
 ## Screenshots
 
 <p align="center">
-  <img src="docs/images/paycheck-detail.png" width="30%" />
+  <img src="docs/images/paycheck-detail.png" width="30%" alt="Paycheck summary" />
   &nbsp;
-  <img src="docs/images/net-pay.png" width="30%" />
+  <img src="docs/images/net-pay.png" width="30%" alt="Pay breakdown" />
   &nbsp;
-	<img src="docs/images/federal-withholding.png" width="30%" />
+  <img src="docs/images/federal-withholding.png" width="30%" alt="Federal withholding details" />
 </p>
 
 ## Features
 
-- **Military compensation modeling:** Configure pay grade, years of service, basic pay, and additional entitlements.
-- **Paycheck scenarios:** Create, duplicate, edit, and save multiple paycheck estimates for comparison.
-- **Entitlements and deductions:** Model allowances, special pay, incentive pay, bonuses, deductions, and allotments.
-- **Federal tax estimation:** Calculate federal income tax withholding using tax-year-specific tables and user-configurable withholding information.
-- **FICA calculations:** Estimate Social Security and Medicare withholding.
-- **Thrift Savings Plan:** Configure Traditional and Roth TSP contribution rates across eligible pay categories.
-- **Net pay visualization:** Display estimated take-home pay alongside a graphical breakdown of taxes, retirement contributions, and other deductions.
-- **Local persistence:** Save paycheck configurations between application sessions using SwiftData.
+- Create, duplicate, edit, sort, and delete paycheck scenarios.
+- Enter basic pay, allowances, special pay, incentive pay, and bonuses.
+- Record deductions and allotments.
+- Configure federal withholding inputs, including filing status, multiple jobs, dependents, other income, deductions, and extra withholding.
+- Set separate Traditional and Roth TSP elections for eligible pay categories.
+- View estimated gross pay, taxes, retirement contributions, adjustments, and net pay.
+- Display a visual breakdown, with alternate states for zero gross pay and negative net pay.
+- Save scenarios locally using SwiftData.
+- Access official source documentation, support, and privacy information from Settings.
 
-## Technical Implementation
+## Requirements
 
-### Technology Stack
-
-| Technology | Application |
-|---|---|
-| SwiftUI | Declarative native iOS interface |
-| SwiftData | Persistent paycheck models and queries |
-| Swift Charts | Interactive financial data visualization |
-
-**Platform:** iPhone, iOS 26.0 or later.
-
-### Architecture and Design
-
-CheckFire separates its application logic into models, views, reusable controls, and supporting utilities.
-
-**Financial domain modeling**
-
-The `Paycheck` model represents a compensation scenario, including pay grade, years of service, basic pay, entitlements, withholding configuration, and TSP contributions.
-
-Pay components are categorized according to their financial treatment, allowing the application to distinguish between taxable compensation, allowances, deductions, and allotments.
-
-**Data-driven withholding calculations**
-
-Federal withholding rules are represented by structured JSON data rather than embedded directly into the user interface.
-
-A dedicated `WithholdingTableRepository` loads tax-year-specific information, while the `WithholdingTable` model performs withholding and FICA calculations.
-
-This approach separates regulatory data from calculation logic and makes the application easier to maintain as tax tables change.
-
-**Financial precision**
-
-Monetary calculations use Swift's `Decimal` type rather than binary floating-point arithmetic.
-
-Explicit rounding utilities help maintain consistent currency calculations across compensation, retirement contributions, and tax withholding.
-
-**Persistence and reactive interface**
-
-SwiftData provides persistence for paycheck scenarios, while SwiftUI bindings and queries connect stored data to the interface.
-
-Changes to compensation inputs are reflected in calculated results and visual summaries.
-
-**Reusable interface components**
-
-Custom SwiftUI controls support currency entry, pay-period selection, and retirement contribution configuration.
-
-These components keep the user interface consistent while separating presentation concerns from financial calculations.
-
-## Engineering Considerations
-
-Several aspects of CheckFire required particular attention to correctness and maintainability.
-
-**Domain-specific compensation rules:** Military pay includes multiple categories with different tax and contribution treatments. Modeling these distinctions explicitly helps prevent calculation logic from becoming entangled with interface code.
-
-**Configurable tax withholding:** Federal withholding depends on filing status, multiple-job considerations, dependents, other income, deductions, and additional withholding. CheckFire incorporates these inputs into a structured calculation model.
-
-**Separation of data and algorithms:** Storing withholding tables independently of the calculation implementation allows changes in annual tax data without requiring corresponding changes to the calculation algorithm.
-
-**Deterministic monetary calculations:** Financial software requires predictable arithmetic and rounding behavior. Using `Decimal` and centralized rounding operations supports this requirement.
-
-**User-centered financial visualization:** Presenting the relationship between gross compensation, deductions, retirement contributions, and net pay helps make complicated payroll information easier to interpret.
+- iPhone running iOS 26.0 or later.
+- A compatible Xcode installation with the iOS 26 SDK or later to build the project.
 
 ## Getting Started
 
 1. Clone the repository:
 
-   ```bash
+   ```sh
    git clone https://github.com/foxrunlabs/checkfire.git
    ```
 
 2. Open `CheckFire.xcodeproj` in Xcode.
-3. Select an iPhone simulator running iOS 26.0 or later, or a compatible physical device.
-4. Build and run the `CheckFire` scheme.
-5. Create a paycheck scenario and configure its compensation and withholding inputs.
+3. Select the `CheckFire` scheme.
+4. Choose an iPhone simulator or configure signing for a physical device.
+5. Build and run.
 
-## Reference Documentation
+To run the automated tests, choose **Product → Test**.
 
-The application uses publicly available U.S. government resources to inform its compensation and withholding models, including:
+## Using CheckFire
 
-- [Defense Finance and Accounting Service (DFAS) — Military Pay Tables](https://www.dfas.mil/MilitaryMembers/payentitlements/Pay-Tables/)
-- [DoD Financial Management Regulation, Volume 7A](https://comptroller.defense.gov/Portals/45/documents/fmr/Volume_07a.pdf)
-- [IRS Publication 15-T — Federal Income Tax Withholding Methods](https://www.irs.gov/forms-pubs/about-publication-15-t)
-- [IRS Publication 505 — Tax Withholding and Estimated Tax](https://www.irs.gov/publications/p505)
+1. Tap **Add Paycheck** to create a saved scenario.
+2. Choose its pay period, pay grade, and years of service.
+3. Open **Entitlements** to enter basic pay and additional compensation.
+4. Configure TSP elections, federal withholding, deductions, and allotments.
+5. Review the calculated monthly net pay and breakdown.
 
-## Project Status
+Basic pay is entered manually. Pay grade and years of service are descriptive metadata and do not automatically populate compensation.
 
-CheckFire is an independently developed portfolio project and remains under development.
+## Architecture
 
-The current implementation includes persistent paycheck scenarios, configurable compensation and deductions, federal withholding calculations, TSP contributions, and net pay visualization.
+### Paycheck: persistent inputs
 
-Additional refinement and validation may be required before relying on calculations for financial planning.
+`Paycheck` is the SwiftData model containing the user’s scenario inputs:
 
-**Disclaimer:** CheckFire is an independent project and is not affiliated with, endorsed by, or an official product of the U.S. Department of Defense, DFAS, or the Internal Revenue Service. Estimates are informational and should not replace official pay statements or professional tax advice.
+- Name, year, and month
+- Pay grade and years of service
+- Basic pay and LES items
+- Federal withholding selections
+- Traditional and Roth TSP elections
 
-## About the Developer
+The application uses `CheckFireSchemaV1` to define the initial versioned schema and `CheckFireMigrationPlan` to register supported schema versions. A `Paycheck` type alias keeps most application code independent of the current schema’s qualified model name.
 
-**Ryan Clarke** — Software developer, electrical engineer, and U.S. Navy officer.
+### PaySystem: calculation service
 
-I develop software and hardware projects through **Fox Run Labs**, my personal engineering portfolio. My work spans native Apple-platform applications, embedded systems, digital electronics, and practical engineering tools.
+`PaySystem` loads the bundled withholding tables and calculates a paycheck from its current inputs.
 
-CheckFire combines my operational familiarity with military compensation and my interest in developing maintainable, technically rigorous software.
+Its responsibilities include:
 
-- [Fox Run Labs — Portfolio](https://labs.thefoxrun.net)
-- [GitHub — foxrunlabs](https://github.com/foxrunlabs)
-- [LinkedIn — Ryan Clarke](https://www.linkedin.com/in/ryanfclarke)
+- Gross pay
+- Traditional and Roth TSP contributions
+- Federal taxable wages
+- Federal income tax withholding
+- Social Security and Medicare estimates
+- Deductions and allotments
+- Net pay
+
+`PaySystem` uses `@Observable` to support SwiftUI’s type-based environment injection.
+
+### PaycheckResult: derived output
+
+`PaySystem.PaycheckResult` is an immutable, equatable value containing calculated amounts. Results are derived from paycheck inputs rather than stored as additional persistent state.
+
+### WithholdingTable: regulatory data
+
+`WithholdingTable` represents the tax-year-specific data decoded from `withholding_tables.json`, including:
+
+- Standard and multiple-jobs withholding schedules
+- Filing-status-specific brackets
+- Default dependent-credit amounts
+- Social Security and Medicare rates
+
+The bundled data currently covers 2023–2026. Supporting another year requires adding and verifying its table data.
+
+### SwiftUI presentation
+
+Views read the persistent model and derive current calculation results through the shared `PaySystem`.
+
+Reusable controls provide currency entry, pay-period selection, and TSP percentage elections. Currency inputs reject negative amounts and round committed values to cents.
+
+## Calculation Model and Limitations
+
+CheckFire estimates monthly payroll amounts. It does not calculate a complete annual tax return or reproduce every payroll adjustment.
+
+- **FICA wage base:** Under CheckFire’s intended calculation model, only basic pay is subject to Social Security and Medicare.
+- **Social Security:** Estimates do not account for year-to-date wages or the annual wage limit.
+- **Medicare:** Estimates do not calculate Additional Medicare withholding.
+- **TSP:** Contributions are calculated from selected percentages. Annual contribution limits and catch-up rules are not enforced.
+- **Federal withholding:** Estimates use the selected year’s bundled tables and entered withholding selections.
+- **Dependent credits:** Defaults represent the modeled W-4 elections, rather than a determination of the user’s final tax-credit eligibility.
+- **Basic pay:** Compensation is entered manually; pay grade and years of service do not perform a pay-table lookup.
+
+Traditional TSP contributions reduce modeled federal taxable wages. Roth TSP contributions do not. Neither reduces the modeled FICA wage base.
+
+Actual payroll amounts may differ because of year-to-date limits, effective dates, eligibility rules, payroll processing, or adjustments outside the app’s scope.
+
+## Financial Precision
+
+Calculations use Foundation’s `Decimal` type, with explicit rounding for calculated taxes and TSP contributions.
+
+Committed currency inputs are rounded to two decimal places. Test fixtures use string-based decimal construction for monetary values to avoid binary floating-point conversion artifacts.
+
+## Automated Tests
+
+The project uses Swift Testing to cover representative calculation behavior, including:
+
+- Zero and basic-pay-only scenarios
+- Entitlement and adjustment classification
+- Basic-pay-only FICA treatment
+- Traditional and Roth TSP effects
+- Complete paycheck reconciliation
+- Negative adjusted wages and negative net pay
+- Recalculation after changing inputs
+- Withholding bracket boundaries
+- Representative tax-year, filing-status, and schedule selection
+- W-4 income adjustments, deductions, credits, and extra withholding
+- Missing tax-year errors
+
+The suite provides calculation regression coverage. It does not replace device testing, persistence verification, or independent validation of regulatory source data.
+
+## Privacy
+
+CheckFire performs calculations locally and stores paycheck scenarios on the device.
+
+The app does not require an account or integrate advertising, analytics, or tracking services. Saved data may be included in device backups according to the user’s Apple settings.
+
+Individual scenarios can be deleted, and Settings includes a **Delete All Data** action.
+
+See [PRIVACY.md](PRIVACY.md) for the full policy.
+
+## Sources
+
+The app includes links to official reference material, including:
+
+- [DFAS Military Pay Tables and Information](https://www.dfas.mil/MilitaryMembers/payentitlements/Pay-Tables/)
+- [DoD Financial Management Regulation](https://comptroller.defense.gov/FMR/)
+- [IRS Publication 15-T](https://www.irs.gov/forms-pubs/about-publication-15-t)
+- [IRS Publication 501](https://www.irs.gov/publications/p501)
+- [IRS Publication 505](https://www.irs.gov/publications/p505)
+- [IRS Schedule 8812](https://www.irs.gov/forms-pubs/about-schedule-8812-form-1040)
+
+## Support
+
+- [CheckFire website](https://labs.thefoxrun.net/checkfire/)
+- [Report an issue](https://github.com/foxrunlabs/checkfire/issues)
+- [Email](mailto:labs@thefoxrun.net)
 
 ## License
 
-CheckFire is released under the [MIT License](LICENSE.md).
+See [LICENSE.md](LICENSE.md).
 
-Copyright © 2026 Ryan Clarke.
+## Disclaimer
+
+CheckFire is an independent estimation tool and is not affiliated with, endorsed by, or an official product of the U.S. Department of Defense, DFAS, IRS, or any other government agency.
+
+Results are estimates and should be checked against official guidance and actual pay records.
