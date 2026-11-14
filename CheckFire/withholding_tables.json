@@ -355,7 +355,7 @@
   {
     "year": 2025,
     "taxCredits": {
-      "child": 2200,
+      "child": 2000,
       "otherDependent": 500
     },
     "ficaRates": {
