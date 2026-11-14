@@ -18,9 +18,11 @@ struct ContentView: View {
     @AppStorage(DefaultsKey.sortBy) private var sortBy = SortOption.payPeriod
     @AppStorage(DefaultsKey.sortOrder) private var sortOrder = SortOrder.forward
     
+    @Environment(\.modelContext) private var modelContext
+    @Environment(PaySystem.self) private var paySystem
+    
     @State private var path = NavigationPath()
     @State private var showSettings = false
-    @State private var showAddPaycheck = false
     
     // MARK: - Computed Properties
     
@@ -78,17 +80,33 @@ struct ContentView: View {
                     
                     ToolbarItemGroup(placement: .bottomBar) {
                         Spacer()
-                        Button("Add Paycheck", systemImage: "plus") { showAddPaycheck = true }
+                        Button("Add Paycheck", systemImage: "plus") { addPaycheck() }
                             .buttonStyle(.glassProminent)
                     }
                 }
                 .sheet(isPresented: $showSettings) {
                     SettingsView()
                 }
-                .sheet(isPresented: $showAddPaycheck) {
-                    AddPaycheckView(path: $path)
-                }
         }
+    }
+    
+    // MARK: - Methods
+    
+    private func addPaycheck() {
+        let calendar = Calendar(identifier: .gregorian)
+        let date = Date.now
+        
+        var year = calendar.component(.year, from: date)
+        var month = calendar.component(.month, from: date)
+        
+        if !paySystem.taxYears.contains(year) {
+            year = paySystem.taxYears.upperBound
+            month = Month.december.rawValue
+        }
+        
+        let newPaycheck = Paycheck(year: year, monthValue: month)
+        modelContext.insert(newPaycheck)
+        path.append(newPaycheck)
     }
 }
 
